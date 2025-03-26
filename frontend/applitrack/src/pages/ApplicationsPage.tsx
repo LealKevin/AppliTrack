@@ -15,6 +15,8 @@ import AddButton from "@/components/AddButton";
 import ApplicationCreateModal from "@/components/ApplicationCreateModal";
 import ApplicationDate from "@/components/ApplicationDate";
 import ApplicationRemoveModal from "@/components/ApplicationRemoveModal";
+import { useDeleteApp } from "@/hooks/useDeleteApp";
+import useApplications from "@/hooks/useApplications";
 
 export type IApplication = {
 	Company: string;
@@ -33,35 +35,9 @@ function toCamelCase(str: string) {
 	return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
-function useApplications({
-	status,
-}: { status: "all" | "pending" | "sent" | "rejected" }) {
-	const [applications, setApplications] = useState<IApplication[]>([]);
-
-	async function fetchApplications() {
-		try {
-			const response = await axios.get("api/applications");
-			setApplications(response.data);
-			console.log(response.data);
-		} catch (error) {
-			console.log("EROOOOOR:", error);
-		}
-	}
-
-	useEffect(() => {
-		fetchApplications();
-	}, []);
-
-	return {
-		applications: applications.filter((application) => {
-			return application.Status === status || status === "all";
-		}),
-		fetchApplications: fetchApplications,
-	};
-}
-
 function ApplicationsPage() {
 	const [isModalCreateOpen, setIsModalCreateOpen] = useState(false);
+	const [isModalEditOpen, setIsModalEditOpen] = useState(false);
 	const [isModalRemoveOpen, setIsModalRemoveOpen] = useState(false);
 	const [selectedApplication, setSelectedApplication] = useState<
 		IApplication | undefined
@@ -70,9 +46,14 @@ function ApplicationsPage() {
 	const [active, setActive] = useState<"all" | "pending" | "sent" | "rejected">(
 		"all",
 	);
-	const { applications, fetchApplications } = useApplications({
-		status: active,
-	});
+
+	const {
+		applications,
+		isLoading: isLoadingApps,
+		error: errorApps,
+		refetch: refetchApps,
+	} = useApplications();
+	const deleteApp = useDeleteApp();
 
 	return (
 		<Layout>
@@ -91,24 +72,28 @@ function ApplicationsPage() {
 				{/*Add application modal*/}
 				<ApplicationCreateModal
 					handleClose={() => setIsModalCreateOpen(false)}
-					onSuccess={fetchApplications}
+					onSuccess={refetchApps}
 					isModalOpen={isModalCreateOpen}
 				/>
 				<AddButton onClick={() => setIsModalCreateOpen(true)} />
 
 				{/*Edit application modal*/}
-				{selectedApplication && (
+				{isModalEditOpen && (
 					<ApplicationEditModal
 						application={selectedApplication}
-						handleClose={() => setSelectedApplication(undefined)}
-						onSuccess={fetchApplications}
+						handleClose={() => setIsModalEditOpen(false)}
+						onSuccess={refetchApps}
 						isModalOpen={true}
 					/>
 				)}
 
 				{/*Remove application modal*/}
-				{isModalRemoveOpen && (
+				{isModalRemoveOpen && selectedApplication && (
 					<ApplicationRemoveModal
+						submit={() => {
+							console.log("Selected", selectedApplication);
+							deleteApp.mutate(selectedApplication.ID);
+						}}
 						application={selectedApplication}
 						handleClose={() => setIsModalRemoveOpen(false)}
 						isModalOpen={true}
@@ -121,8 +106,18 @@ function ApplicationsPage() {
 						<ApplicationCompany company={application.Company} />
 						<ApplicationDate date={application.SentDate} />
 						<ApplicationIcons>
-							<EditButton onClick={() => setSelectedApplication(application)} />
-							<TrashButton onClick={() => setIsModalRemoveOpen(true)} />
+							<EditButton
+								onClick={() => {
+									setIsModalEditOpen(true);
+									setSelectedApplication(application);
+								}}
+							/>
+							<TrashButton
+								onClick={() => {
+									setIsModalRemoveOpen(true);
+									setSelectedApplication(application);
+								}}
+							/>
 							<WebSiteButton url={application.UrlApplication} />
 						</ApplicationIcons>
 					</Application>

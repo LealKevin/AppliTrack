@@ -28,7 +28,6 @@ function ApplicationEditModal({
 		console.log("edit");
 		onSuccess();
 	}
-	console.log({ application });
 
 	return (
 		<Dialog

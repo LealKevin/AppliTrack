@@ -5,6 +5,7 @@ import (
 	db "ApplyTrack/internal/db/queries"
 	"context"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -55,6 +56,7 @@ func GetOneApplicationByID(w http.ResponseWriter, r *http.Request) {
 }
 
 func DeleteOneApplicationByID(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("DeleteOneApplicationByID")
 	ctx := context.Background()
 
 	idInt, err := strconv.Atoi(chi.URLParam(r, "id"))

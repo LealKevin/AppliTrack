@@ -25,7 +25,6 @@ function WebSiteButton({ url }: WebSiteButtonProps) {
 		</svg>
 	);
 
-	console.log(url);
 	return (
 		<Button
 			onClick={url !== null ? () => window.open(url, "_blank") : undefined}
