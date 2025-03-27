@@ -20,7 +20,6 @@ CREATE TABLE applications (
     sent_date DATE NOT NULL,
     status VARCHAR(50) CHECK (status IN ('sent', 'pending', 'rejected', 'interview_scheduled')),
     notes TEXT,
-    url_application TEXT,
     user_id INT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

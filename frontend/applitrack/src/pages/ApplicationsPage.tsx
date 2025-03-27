@@ -1,8 +1,6 @@
 import Layout from "./Layout";
-import { useEffect, useState } from "react";
-import axios from "axios";
+import { useState } from "react";
 import StatusButton from "@/components/StatusButton";
-import CreateEditModal from "@/components/CreateEditModal";
 import Application from "@/components/Application";
 import ApplicationTitle from "@/components/ApplicationTitle";
 import ApplicationCompany from "@/components/ApplicationCompany";
@@ -17,6 +15,7 @@ import ApplicationDate from "@/components/ApplicationDate";
 import ApplicationRemoveModal from "@/components/ApplicationRemoveModal";
 import { useDeleteApp } from "@/hooks/useDeleteApp";
 import useApplications from "@/hooks/useApplications";
+import useApplicationsByStatus from "@/hooks/useApplicationsByStatus";
 
 export type IApplication = {
 	Company: string;
@@ -47,12 +46,7 @@ function ApplicationsPage() {
 		"all",
 	);
 
-	const {
-		applications,
-		isLoading: isLoadingApps,
-		error: errorApps,
-		refetch: refetchApps,
-	} = useApplications();
+	const { applications, refetch: refetchApps } = useApplications(active);
 	const deleteApp = useDeleteApp();
 
 	return (
@@ -62,7 +56,9 @@ function ApplicationsPage() {
 					<StatusButton
 						key={status}
 						isActive={active === status}
-						onClick={() => setActive(status)}
+						onClick={() => {
+							setActive(status);
+						}}
 					>
 						{toCamelCase(status)}
 					</StatusButton>

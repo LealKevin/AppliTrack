@@ -108,6 +108,41 @@ func (q *Queries) GetAllApplications(ctx context.Context) ([]Application, error)
 	return items, nil
 }
 
+const getApplicationsByStatus = `-- name: GetApplicationsByStatus :many
+SELECT id, title_application, company, sent_date, status, notes, url_application, user_id, created_at, updated_at FROM applications WHERE status = $1
+`
+
+func (q *Queries) GetApplicationsByStatus(ctx context.Context, status pgtype.Text) ([]Application, error) {
+	rows, err := q.db.Query(ctx, getApplicationsByStatus, status)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Application
+	for rows.Next() {
+		var i Application
+		if err := rows.Scan(
+			&i.ID,
+			&i.TitleApplication,
+			&i.Company,
+			&i.SentDate,
+			&i.Status,
+			&i.Notes,
+			&i.UrlApplication,
+			&i.UserID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getOneApplicationByID = `-- name: GetOneApplicationByID :one
 SELECT id, title_application, company, sent_date, status, notes, url_application, user_id, created_at, updated_at FROM applications WHERE id = $1
 `

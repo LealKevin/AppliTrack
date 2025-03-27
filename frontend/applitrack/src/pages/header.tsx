@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { UserContext } from "@/hooks/useUser";
 
 const iconHome = (
 	<svg
@@ -77,6 +78,7 @@ function Header() {
 				<Button className="self-end  m-4 w-10 h-10" asChild>
 					<Link to="/stats">{iconAlert}</Link>
 				</Button>
+
 				<Button className="self-end  m-4 w-10 h-10" asChild>
 					<Link to="/stats">{iconUser}</Link>
 				</Button>
