@@ -13,4 +13,14 @@ DELETE FROM applications WHERE id = $1 RETURNING *;
 -- name: CreateOneApplication :one
 INSERT INTO applications ( title_application, company, sent_date, status, notes, url_application, user_id ) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *;
 
+-- name: CreateUser :one
+INSERT INTO users ( name, email, password ) VALUES ($1, $2, $3) RETURNING *;
+
+-- name: GetOneUserByEmail :one
+SELECT * FROM users WHERE email = $1;
+
+-- name: GetOneUserByID :one
+SELECT * FROM users WHERE id = $1;
+
+
 

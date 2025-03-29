@@ -1,7 +1,6 @@
-import { useContext, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { UserContext } from "@/hooks/useUser";
+import { useUserConnectionModal } from "@/contexts/userConnectionModalProvider";
 
 const iconHome = (
 	<svg
@@ -46,6 +45,7 @@ const iconAlert = (
 );
 
 function Header() {
+	const { openModal: openConnectionModal } = useUserConnectionModal();
 	const { pathname } = useLocation();
 	return (
 		<header className="sticky">
@@ -79,8 +79,12 @@ function Header() {
 					<Link to="/stats">{iconAlert}</Link>
 				</Button>
 
-				<Button className="self-end  m-4 w-10 h-10" asChild>
-					<Link to="/stats">{iconUser}</Link>
+				<Button
+					onClick={openConnectionModal}
+					className="self-end  m-4 w-10 h-10"
+					asChild
+				>
+					{iconUser}
 				</Button>
 			</nav>
 		</header>

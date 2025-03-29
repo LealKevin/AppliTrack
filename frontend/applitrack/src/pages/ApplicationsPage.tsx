@@ -15,7 +15,6 @@ import ApplicationDate from "@/components/ApplicationDate";
 import ApplicationRemoveModal from "@/components/ApplicationRemoveModal";
 import { useDeleteApp } from "@/hooks/useDeleteApp";
 import useApplications from "@/hooks/useApplications";
-import useApplicationsByStatus from "@/hooks/useApplicationsByStatus";
 
 export type IApplication = {
 	Company: string;

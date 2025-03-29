@@ -51,6 +51,30 @@ func (q *Queries) CreateOneApplication(ctx context.Context, arg CreateOneApplica
 	return i, err
 }
 
+const createUser = `-- name: CreateUser :one
+INSERT INTO users ( name, email, password ) VALUES ($1, $2, $3) RETURNING id, name, email, password, created_at, updated_at
+`
+
+type CreateUserParams struct {
+	Name     string
+	Email    string
+	Password string
+}
+
+func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
+	row := q.db.QueryRow(ctx, createUser, arg.Name, arg.Email, arg.Password)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Email,
+		&i.Password,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const deleteOneApplicationByID = `-- name: DeleteOneApplicationByID :one
 DELETE FROM applications WHERE id = $1 RETURNING id, title_application, company, sent_date, status, notes, url_application, user_id, created_at, updated_at
 `
@@ -159,6 +183,42 @@ func (q *Queries) GetOneApplicationByID(ctx context.Context, id int32) (Applicat
 		&i.Notes,
 		&i.UrlApplication,
 		&i.UserID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const getOneUserByEmail = `-- name: GetOneUserByEmail :one
+SELECT id, name, email, password, created_at, updated_at FROM users WHERE email = $1
+`
+
+func (q *Queries) GetOneUserByEmail(ctx context.Context, email string) (User, error) {
+	row := q.db.QueryRow(ctx, getOneUserByEmail, email)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Email,
+		&i.Password,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const getOneUserByID = `-- name: GetOneUserByID :one
+SELECT id, name, email, password, created_at, updated_at FROM users WHERE id = $1
+`
+
+func (q *Queries) GetOneUserByID(ctx context.Context, id int32) (User, error) {
+	row := q.db.QueryRow(ctx, getOneUserByID, id)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Email,
+		&i.Password,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)

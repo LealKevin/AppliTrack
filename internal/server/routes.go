@@ -13,7 +13,6 @@ func Router() *chi.Mux {
 
 	router.Get("/applications", handlers.GetAllApplications)
 	router.Get("/applications/{id}", handlers.GetOneApplicationByID)
-	router.Get("/applications/{status}", handlers.GetApplicationsByStatus)
 	router.Post("/application", handlers.CreateOneApplication)
 	router.Delete("/applications/{id}", handlers.DeleteOneApplicationByID)
 
