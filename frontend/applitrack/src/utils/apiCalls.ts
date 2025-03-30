@@ -24,3 +24,19 @@ export async function fetchApplicationsByStatus(status: string) {
 	);
 	return response.data;
 }
+
+export async function createUser(
+	newName: string,
+	newEmail: string,
+	newPassword: string,
+	newPassWordRepeat,
+) {
+	const response = await axios.post<any>("api/users", {
+		name: newName,
+		email: newEmail,
+		password: newPassword,
+		passwordRepeat: newPassWordRepeat,
+	});
+
+	return response.data;
+}

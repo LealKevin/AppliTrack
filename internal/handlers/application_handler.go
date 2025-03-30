@@ -145,3 +145,46 @@ func CreateOneApplication(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(application)
 }
+
+type CreateUserRequest struct {
+	Name           string `json:"name"`
+	Email          string `json:"email"`
+	Password       string `json:"password"`
+	PasswordRepeat string `json:"passwordRepeat"`
+}
+
+func CreateUser(w http.ResponseWriter, r *http.Request) {
+
+	ctx := context.Background()
+
+	var req CreateUserRequest
+
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	if req.Password != req.PasswordRepeat {
+		log.Print("Password do not match in account creation")
+		http.Error(w, "Passwords do not match", http.StatusBadRequest)
+		return
+	}
+
+	userParams := db.CreateUserParams{
+		Email:    req.Email,
+		Name:     req.Name,
+		Password: req.Password,
+	}
+
+	queries := db.New(client.Conn)
+	user, err := queries.CreateUser(ctx, userParams)
+	if err != nil {
+		log.Println("Failed to create user, error: %v", err)
+		http.Error(w, "Failed to create user", http.StatusBadRequest)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(user)
+}

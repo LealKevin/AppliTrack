@@ -16,5 +16,7 @@ func Router() *chi.Mux {
 	router.Post("/application", handlers.CreateOneApplication)
 	router.Delete("/applications/{id}", handlers.DeleteOneApplicationByID)
 
+	router.Post("/users", handlers)
+
 	return router
 }
