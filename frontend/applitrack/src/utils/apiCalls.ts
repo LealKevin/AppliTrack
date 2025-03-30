@@ -29,9 +29,10 @@ export async function createUser(
 	newName: string,
 	newEmail: string,
 	newPassword: string,
-	newPassWordRepeat,
-) {
-	const response = await axios.post<any>("api/users", {
+	newPassWordRepeat: string,
+): Promise<IUser> {
+	console.log("createUser");
+	const response = await axios.post<IUser>("api/users", {
 		name: newName,
 		email: newEmail,
 		password: newPassword,
@@ -40,3 +41,9 @@ export async function createUser(
 
 	return response.data;
 }
+
+type IUser = {
+	id: number;
+	name: string;
+	email: string;
+};

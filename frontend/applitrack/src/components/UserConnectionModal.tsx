@@ -9,9 +9,9 @@ import {
 	CardDescription,
 	CardFooter,
 	CardHeader,
-	CardTitle,
 } from "./ui/card";
 import { useState } from "react";
+import { useCreateAccount } from "@/hooks/useCreateAccount";
 
 type UserConnectionModalProps = {
 	isModalOpen: boolean;
@@ -24,12 +24,20 @@ export function UserConnectionModal({
 	isModalOpen,
 	handleClose,
 	connectionSubmit,
-	createAccountSubmit,
 }: UserConnectionModalProps) {
 	const [newName, setNewName] = useState("");
 	const [newEmail, setNewEmail] = useState("");
 	const [newPassword, setNewPassword] = useState("");
 	const [newPasswordRepeat, setNewPasswordRepeat] = useState("");
+
+	const newUser = {
+		name: newName,
+		email: newEmail,
+		password: newPassword,
+		passwordRepeat: newPasswordRepeat,
+	};
+
+	const { mutate: createAccount } = useCreateAccount();
 
 	return (
 		<Dialog
@@ -76,58 +84,66 @@ export function UserConnectionModal({
 						</Card>
 					</TabsContent>
 
-					<TabsContent onSubmit="createAccountSubmit" value="createAccount">
+					<TabsContent value="createAccount">
 						<Card>
-							<CardHeader>
-								<CardDescription className="text-center">
-									Create a new account.
-								</CardDescription>
-							</CardHeader>
-							<CardContent className="space-y-2">
-								<div className="space-y-1">
-									<Label htmlFor="email">Name</Label>
-									<Input
-										onChange={(e) => setNewName(e.currentTarget.value)}
-										id="name"
-										placeholder="Your name"
-									/>
-								</div>
+							<form
+								onSubmit={(e) => {
+									e.preventDefault();
+									console.log("creating account:", newUser);
+									createAccount(newUser);
+								}}
+							>
+								<CardHeader>
+									<CardDescription className="text-center">
+										Create a new account.
+									</CardDescription>
+								</CardHeader>
+								<CardContent className="space-y-2">
+									<div className="space-y-1">
+										<Label htmlFor="email">Name</Label>
+										<Input
+											onChange={(e) => setNewName(e.currentTarget.value)}
+											id="name"
+											placeholder="Your name"
+										/>
+									</div>
 
-								<div className="space-y-1">
-									<Label htmlFor="email">E-mail</Label>
-									<Input
-										onChange={(e) => setNewEmail(e.currentTarget.value)}
-										id="email"
-										placeholder="Your email"
-									/>
-								</div>
+									<div className="space-y-1">
+										<Label htmlFor="email">E-mail</Label>
+										<Input
+											onChange={(e) => setNewEmail(e.currentTarget.value)}
+											id="email"
+											placeholder="Your email"
+										/>
+									</div>
 
-								<div className="space-y-1">
-									<Label htmlFor="password">Password</Label>
-									<Input
-										onChange={(e) => setNewPassword(e.currentTarget.value)}
-										type="password"
-										id="password"
-										placeholder="Your password"
-									/>
-								</div>
+									<div className="space-y-1">
+										<Label htmlFor="password">Password</Label>
+										<Input
+											onChange={(e) => setNewPassword(e.currentTarget.value)}
+											type="password"
+											id="password"
+											placeholder="Your password"
+										/>
+									</div>
 
-								<div className="space-y-1">
-									<Label htmlFor="passwordRepeat">Repeat password</Label>
-									<Input
-										onChange={(e) =>
-											setNewPasswordRepeat(e.currentTarget.value)
-										}
-										type="password"
-										id="passwordRepeat"
-										placeholder="Re-enter password"
-									/>
-								</div>
-							</CardContent>
-							<CardFooter className=" space-x-2">
-								<Button variant={"outline"}>Cancel</Button>
-								<Button>Create account</Button>
-							</CardFooter>
+									<div className="space-y-1">
+										<Label htmlFor="passwordRepeat">Repeat password</Label>
+										<Input
+											onChange={(e) =>
+												setNewPasswordRepeat(e.currentTarget.value)
+											}
+											type="password"
+											id="passwordRepeat"
+											placeholder="Re-enter password"
+										/>
+									</div>
+								</CardContent>
+								<CardFooter className=" space-x-2">
+									<Button variant={"outline"}>Cancel</Button>
+									<Button type="submit">Create account</Button>
+								</CardFooter>
+							</form>
 						</Card>
 					</TabsContent>
 				</Tabs>

@@ -3,6 +3,7 @@ package handlers
 import (
 	client "ApplyTrack/internal/db"
 	db "ApplyTrack/internal/db/queries"
+	hash "ApplyTrack/internal/utils"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -22,7 +23,6 @@ func GetAllApplications(w http.ResponseWriter, r *http.Request) {
 	ctx := context.Background()
 
 	statusParam := r.URL.Query().Get("status")
-	fmt.Printf("Params: %v", r.URL.Query().Get("status"))
 
 	queries := db.New(client.Conn)
 
@@ -35,40 +35,11 @@ func GetAllApplications(w http.ResponseWriter, r *http.Request) {
 
 	if statusParam == "all" {
 		applications, err = queries.GetAllApplications(ctx)
-		log.Println("Applications: ", applications)
 	} else {
 		applications, err = queries.GetApplicationsByStatus(ctx, status)
-		log.Println("Applications without status: ", applications)
 	}
 	if err != nil {
 		log.Println("Error getting applications", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(applications)
-
-}
-
-func GetApplicationsByStatus(w http.ResponseWriter, r *http.Request) {
-	ctx := context.Background()
-
-	statusParam := chi.URLParam(r, "status")
-	if statusParam == "" {
-		log.Println("No status provided")
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	var status pgtype.Text
-	status.String = statusParam
-
-	queries := db.New(client.Conn)
-	applications, err := queries.GetApplicationsByStatus(ctx, status)
-	if err != nil {
-		log.Println("Error getting applications by status", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -154,6 +125,7 @@ type CreateUserRequest struct {
 }
 
 func CreateUser(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Reached ehre")
 
 	ctx := context.Background()
 
@@ -170,16 +142,24 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	hashedPassword, err := hash.HashPassword(req.Password)
+	if err != nil {
+		log.Printf("Failed to hash password, error: %v", err)
+		http.Error(w, "Passwords do not match", http.StatusBadRequest)
+		http.Error(w, "Failed to hash password", http.StatusBadRequest)
+		return
+	}
+
 	userParams := db.CreateUserParams{
 		Email:    req.Email,
 		Name:     req.Name,
-		Password: req.Password,
+		Password: hashedPassword,
 	}
 
 	queries := db.New(client.Conn)
 	user, err := queries.CreateUser(ctx, userParams)
 	if err != nil {
-		log.Println("Failed to create user, error: %v", err)
+		log.Printf("Failed to create user, error: %v", err)
 		http.Error(w, "Failed to create user", http.StatusBadRequest)
 		return
 	}
@@ -187,4 +167,19 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(user)
+}
+
+func GetAllUsers(w http.ResponseWriter, r *http.Request) {
+	ctx := context.Background()
+
+	queries := db.New(client.Conn)
+
+	users, err := queries.GetAllUsers(ctx)
+	if err != nil {
+		http.Error(w, "Unable to get all users", http.StatusBadRequest)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(users)
 }
