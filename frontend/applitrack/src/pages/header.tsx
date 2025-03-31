@@ -1,6 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useUserConnectionModal } from "@/contexts/userConnectionModalProvider";
+import useDisconnection from "@/hooks/useDisconnection";
 
 const iconHome = (
 	<svg
@@ -47,6 +48,8 @@ const iconAlert = (
 function Header() {
 	const { openModal: openConnectionModal } = useUserConnectionModal();
 	const { pathname } = useLocation();
+
+	const { mutate: disconnect } = useDisconnection();
 	return (
 		<header className="sticky">
 			<nav className="flex justify-center ">
@@ -76,7 +79,15 @@ function Header() {
 					<Link to="/stats">Stats</Link>
 				</Button>
 				<Button className="self-end  m-4 w-10 h-10" asChild>
-					<Link to="/stats">{iconAlert}</Link>
+					<Link
+						onClick={() => {
+							console.log("button clicked");
+							disconnect();
+						}}
+						to="/"
+					>
+						disconnect
+					</Link>
 				</Button>
 
 				<Button

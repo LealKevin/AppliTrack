@@ -71,3 +71,8 @@ export async function connectUser(
 
 	return response.data;
 }
+
+export async function logoutUser(): Promise<void> {
+	console.log("hare");
+	await axios.post("/api/logout", {}, { withCredentials: true });
+}

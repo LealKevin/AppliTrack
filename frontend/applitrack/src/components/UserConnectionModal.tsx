@@ -72,6 +72,7 @@ export function UserConnectionModal({
 								onSubmit={(e) => {
 									e.preventDefault();
 									connectAccount(connectUser);
+									handleClose();
 								}}
 							>
 								<CardHeader>
