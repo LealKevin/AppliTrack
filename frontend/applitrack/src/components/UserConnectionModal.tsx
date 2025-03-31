@@ -12,6 +12,7 @@ import {
 } from "./ui/card";
 import { useState } from "react";
 import { useCreateAccount } from "@/hooks/useCreateAccount";
+import { useConnection } from "@/hooks/useConnection";
 
 type UserConnectionModalProps = {
 	isModalOpen: boolean;
@@ -23,12 +24,19 @@ type UserConnectionModalProps = {
 export function UserConnectionModal({
 	isModalOpen,
 	handleClose,
-	connectionSubmit,
 }: UserConnectionModalProps) {
 	const [newName, setNewName] = useState("");
 	const [newEmail, setNewEmail] = useState("");
 	const [newPassword, setNewPassword] = useState("");
 	const [newPasswordRepeat, setNewPasswordRepeat] = useState("");
+
+	const [connectEmail, setConnectEmail] = useState("");
+	const [connectPassword, setConnectPassword] = useState("");
+
+	const connectUser = {
+		email: connectEmail,
+		password: connectPassword,
+	};
 
 	const newUser = {
 		name: newName,
@@ -38,6 +46,8 @@ export function UserConnectionModal({
 	};
 
 	const { mutate: createAccount } = useCreateAccount();
+
+	const { mutate: connectAccount } = useConnection();
 
 	return (
 		<Dialog
@@ -56,31 +66,45 @@ export function UserConnectionModal({
 						<TabsTrigger value="createAccount">Create an account</TabsTrigger>
 					</TabsList>
 
-					<TabsContent onSubmit={connectionSubmit} value="connection">
+					<TabsContent value="connection">
 						<Card>
-							<CardHeader>
-								<CardDescription className="text-center">
-									Connection with your existing account.
-								</CardDescription>
-							</CardHeader>
-							<CardContent className="space-y-2">
-								<div className="space-y-1">
-									<Label htmlFor="email">E-mail</Label>
-									<Input id="email" placeholder="Your email" />
-								</div>
-								<div className="space-y-1">
-									<Label htmlFor="password">Password</Label>
-									<Input
-										type="password"
-										id="password"
-										placeholder="Your password"
-									/>
-								</div>
-							</CardContent>
-							<CardFooter className=" space-x-2">
-								<Button variant={"outline"}>Cancel</Button>
-								<Button type="submit">Connection</Button>
-							</CardFooter>
+							<form
+								onSubmit={(e) => {
+									e.preventDefault();
+									connectAccount(connectUser);
+								}}
+							>
+								<CardHeader>
+									<CardDescription className="text-center">
+										Connection with your existing account.
+									</CardDescription>
+								</CardHeader>
+								<CardContent className="space-y-2">
+									<div className="space-y-1">
+										<Label htmlFor="email">E-mail</Label>
+										<Input
+											onChange={(e) => setConnectEmail(e.currentTarget.value)}
+											id="email"
+											placeholder="Your email"
+										/>
+									</div>
+									<div className="space-y-1">
+										<Label htmlFor="password">Password</Label>
+										<Input
+											type="password"
+											id="password"
+											placeholder="Your password"
+											onChange={(e) =>
+												setConnectPassword(e.currentTarget.value)
+											}
+										/>
+									</div>
+								</CardContent>
+								<CardFooter className=" space-x-2">
+									<Button variant={"outline"}>Cancel</Button>
+									<Button type="submit">Connection</Button>
+								</CardFooter>
+							</form>
 						</Card>
 					</TabsContent>
 

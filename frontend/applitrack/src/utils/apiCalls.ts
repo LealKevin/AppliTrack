@@ -1,5 +1,10 @@
 import type { IApplication } from "@/pages/ApplicationsPage";
 import axios from "axios";
+type IUser = {
+	id: number;
+	name: string;
+	email: string;
+};
 
 // This function is used to fetch all applications from the server
 export async function fetchApplications(
@@ -25,25 +30,44 @@ export async function fetchApplicationsByStatus(status: string) {
 	return response.data;
 }
 
+type CreateUserResponse = {
+	user: IUser;
+	token: string;
+};
+
 export async function createUser(
 	newName: string,
 	newEmail: string,
 	newPassword: string,
 	newPassWordRepeat: string,
-): Promise<IUser> {
-	console.log("createUser");
-	const response = await axios.post<IUser>("api/users", {
-		name: newName,
-		email: newEmail,
-		password: newPassword,
-		passwordRepeat: newPassWordRepeat,
-	});
-
+): Promise<CreateUserResponse> {
+	const response = await axios.post<CreateUserResponse>(
+		"api/users",
+		{
+			name: newName,
+			email: newEmail,
+			password: newPassword,
+			passwordRepeat: newPassWordRepeat,
+		},
+		{ withCredentials: true },
+	);
 	return response.data;
 }
 
-type IUser = {
-	id: number;
-	name: string;
-	email: string;
-};
+export async function connectUser(
+	email: string,
+	password: string,
+): Promise<CreateUserResponse> {
+	const response = await axios.post<CreateUserResponse>(
+		"/api/login",
+		{
+			email: email,
+			password: password,
+		},
+		{
+			withCredentials: true,
+		},
+	);
+
+	return response.data;
+}

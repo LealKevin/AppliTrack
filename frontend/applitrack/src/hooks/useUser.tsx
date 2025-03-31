@@ -1,5 +1,4 @@
 import { createContext } from "react";
-impart;
 
 export const UserContext = createContext<{
 	userName: string;

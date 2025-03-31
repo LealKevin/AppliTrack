@@ -2,6 +2,7 @@ package server
 
 import (
 	"ApplyTrack/internal/handlers"
+	"ApplyTrack/internal/utils"
 
 	"github.com/go-chi/chi"
 )
@@ -9,15 +10,24 @@ import (
 func Router() *chi.Mux {
 	router := chi.NewRouter()
 
-	router.Get("/", handlers.GetHomePage)
+	router.Route("/api", func(r chi.Router) {
 
-	router.Get("/applications", handlers.GetAllApplications)
-	router.Get("/applications/{id}", handlers.GetOneApplicationByID)
-	router.Post("/application", handlers.CreateOneApplication)
-	router.Delete("/applications/{id}", handlers.DeleteOneApplicationByID)
+		r.Post("/users", handlers.CreateUser)
+		r.Post("/login", handlers.Login)
+		r.Post("/logout", handlers.Logout)
 
-	router.Get("/users", handlers.GetAllUsers)
-	router.Post("/users", handlers.CreateUser)
+		r.Group(func(r chi.Router) {
+			r.Use(utils.AuthMiddleware)
+
+			r.Get("/applications", handlers.GetAllApplications)
+			r.Get("/applications/{id}", handlers.GetOneApplicationByID)
+			r.Post("/application", handlers.CreateOneApplication)
+			r.Delete("/applications/{id}", handlers.DeleteOneApplicationByID)
+
+			r.Get("/users", handlers.GetAllUsers)
+			r.Get("/me", handlers.GetCurrentUser)
+		})
+	})
 
 	return router
 }

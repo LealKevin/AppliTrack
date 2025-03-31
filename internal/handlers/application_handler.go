@@ -10,6 +10,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/go-chi/chi"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -125,7 +126,6 @@ type CreateUserRequest struct {
 }
 
 func CreateUser(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Reached ehre")
 
 	ctx := context.Background()
 
@@ -164,6 +164,18 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	token, err := hash.CreateToken(int(user.ID))
+
+	http.SetCookie(w, &http.Cookie{
+		Name:     "jwt",
+		Value:    token,
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   true,
+		SameSite: http.SameSiteLaxMode,
+		MaxAge:   60 * 60 * 24,
+	})
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(user)
@@ -182,4 +194,86 @@ func GetAllUsers(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(users)
+}
+
+func GetCurrentUser(w http.ResponseWriter, r *http.Request) {
+	userID := r.Context().Value("userID").(int)
+	if userID == 0 {
+		http.Error(w, "Invalid user", http.StatusBadRequest)
+		return
+	}
+
+	ctx := context.Background()
+	query := db.New(client.Conn)
+	user, err := query.GetOneUserByID(ctx, int32(userID))
+	if err != nil {
+		http.Error(w, "Unable to get user", http.StatusBadRequest)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(user)
+
+}
+
+func Logout(w http.ResponseWriter, r *http.Request) {
+	http.SetCookie(w, &http.Cookie{
+		Name:     "jwt",
+		Value:    "",
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   true,
+		SameSite: http.SameSiteLaxMode,
+		Expires:  time.Unix(0, 0),
+		MaxAge:   -1,
+	})
+
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("Logged out"))
+}
+
+type UserConnection struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+func Login(w http.ResponseWriter, r *http.Request) {
+	ctx := context.Background()
+
+	var userParams UserConnection
+
+	err := json.NewDecoder(r.Body).Decode(&userParams)
+	if err != nil {
+		http.Error(w, "Unable to get user ", http.StatusBadRequest)
+	}
+
+	query := db.New(client.Conn)
+	user, err := query.GetOneUserByEmail(ctx, userParams.Email)
+	if err != nil {
+		http.Error(w, "Email or Password invalid", http.StatusUnauthorized)
+	}
+
+	err = hash.ComparePassword(userParams.Password, user.Password)
+	if err != nil {
+		http.Error(w, "Email or Password invalid", http.StatusUnauthorized)
+	}
+
+	token, err := hash.CreateToken(int(user.ID))
+	if err != nil {
+		http.Error(w, "Email or Password invalid", http.StatusUnauthorized)
+	}
+
+	http.SetCookie(w, &http.Cookie{
+		Name:     "jwt",
+		Value:    token,
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   true,
+		SameSite: http.SameSiteLaxMode,
+		MaxAge:   60 * 60 * 24,
+	})
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(user)
 }
