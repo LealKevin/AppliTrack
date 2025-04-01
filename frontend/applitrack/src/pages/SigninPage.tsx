@@ -1,13 +1,13 @@
-import { LoginForm } from "@/components/login-form";
+import { SigninForm } from "@/components/signin-form";
 
-function HomePage() {
+function SigninPage() {
 	return (
 		<>
 			<div className="grid min-h-svh lg:grid-cols-2">
 				<div className="flex flex-col gap-4 p-6 md:p-10">
 					<div className="flex flex-1 items-center justify-center">
 						<div className="w-full max-w-xs">
-							<LoginForm />
+							<SigninForm />
 						</div>
 					</div>
 				</div>
@@ -23,4 +23,4 @@ function HomePage() {
 	);
 }
 
-export default HomePage;
+export default SigninPage;

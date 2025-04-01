@@ -1,6 +1,6 @@
 import { LoginForm } from "@/components/login-form";
 
-function HomePage() {
+function LoginPage() {
 	return (
 		<>
 			<div className="grid min-h-svh lg:grid-cols-2">
@@ -23,4 +23,4 @@ function HomePage() {
 	);
 }
 
-export default HomePage;
+export default LoginPage;

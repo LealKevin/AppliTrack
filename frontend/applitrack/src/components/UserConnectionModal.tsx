@@ -58,7 +58,6 @@ export function UserConnectionModal({
 				}
 			}}
 		>
-			<DialogTitle>Settings</DialogTitle>
 			<DialogContent className="justify-center">
 				<Tabs defaultValue="connection" className="w-[425px]">
 					<TabsList className="grid w-full grid-cols-2">

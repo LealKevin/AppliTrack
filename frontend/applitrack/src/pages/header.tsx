@@ -84,7 +84,7 @@ function Header() {
 							console.log("button clicked");
 							disconnect();
 						}}
-						to="/"
+						to="/login"
 					>
 						disconnect
 					</Link>
