@@ -5,12 +5,7 @@ import {
 	IconLoader,
 	IconTrendingUp,
 } from "@tabler/icons-react";
-import {
-	ColumnDef,
-	ColumnFiltersState,
-	SortingState,
-	VisibilityState,
-} from "@tanstack/react-table";
+import { ColumnDef, SortingState } from "@tanstack/react-table";
 import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
 import { z } from "zod";
 
@@ -54,6 +49,9 @@ import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ReusableTable } from "./table";
 import useApplications from "@/hooks/useApplications";
+import ApplicationCreateModal from "./ApplicationCreateModal";
+import ApplicationRemoveModal from "./ApplicationRemoveModal";
+import { useDeleteApp } from "@/hooks/useDeleteApp";
 
 export const schema = z.object({
 	id: z.number(),
@@ -64,115 +62,112 @@ export const schema = z.object({
 	sentDate: z.number(),
 });
 
-// Create a separate component for the drag handle
-
-const columns: ColumnDef<z.infer<typeof schema>>[] = [
-	{
-		id: "select",
-		header: ({ table }) => (
-			<div className="flex items-center justify-center">
-				<Checkbox
-					checked={
-						table.getIsAllPageRowsSelected() ||
-						(table.getIsSomePageRowsSelected() && "indeterminate")
-					}
-					onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-					aria-label="Select all"
-				/>
-			</div>
-		),
-		cell: ({ row }) => (
-			<div className="flex items-center justify-center">
-				<Checkbox
-					checked={row.getIsSelected()}
-					onCheckedChange={(value) => row.toggleSelected(!!value)}
-					aria-label="Select row"
-				/>
-			</div>
-		),
-		enableSorting: false,
-		enableHiding: false,
-	},
-	{
-		accessorKey: "header",
-		header: "Applications",
-		cell: ({ row }) => {
-			return <TableCellViewer item={row.original} />;
+function getColumns({
+	setSelectedApplication,
+	setIsModalRemoveOpen,
+}: {
+	setSelectedApplication: React.Dispatch<
+		React.SetStateAction<z.infer<typeof schema> | null>
+	>;
+	setIsModalRemoveOpen: React.Dispatch<React.SetStateAction<boolean>>;
+}): ColumnDef<z.infer<typeof schema>>[] {
+	return [
+		{
+			accessorKey: "header",
+			header: "Applications",
+			cell: ({ row }) => {
+				return <TableCellViewer item={row.original} />;
+			},
+			enableHiding: false,
 		},
-		enableHiding: false,
-	},
-	{
-		accessorKey: "company",
-		header: () => <div className="w-32">Company</div>,
-		cell: ({ row }) => (
-			<div className="w-32">
-				<Badge variant="outline" className="text-muted-foreground px-1.5">
-					{row.original.company}
-				</Badge>
-			</div>
-		),
-	},
-	{
-		accessorKey: "status",
-		header: () => <div className="w-28">Status</div>,
-		cell: ({ row }) => (
-			<div className="w-28">
-				<Badge variant="outline" className="text-muted-foreground px-1.5">
-					{row.original.status === "sent" ? (
-						<IconCircleCheckFilled className="fill-green-500 dark:fill-green-400" />
-					) : (
-						<IconLoader />
-					)}
-					{row.original.status}
-				</Badge>
-			</div>
-		),
-	},
-	{
-		accessorKey: "date",
-		header: () => <div className="w-24">Date</div>,
-		cell: ({ row }) => <div className="w-24">{row.original.sentDate}</div>,
-	},
-	{
-		id: "actions",
-		cell: () => (
-			<DropdownMenu>
-				<DropdownMenuTrigger asChild>
-					<Button
-						variant="ghost"
-						className="data-[state=open]:bg-muted text-muted-foreground flex size-8"
-						size="icon"
+		{
+			accessorKey: "company",
+			header: () => <div className="w-32">Company</div>,
+			cell: ({ row }) => (
+				<div className="w-32">
+					<Badge variant="outline" className="text-muted-foreground px-1.5">
+						{row.original.company}
+					</Badge>
+				</div>
+			),
+		},
+		{
+			accessorKey: "status",
+			header: () => <div className="w-28">Status</div>,
+			cell: ({ row }) => (
+				<div className="w-28">
+					<Badge
+						variant="outline"
+						className="text-muted-foreground px-1.5 flex items-center gap-1"
 					>
-						<IconDotsVertical />
-						<span className="sr-only">Open menu</span>
-					</Button>
-				</DropdownMenuTrigger>
-				<DropdownMenuContent align="end" className="w-32">
-					<DropdownMenuItem>Edit</DropdownMenuItem>
-					<DropdownMenuItem>Make a copy</DropdownMenuItem>
-					<DropdownMenuItem>Favorite</DropdownMenuItem>
-					<DropdownMenuSeparator />
-					<DropdownMenuItem variant="destructive">Delete</DropdownMenuItem>
-				</DropdownMenuContent>
-			</DropdownMenu>
-		),
-	},
-];
+						{row.original.status === "sent" && (
+							<IconCircleCheckFilled className="fill-green-500 dark:fill-green-400" />
+						)}
+						{row.original.status === "rejected" && (
+							<IconCircleCheckFilled className="fill-red-500 dark:fill-red-400" />
+						)}
+						{row.original.status !== "sent" &&
+							row.original.status !== "rejected" && (
+								<IconLoader className="animate-spin" />
+							)}
+						{row.original.status}
+					</Badge>{" "}
+				</div>
+			),
+		},
+		{
+			accessorKey: "date",
+			header: () => <div className="w-24">Date</div>,
+			cell: ({ row }) => <div className="w-24">{row.original.sentDate}</div>,
+		},
+		{
+			id: "actions",
+			cell: ({ row }) => (
+				<DropdownMenu>
+					<DropdownMenuTrigger asChild>
+						<Button
+							variant="ghost"
+							className="data-[state=open]:bg-muted text-muted-foreground flex size-8"
+							size="icon"
+						>
+							<IconDotsVertical />
+							<span className="sr-only">Open menu</span>
+						</Button>
+					</DropdownMenuTrigger>
+					<DropdownMenuContent align="end" className="w-32">
+						<DropdownMenuItem>Edit</DropdownMenuItem>
+						<DropdownMenuItem>Make a copy</DropdownMenuItem>
+						<DropdownMenuItem>Favorite</DropdownMenuItem>
+						<DropdownMenuSeparator />
+						<DropdownMenuItem
+							onClick={() => {
+								setSelectedApplication(row.original);
+								setIsModalRemoveOpen(true);
+							}}
+							className="text-red-500 focus:text-red-500"
+						>
+							Delete
+						</DropdownMenuItem>
+					</DropdownMenuContent>
+				</DropdownMenu>
+			),
+		},
+	];
+}
 
 export function DataTable() {
-	const [rowSelection, setRowSelection] = React.useState({});
-	const [columnVisibility, setColumnVisibility] =
-		React.useState<VisibilityState>({});
-	const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-		[],
-	);
-	const [sorting, setSorting] = React.useState<SortingState>([]);
-	const [pagination, setPagination] = React.useState({
-		pageIndex: 0,
-		pageSize: 10,
-	});
+	const [isModalRemoveOpen, setIsModalRemoveOpen] = React.useState(false);
+	const [isModalCreateOpen, setIsModalCreateOpen] = React.useState(false);
+	const [selectedApplication, setSelectedApplication] = React.useState<z.infer<
+		typeof schema
+	> | null>(null);
+	const columns = getColumns({ setSelectedApplication, setIsModalRemoveOpen });
 
-	const { applications: allApps } = useApplications("all");
+	const deleteApp = useDeleteApp();
+
+	const { applications: allApps, refetch: refetchApps } =
+		useApplications("all");
+
 	const dataAll = allApps.map((app) => ({
 		id: app.ID,
 		header: app.TitleApplication,
@@ -247,6 +242,16 @@ export function DataTable() {
 						Rejected<Badge variant="secondary">{dataRejected.length}</Badge>
 					</TabsTrigger>
 				</TabsList>
+
+				<ApplicationCreateModal
+					handleClose={() => setIsModalCreateOpen(false)}
+					onSuccess={refetchApps}
+					isModalOpen={isModalCreateOpen}
+				/>
+				<Button onClick={() => setIsModalCreateOpen(true)}>
+					{" "}
+					Add new application{" "}
+				</Button>
 			</div>
 			<TabsContent
 				value="all"
@@ -254,18 +259,31 @@ export function DataTable() {
 			>
 				<ReusableTable data={dataAll} columns={columns} />
 			</TabsContent>
-
 			<TabsContent value="sent" className="flex flex-col px-4 lg:px-6">
 				<ReusableTable data={dataSent} columns={columns} />
 			</TabsContent>
-
 			<TabsContent value="pending" className="flex flex-col px-4 lg:px-6">
 				<ReusableTable data={dataPending} columns={columns} />
 			</TabsContent>
-
 			<TabsContent value="rejected" className="flex flex-col px-4 lg:px-6">
 				<ReusableTable data={dataRejected} columns={columns} />
 			</TabsContent>
+			{isModalRemoveOpen && selectedApplication && (
+				<ApplicationRemoveModal
+					submit={() => {
+						deleteApp.mutate(selectedApplication.id, {
+							onSuccess: () => {
+								setIsModalRemoveOpen(false);
+								setSelectedApplication(null);
+								refetchApps();
+							},
+						});
+					}}
+					application={selectedApplication}
+					handleClose={() => setIsModalRemoveOpen(false)}
+					isModalOpen={true}
+				/>
+			)}
 		</Tabs>
 	);
 }
@@ -296,8 +314,8 @@ function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
 	return (
 		<Drawer direction={isMobile ? "bottom" : "right"}>
 			<DrawerTrigger asChild>
-				<Button variant="link" className="text-foreground w-fit px-0 text-left">
-					{item.header}sad
+				<Button variant="link" className=" text-foreground  px-2 text-left">
+					{item.header}
 				</Button>
 			</DrawerTrigger>
 			<DrawerContent>

@@ -90,10 +90,17 @@ func DeleteOneApplicationByID(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
+	fmt.Print(deleted)
+
+	applications, err := queries.GetAllApplications(ctx)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(deleted)
+	json.NewEncoder(w).Encode(applications)
 }
 
 func CreateOneApplication(w http.ResponseWriter, r *http.Request) {
