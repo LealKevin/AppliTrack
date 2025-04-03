@@ -14,10 +14,7 @@ import useCreateApplication from "@/hooks/useCreateApplication";
 
 type CreateModalProps = {
 	isModalOpen: boolean;
-	onSuccess: () => void;
-	application?: IApplication;
 	handleClose: () => void;
-	onSubmit: () => void;
 };
 
 function ApplicationCreateModal({

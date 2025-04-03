@@ -1,6 +1,15 @@
 import { LoginForm } from "@/components/login-form";
+import { useUser } from "@/hooks/useUser";
+import { useNavigate } from "react-router-dom";
 
 function LoginPage() {
+	const user = useUser();
+
+	const navigate = useNavigate();
+	if (user) {
+		navigate("/applications");
+		return;
+	}
 	return (
 		<>
 			<div className="grid min-h-svh lg:grid-cols-2">

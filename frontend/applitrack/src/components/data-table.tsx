@@ -51,8 +51,8 @@ import useApplications from "@/hooks/useApplications";
 import ApplicationCreateModal from "./ApplicationCreateModal";
 import ApplicationRemoveModal from "./ApplicationRemoveModal";
 import { useDeleteApp } from "@/hooks/useDeleteApp";
-import useCreateApplication from "@/hooks/useCreateApplication";
 import { IApplication } from "@/pages/ApplicationsPage";
+import ApplicationEditModal from "./ApplicationEditModal";
 
 export const schema = z.object({
 	id: z.number(),
@@ -136,7 +136,15 @@ function getColumns({
 						</Button>
 					</DropdownMenuTrigger>
 					<DropdownMenuContent align="end" className="w-32">
-						<DropdownMenuItem>Edit</DropdownMenuItem>
+						<DropdownMenuItem
+							onClick={() => {
+								setSelectedApplication(row.original);
+								setIsModalRemoveOpen(true);
+							}}
+							className="text-red-500 focus:text-red-500"
+						>
+							Edit
+						</DropdownMenuItem>
 						<DropdownMenuSeparator />
 						<DropdownMenuItem
 							onClick={() => {
@@ -172,13 +180,13 @@ export function DataTable() {
 	>("all");
 	const [isModalRemoveOpen, setIsModalRemoveOpen] = React.useState(false);
 	const [isModalCreateOpen, setIsModalCreateOpen] = React.useState(false);
+	const [isModalEditOpen, setIsModalEditOpen] = React.useState(false);
 	const [selectedApplication, setSelectedApplication] = React.useState<z.infer<
 		typeof schema
 	> | null>(null);
 	const columns = getColumns({ setSelectedApplication, setIsModalRemoveOpen });
-	const { applications, refetch } = useApplications(status);
+	const { applications } = useApplications(status);
 	const dataParsed = parseData(applications);
-
 	const deleteApp = useDeleteApp();
 
 	return (
@@ -217,6 +225,10 @@ export function DataTable() {
 					</TabsTrigger>
 				</TabsList>
 
+				<ApplicationEditModal
+					handleClose={() => setIsModalEditOpen(false)}
+					isModalOpen={isModalEditOpen}
+				/>
 				<ApplicationCreateModal
 					handleClose={() => setIsModalCreateOpen(false)}
 					isModalOpen={isModalCreateOpen}
