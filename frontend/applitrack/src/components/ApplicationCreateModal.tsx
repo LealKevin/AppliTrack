@@ -8,43 +8,43 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import axios from "axios";
 import { useState } from "react";
 import type { IApplication } from "@/pages/ApplicationsPage";
+import useCreateApplication from "@/hooks/useCreateApplication";
 
 type CreateModalProps = {
 	isModalOpen: boolean;
 	onSuccess: () => void;
 	application?: IApplication;
 	handleClose: () => void;
+	onSubmit: () => void;
 };
 
 function ApplicationCreateModal({
 	handleClose,
 	isModalOpen,
-	onSuccess,
 }: CreateModalProps) {
 	const [status, setStatus] = useState<"pending" | "sent" | "rejected">(
 		"pending",
 	);
 
-	async function handleCreateSubmit(event: React.FormEvent<HTMLFormElement>) {
+	const createApp = useCreateApplication();
+	const handleCreateApplication = async (event: React.FormEvent) => {
 		event.preventDefault();
-		const formData = new FormData(event.currentTarget);
-		const data = Object.fromEntries(formData.entries());
-
-		try {
-			const response = await axios.post("api/application", {
-				...data,
-				UserID: 1,
-			});
-			console.log(response.data);
-		} catch (error) {
-			console.log("EROOOOOR:", error);
-		}
-		onSuccess();
+		const form = event.currentTarget as HTMLFormElement;
+		const formData = new FormData(form);
+		const newApplication: IApplication = {
+			TitleApplication: formData.get("TitleApplication") as string,
+			Company: formData.get("Company") as string,
+			UrlApplication: formData.get("UrlApplication") as string,
+			SentDate: formData.get("SentDate") as string,
+			Status: status,
+			Notes: formData.get("Notes") as string,
+			UserID: 1,
+		};
+		await createApp.mutateAsync(newApplication);
 		handleClose();
-	}
+	};
 
 	return (
 		<Dialog
@@ -59,7 +59,7 @@ function ApplicationCreateModal({
 				<DialogHeader>
 					<DialogTitle className="text-center">Create Application</DialogTitle>
 				</DialogHeader>
-				<form onSubmit={handleCreateSubmit}>
+				<form onSubmit={handleCreateApplication}>
 					<div className="grid gap-2 py-4">
 						<span>Title</span>
 						<Label>
@@ -110,7 +110,9 @@ function ApplicationCreateModal({
 						</Label>
 					</div>
 					<DialogFooter className="justify-between justify-center">
-						<Button variant="secondary">Cancel</Button>
+						<Button variant="secondary" onClick={() => setOpen(false)}>
+							Cancel
+						</Button>
 						<Button type="submit">Create new application</Button>
 					</DialogFooter>
 				</form>

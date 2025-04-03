@@ -30,6 +30,15 @@ export async function fetchApplicationsByStatus(status: string) {
 	return response.data;
 }
 
+// This function is used to create an application from the server
+export async function createApplication(application: IApplication) {
+	const response = await axios.post<IApplication>("api/application", {
+		...application,
+		UserID: 1,
+	});
+	return response.data;
+}
+
 type CreateUserResponse = {
 	user: IUser;
 	token: string;

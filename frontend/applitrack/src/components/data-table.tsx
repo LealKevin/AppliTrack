@@ -5,7 +5,7 @@ import {
 	IconLoader,
 	IconTrendingUp,
 } from "@tabler/icons-react";
-import { ColumnDef, SortingState } from "@tanstack/react-table";
+import { ColumnDef } from "@tanstack/react-table";
 import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
 import { z } from "zod";
 
@@ -18,7 +18,6 @@ import {
 	ChartTooltip,
 	ChartTooltipContent,
 } from "@/components/ui/chart";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
 	Drawer,
 	DrawerClose,
@@ -52,6 +51,7 @@ import useApplications from "@/hooks/useApplications";
 import ApplicationCreateModal from "./ApplicationCreateModal";
 import ApplicationRemoveModal from "./ApplicationRemoveModal";
 import { useDeleteApp } from "@/hooks/useDeleteApp";
+import useCreateApplication from "@/hooks/useCreateApplication";
 
 export const schema = z.object({
 	id: z.number(),
@@ -164,6 +164,7 @@ export function DataTable() {
 	const columns = getColumns({ setSelectedApplication, setIsModalRemoveOpen });
 
 	const deleteApp = useDeleteApp();
+	const createApp = useCreateApplication();
 
 	const { applications: allApps, refetch: refetchApps } =
 		useApplications("all");
@@ -247,6 +248,7 @@ export function DataTable() {
 					handleClose={() => setIsModalCreateOpen(false)}
 					onSuccess={refetchApps}
 					isModalOpen={isModalCreateOpen}
+					onSubmit={() => createApp.mutate()}
 				/>
 				<Button onClick={() => setIsModalCreateOpen(true)}>
 					{" "}
