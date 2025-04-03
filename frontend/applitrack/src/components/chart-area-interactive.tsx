@@ -79,7 +79,7 @@ export function ChartAreaInteractive() {
 	return (
 		<Card className="@container/card">
 			<CardHeader>
-				<CardTitle>Total Visitors</CardTitle>
+				<CardTitle>Total Applications</CardTitle>
 				<CardDescription>
 					<span className="hidden @[540px]/card:block">
 						Total for the last 3 months
@@ -184,16 +184,9 @@ export function ChartAreaInteractive() {
 						/>
 						<Area
 							dataKey="count"
-							type="natural"
+							type="bump"
 							fill="url(#fillMobile)"
-							stroke="var(--color-mobile)"
-							stackId="a"
-						/>
-						<Area
-							dataKey="desktop"
-							type="natural"
-							fill="url(#fillDesktop)"
-							stroke="var(--color-desktop)"
+							stroke="#6366f1"
 							stackId="a"
 						/>
 					</AreaChart>
