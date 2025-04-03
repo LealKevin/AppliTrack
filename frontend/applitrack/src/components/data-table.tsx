@@ -52,6 +52,7 @@ import ApplicationCreateModal from "./ApplicationCreateModal";
 import ApplicationRemoveModal from "./ApplicationRemoveModal";
 import { useDeleteApp } from "@/hooks/useDeleteApp";
 import useCreateApplication from "@/hooks/useCreateApplication";
+import { IApplication } from "@/pages/ApplicationsPage";
 
 export const schema = z.object({
 	id: z.number(),
@@ -136,8 +137,6 @@ function getColumns({
 					</DropdownMenuTrigger>
 					<DropdownMenuContent align="end" className="w-32">
 						<DropdownMenuItem>Edit</DropdownMenuItem>
-						<DropdownMenuItem>Make a copy</DropdownMenuItem>
-						<DropdownMenuItem>Favorite</DropdownMenuItem>
 						<DropdownMenuSeparator />
 						<DropdownMenuItem
 							onClick={() => {
@@ -155,58 +154,32 @@ function getColumns({
 	];
 }
 
+function parseData(apps: IApplication[]) {
+	const dataParse = apps.map((app) => ({
+		id: app.ID,
+		header: app.TitleApplication,
+		company: app.Company,
+		status: app.Status,
+		url: app.UrlApplication,
+		sentDate: app.SentDate,
+	}));
+	return dataParse;
+}
+
 export function DataTable() {
+	const [status, setStatus] = React.useState<
+		"sent" | "rejected" | "all" | "pending"
+	>("all");
 	const [isModalRemoveOpen, setIsModalRemoveOpen] = React.useState(false);
 	const [isModalCreateOpen, setIsModalCreateOpen] = React.useState(false);
 	const [selectedApplication, setSelectedApplication] = React.useState<z.infer<
 		typeof schema
 	> | null>(null);
 	const columns = getColumns({ setSelectedApplication, setIsModalRemoveOpen });
+	const { applications, refetch } = useApplications(status);
+	const dataParsed = parseData(applications);
 
 	const deleteApp = useDeleteApp();
-	const createApp = useCreateApplication();
-
-	const { applications: allApps, refetch: refetchApps } =
-		useApplications("all");
-
-	const dataAll = allApps.map((app) => ({
-		id: app.ID,
-		header: app.TitleApplication,
-		company: app.Company,
-		status: app.Status,
-		url: app.UrlApplication,
-		sentDate: app.SentDate,
-	}));
-
-	const { applications: sentApps } = useApplications("sent");
-	const dataSent = sentApps.map((app) => ({
-		id: app.ID,
-		header: app.TitleApplication,
-		company: app.Company,
-		status: app.Status,
-		url: app.UrlApplication,
-		sentDate: app.SentDate,
-	}));
-
-	const { applications: pendingApps } = useApplications("pending");
-	const dataPending = pendingApps.map((app) => ({
-		id: app.ID,
-		header: app.TitleApplication,
-		company: app.Company,
-		status: app.Status,
-		url: app.UrlApplication,
-		sentDate: app.SentDate,
-	}));
-
-	const { applications: rejectedApps } = useApplications("rejected");
-	const dataRejected = rejectedApps.map((app) => ({
-		id: app.ID,
-		header: app.TitleApplication,
-		company: app.Company,
-		status: app.Status,
-		url: app.UrlApplication,
-		sentDate: app.SentDate,
-	}));
 
 	return (
 		<Tabs defaultValue="all" className="w-full flex-col justify-start gap-6">
@@ -230,46 +203,30 @@ export function DataTable() {
 					</SelectContent>
 				</Select>
 				<TabsList className="**:data-[slot=badge]:bg-muted-foreground/30 hidden **:data-[slot=badge]:size-5 **:data-[slot=badge]:rounded-full **:data-[slot=badge]:px-1 @4xl/main:flex">
-					<TabsTrigger value="all">
-						All<Badge variant="secondary">{dataAll.length}</Badge>
+					<TabsTrigger onClick={() => setStatus("all")} value="all">
+						All<Badge variant="secondary">{dataParsed.length}</Badge>
 					</TabsTrigger>
-					<TabsTrigger value="sent">
-						Sent <Badge variant="secondary">{dataSent.length}</Badge>
+					<TabsTrigger onClick={() => setStatus("sent")} value="sent">
+						Sent <Badge variant="secondary">{dataParsed.length}</Badge>
 					</TabsTrigger>
-					<TabsTrigger value="pending">
-						Pending <Badge variant="secondary">{dataPending.length}</Badge>
+					<TabsTrigger onClick={() => setStatus("pending")} value="pending">
+						Pending <Badge variant="secondary">{dataParsed.length}</Badge>
 					</TabsTrigger>
-					<TabsTrigger value="rejected">
-						Rejected<Badge variant="secondary">{dataRejected.length}</Badge>
+					<TabsTrigger onClick={() => setStatus("rejected")} value="rejected">
+						Rejected<Badge variant="secondary">{dataParsed.length}</Badge>
 					</TabsTrigger>
 				</TabsList>
 
 				<ApplicationCreateModal
 					handleClose={() => setIsModalCreateOpen(false)}
-					onSuccess={refetchApps}
 					isModalOpen={isModalCreateOpen}
-					onSubmit={() => createApp.mutate()}
 				/>
 				<Button onClick={() => setIsModalCreateOpen(true)}>
 					{" "}
 					Add new application{" "}
 				</Button>
 			</div>
-			<TabsContent
-				value="all"
-				className="relative flex flex-col gap-4 overflow-auto px-4 lg:px-6"
-			>
-				<ReusableTable data={dataAll} columns={columns} />
-			</TabsContent>
-			<TabsContent value="sent" className="flex flex-col px-4 lg:px-6">
-				<ReusableTable data={dataSent} columns={columns} />
-			</TabsContent>
-			<TabsContent value="pending" className="flex flex-col px-4 lg:px-6">
-				<ReusableTable data={dataPending} columns={columns} />
-			</TabsContent>
-			<TabsContent value="rejected" className="flex flex-col px-4 lg:px-6">
-				<ReusableTable data={dataRejected} columns={columns} />
-			</TabsContent>
+			<ReusableTable data={dataParsed} columns={columns} />
 			{isModalRemoveOpen && selectedApplication && (
 				<ApplicationRemoveModal
 					submit={() => {
@@ -277,7 +234,6 @@ export function DataTable() {
 							onSuccess: () => {
 								setIsModalRemoveOpen(false);
 								setSelectedApplication(null);
-								refetchApps();
 							},
 						});
 					}}

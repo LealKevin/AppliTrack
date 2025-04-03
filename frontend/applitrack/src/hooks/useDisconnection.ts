@@ -1,15 +1,17 @@
 import { logoutUser } from "@/utils/apiCalls";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
 
 export default function useDisconnection() {
-	console.log("here");
 	const queryClient = useQueryClient();
+	const navigate = useNavigate();
 
 	const mutation = useMutation({
 		mutationKey: ["user"],
 		mutationFn: () => logoutUser(),
 		onSuccess: () => {
 			queryClient.clear();
+			navigate("/login");
 		},
 		onError: (error) => {
 			console.error("Erreur lors de la suppression de l'application :", error);

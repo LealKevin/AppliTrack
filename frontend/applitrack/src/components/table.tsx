@@ -101,14 +101,13 @@ export interface ReusableTableProps<T extends { id: number }> {
 }
 
 export function ReusableTable<T extends { id: number }>({
-	data: initialData,
+	data,
 	columns,
 	enableDragAndDrop = true,
 	showPagination = true,
 	showColumnCustomization = false,
 	pageSize = 10,
 }: ReusableTableProps<T>) {
-	const [data, setData] = React.useState(() => initialData);
 	const [rowSelection, setRowSelection] = React.useState({});
 	const [columnVisibility, setColumnVisibility] =
 		React.useState<VisibilityState>({});

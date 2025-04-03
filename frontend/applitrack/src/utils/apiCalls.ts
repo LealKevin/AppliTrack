@@ -82,6 +82,19 @@ export async function connectUser(
 }
 
 export async function logoutUser(): Promise<void> {
-	console.log("hare");
 	await axios.post("/api/logout", {}, { withCredentials: true });
+}
+
+type UserType = {
+	Name: string;
+	Email: string;
+};
+
+export async function getUser(): Promise<UserType> {
+	const response = await axios.get<UserType>("/api/me", {
+		withCredentials: true,
+	});
+	console.log("Here");
+	console.log({ response });
+	return response.data;
 }

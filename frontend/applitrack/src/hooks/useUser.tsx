@@ -1,9 +1,11 @@
-import { createContext } from "react";
+import { getUser } from "@/utils/apiCalls";
+import { useQuery } from "@tanstack/react-query";
 
-export const UserContext = createContext<{
-	userName: string;
-	logout: () => void;
-}>({
-	userName: "Not connected",
-	logout: () => {},
-});
+export function useUser() {
+	const data = useQuery({
+		queryKey: ["user"],
+		queryFn: () => getUser(),
+	});
+
+	return data;
+}
