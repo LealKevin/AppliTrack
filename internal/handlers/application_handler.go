@@ -113,9 +113,6 @@ func CreateOneApplication(w http.ResponseWriter, r *http.Request) {
 	}
 
 	fmt.Printf("CreateOneApplication: %+v\n", data)
-	sentDateString := data.SentDate.Time.Format("2006-01-02")
-
-	data.SentDate = sentDateString
 
 	queries := db.New(client.Conn)
 	application, err := queries.CreateOneApplication(ctx, data)
