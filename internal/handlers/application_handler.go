@@ -48,7 +48,6 @@ func GetAllApplications(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(applications)
-
 }
 
 func GetOneApplicationByID(w http.ResponseWriter, r *http.Request) {
@@ -113,6 +112,11 @@ func CreateOneApplication(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	fmt.Printf("CreateOneApplication: %+v\n", data)
+	sentDateString := data.SentDate.Time.Format("2006-01-02")
+
+	data.SentDate = sentDateString
+
 	queries := db.New(client.Conn)
 	application, err := queries.CreateOneApplication(ctx, data)
 	if err != nil {
@@ -135,7 +139,6 @@ type CreateUserRequest struct {
 func CreateUser(w http.ResponseWriter, r *http.Request) {
 
 	ctx := context.Background()
-
 	var req CreateUserRequest
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -216,11 +219,17 @@ func GetCurrentUser(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, "Unable to get user", http.StatusBadRequest)
 	}
+	sendUser := struct {
+		Name  string `json:"name"`
+		Email string `json:"email"`
+	}{
+		Name:  user.Name,
+		Email: user.Email,
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(user)
-
+	json.NewEncoder(w).Encode(sendUser)
 }
 
 func Logout(w http.ResponseWriter, r *http.Request) {

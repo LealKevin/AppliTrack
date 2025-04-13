@@ -141,7 +141,7 @@ function getColumns({
 								setSelectedApplication(row.original);
 								setIsModalRemoveOpen(true);
 							}}
-							className="text-red-500 focus:text-red-500"
+							className="text-white focus:text-red-500"
 						>
 							Edit
 						</DropdownMenuItem>
