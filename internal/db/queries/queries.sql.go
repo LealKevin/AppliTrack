@@ -98,11 +98,11 @@ func (q *Queries) DeleteOneApplicationByID(ctx context.Context, id int32) (Appli
 }
 
 const getAllApplications = `-- name: GetAllApplications :many
-SELECT id, title_application, company, sent_date, status, notes, url_application, user_id, created_at, updated_at FROM applications
+SELECT id, title_application, company, sent_date, status, notes, url_application, user_id, created_at, updated_at FROM applications WHERE user_id = $1
 `
 
-func (q *Queries) GetAllApplications(ctx context.Context) ([]Application, error) {
-	rows, err := q.db.Query(ctx, getAllApplications)
+func (q *Queries) GetAllApplications(ctx context.Context, userID int32) ([]Application, error) {
+	rows, err := q.db.Query(ctx, getAllApplications, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -164,11 +164,16 @@ func (q *Queries) GetAllUsers(ctx context.Context) ([]User, error) {
 }
 
 const getApplicationsByStatus = `-- name: GetApplicationsByStatus :many
-SELECT id, title_application, company, sent_date, status, notes, url_application, user_id, created_at, updated_at FROM applications WHERE status = $1
+SELECT id, title_application, company, sent_date, status, notes, url_application, user_id, created_at, updated_at FROM applications WHERE status = $1 AND user_id = $2
 `
 
-func (q *Queries) GetApplicationsByStatus(ctx context.Context, status pgtype.Text) ([]Application, error) {
-	rows, err := q.db.Query(ctx, getApplicationsByStatus, status)
+type GetApplicationsByStatusParams struct {
+	Status pgtype.Text
+	UserID int32
+}
+
+func (q *Queries) GetApplicationsByStatus(ctx context.Context, arg GetApplicationsByStatusParams) ([]Application, error) {
+	rows, err := q.db.Query(ctx, getApplicationsByStatus, arg.Status, arg.UserID)
 	if err != nil {
 		return nil, err
 	}

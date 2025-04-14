@@ -1,8 +1,8 @@
 -- name: GetAllApplications :many
-SELECT * FROM applications;
+SELECT * FROM applications WHERE user_id = $1;
 
 -- name: GetApplicationsByStatus :many
-SELECT * FROM applications WHERE status = $1;
+SELECT * FROM applications WHERE status = $1 AND user_id = $2;
 
 -- name: GetOneApplicationByID :one
 SELECT * FROM applications WHERE id = $1;

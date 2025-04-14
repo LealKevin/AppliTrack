@@ -21,6 +21,11 @@ func GetHomePage(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetAllApplications(w http.ResponseWriter, r *http.Request) {
+	userID := r.Context().Value("userID").(int)
+	if userID == 0 {
+		http.Error(w, "Invalid user", http.StatusBadRequest)
+		return
+	}
 	ctx := context.Background()
 
 	statusParam := r.URL.Query().Get("status")
@@ -34,10 +39,20 @@ func GetAllApplications(w http.ResponseWriter, r *http.Request) {
 	var applications []db.Application
 	var err error
 
+	user, err := queries.GetOneUserByID(ctx, int32(userID))
+	if err != nil {
+		http.Error(w, "Unable to get user", http.StatusBadRequest)
+	}
+
 	if statusParam == "all" {
-		applications, err = queries.GetAllApplications(ctx)
+		applications, err = queries.GetAllApplications(ctx, user.ID)
 	} else {
-		applications, err = queries.GetApplicationsByStatus(ctx, status)
+		args := db.GetApplicationsByStatusParams{
+			Status: status,
+			UserID: user.ID,
+		}
+
+		applications, err = queries.GetApplicationsByStatus(ctx, args)
 	}
 	if err != nil {
 		log.Println("Error getting applications", err)
@@ -73,7 +88,6 @@ func GetOneApplicationByID(w http.ResponseWriter, r *http.Request) {
 }
 
 func DeleteOneApplicationByID(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("DeleteOneApplicationByID")
 	ctx := context.Background()
 
 	idInt, err := strconv.Atoi(chi.URLParam(r, "id"))
@@ -91,36 +105,73 @@ func DeleteOneApplicationByID(w http.ResponseWriter, r *http.Request) {
 	}
 	fmt.Print(deleted)
 
-	applications, err := queries.GetAllApplications(ctx)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(applications)
+	json.NewEncoder(w).Encode(deleted)
+}
+
+type CreateApplicationRequest struct {
+	TitleApplication string `json:"title"`
+	Company          string `json:"company"`
+	SentDate         string `json:"sent_date"`
+	Status           string `json:"status"`
+	Notes            string `json:"notes"`
+	UrlApplication   string `json:"url_application"`
 }
 
 func CreateOneApplication(w http.ResponseWriter, r *http.Request) {
 	ctx := context.Background()
-	var data db.CreateOneApplicationParams
-
-	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
-		log.Println("Error decoding json", err)
-		w.WriteHeader(http.StatusBadRequest)
+	userID := r.Context().Value("userID").(int)
+	if userID == 0 {
+		http.Error(w, "Invalid user", http.StatusBadRequest)
 		return
 	}
 
-	fmt.Printf("CreateOneApplication: %+v\n", data)
+	var input CreateApplicationRequest
+	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
+		log.Println("Error decoding json", err)
+		http.Error(w, "Invalid input", http.StatusBadRequest)
+		return
+	}
+
+	parsedDate, err := time.Parse("2006-01-02", input.SentDate)
+	if err != nil {
+		log.Println("Invalid date format:", err)
+		http.Error(w, "Invalid date format, expected YYYY-MM-DD", http.StatusBadRequest)
+		return
+	}
+
+	data := db.CreateOneApplicationParams{
+		TitleApplication: input.TitleApplication,
+		Company:          input.Company,
+		SentDate: pgtype.Date{
+			Time:  parsedDate,
+			Valid: true,
+		},
+		Status: pgtype.Text{
+			String: input.Status,
+			Valid:  true,
+		},
+		Notes: pgtype.Text{
+			String: "",
+			Valid:  false,
+		},
+		UrlApplication: pgtype.Text{
+			String: input.UrlApplication,
+			Valid:  input.UrlApplication != "",
+		},
+		UserID: int32(userID),
+	}
 
 	queries := db.New(client.Conn)
 	application, err := queries.CreateOneApplication(ctx, data)
 	if err != nil {
 		log.Println("Error creating application", err)
-		w.WriteHeader(http.StatusInternalServerError)
+		http.Error(w, "Error creating application", http.StatusInternalServerError)
 		return
 	}
+
+	fmt.Println("Application created:", application)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(application)

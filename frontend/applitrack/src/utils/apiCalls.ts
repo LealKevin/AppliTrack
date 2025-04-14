@@ -32,6 +32,7 @@ export async function fetchApplicationsByStatus(status: string) {
 
 // This function is used to create an application from the server
 export async function createApplication(application: IApplication) {
+	console.log("Creating application", application);
 	const response = await axios.post<IApplication>("api/application", {
 		...application,
 		UserID: 1,
