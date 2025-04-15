@@ -23,6 +23,7 @@ func Router() *chi.Mux {
 			r.Get("/applications/{id}", handlers.GetOneApplicationByID)
 			r.Post("/application", handlers.CreateOneApplication)
 			r.Delete("/applications/{id}", handlers.DeleteOneApplicationByID)
+			r.Put("/applications/{id}", handlers.UpdateOneApplicationByID)
 
 			r.Get("/users", handlers.GetAllUsers)
 			r.Get("/me", handlers.GetCurrentUser)

@@ -265,3 +265,45 @@ func (q *Queries) GetOneUserByID(ctx context.Context, id int32) (User, error) {
 	)
 	return i, err
 }
+
+const updateOneApplicationByID = `-- name: UpdateOneApplicationByID :one
+UPDATE applications SET title_application = $1, company = $2, sent_date = $3, status = $4, notes = $5, url_application = $6 WHERE id = $7 AND user_id = $8 RETURNING id, title_application, company, sent_date, status, notes, url_application, user_id, created_at, updated_at
+`
+
+type UpdateOneApplicationByIDParams struct {
+	TitleApplication string
+	Company          string
+	SentDate         pgtype.Date
+	Status           pgtype.Text
+	Notes            pgtype.Text
+	UrlApplication   pgtype.Text
+	ID               int32
+	UserID           int32
+}
+
+func (q *Queries) UpdateOneApplicationByID(ctx context.Context, arg UpdateOneApplicationByIDParams) (Application, error) {
+	row := q.db.QueryRow(ctx, updateOneApplicationByID,
+		arg.TitleApplication,
+		arg.Company,
+		arg.SentDate,
+		arg.Status,
+		arg.Notes,
+		arg.UrlApplication,
+		arg.ID,
+		arg.UserID,
+	)
+	var i Application
+	err := row.Scan(
+		&i.ID,
+		&i.TitleApplication,
+		&i.Company,
+		&i.SentDate,
+		&i.Status,
+		&i.Notes,
+		&i.UrlApplication,
+		&i.UserID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}

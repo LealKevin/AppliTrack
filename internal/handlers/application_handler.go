@@ -109,7 +109,9 @@ func DeleteOneApplicationByID(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
-	fmt.Print(deleted)
+	fmt.Print("Deleted application: ", deleted)
+	fmt.Println("User ID: ", userID)
+	fmt.Print("Application ID: ", appId)
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
@@ -183,6 +185,42 @@ func CreateOneApplication(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(application)
 }
 
+func UpdateOneApplicationByID(w http.ResponseWriter, r *http.Request) {
+	ctx := context.Background()
+	userID := r.Context().Value("userID").(int)
+	if userID == 0 {
+		http.Error(w, "Invalid user", http.StatusBadRequest)
+		return
+	}
+	idInt, err := strconv.Atoi(chi.URLParam(r, "id"))
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	id := int32(idInt)
+	var input db.UpdateOneApplicationByIDParams
+
+	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
+		log.Println("Error decoding json", err)
+		http.Error(w, "Invalid input", http.StatusBadRequest)
+		return
+	}
+	defer r.Body.Close()
+
+	input.ID = id
+	queries := db.New(client.Conn)
+	application, err := queries.UpdateOneApplicationByID(ctx, input)
+	if err != nil {
+		log.Println("Error updating application", err)
+		http.Error(w, "Error updating application", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(application)
+}
+
 type CreateUserRequest struct {
 	Name           string `json:"name"`
 	Email          string `json:"email"`
@@ -191,7 +229,6 @@ type CreateUserRequest struct {
 }
 
 func CreateUser(w http.ResponseWriter, r *http.Request) {
-
 	ctx := context.Background()
 	var req CreateUserRequest
 
@@ -247,7 +284,6 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 
 func GetAllUsers(w http.ResponseWriter, r *http.Request) {
 	ctx := context.Background()
-
 	queries := db.New(client.Conn)
 
 	users, err := queries.GetAllUsers(ctx)
