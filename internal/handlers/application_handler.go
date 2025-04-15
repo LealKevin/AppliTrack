@@ -185,6 +185,16 @@ func CreateOneApplication(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(application)
 }
 
+type UpdateApplicationRequest struct {
+	ID               int32  `json:"id"`
+	TitleApplication string `json:"title"`
+	Company          string `json:"company"`
+	SentDate         string `json:"sent_date"`
+	Status           string `json:"status"`
+	Notes            string `json:"notes"`
+	UrlApplication   string `json:"url_application"`
+}
+
 func UpdateOneApplicationByID(w http.ResponseWriter, r *http.Request) {
 	ctx := context.Background()
 	userID := r.Context().Value("userID").(int)
@@ -198,7 +208,7 @@ func UpdateOneApplicationByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	id := int32(idInt)
-	var input db.UpdateOneApplicationByIDParams
+	var input UpdateApplicationRequest
 
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
 		log.Println("Error decoding json", err)
@@ -207,9 +217,41 @@ func UpdateOneApplicationByID(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
+	parsedDate, err := time.Parse("2006-01-02", input.SentDate)
+	if err != nil {
+		log.Println("Invalid date format:", err)
+		http.Error(w, "Invalid date format, expected YYYY-MM-DD", http.StatusBadRequest)
+		return
+	}
 	input.ID = id
+
+	data := db.UpdateOneApplicationByIDParams{
+		ID:               input.ID,
+		TitleApplication: input.TitleApplication,
+		Company:          input.Company,
+		SentDate: pgtype.Date{
+			Time:  parsedDate,
+			Valid: true,
+		},
+		Status: pgtype.Text{
+			String: input.Status,
+			Valid:  true,
+		},
+		Notes: pgtype.Text{
+			String: input.Notes,
+			Valid:  input.Notes != "",
+		},
+		UrlApplication: pgtype.Text{
+			String: input.UrlApplication,
+			Valid:  input.UrlApplication != "",
+		},
+		UserID: int32(userID),
+	}
+
+	fmt.Println("Input: ", input)
+
 	queries := db.New(client.Conn)
-	application, err := queries.UpdateOneApplicationByID(ctx, input)
+	application, err := queries.UpdateOneApplicationByID(ctx, data)
 	if err != nil {
 		log.Println("Error updating application", err)
 		http.Error(w, "Error updating application", http.StatusInternalServerError)

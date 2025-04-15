@@ -2,7 +2,7 @@
 SELECT * FROM applications WHERE user_id = $1;
 
 -- name: GetApplicationsByStatus :many
-SELECT * FROM applications WHERE status = $1 AND user_id = $2;
+SELECT * FROM applications WHERE status = $1 AND user_id = $2 ORDER BY updated_at DESC, created_at DESC;
 
 -- name: GetOneApplicationByID :one
 SELECT * FROM applications WHERE id = $1;

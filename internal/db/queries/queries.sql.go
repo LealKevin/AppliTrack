@@ -169,7 +169,7 @@ func (q *Queries) GetAllUsers(ctx context.Context) ([]User, error) {
 }
 
 const getApplicationsByStatus = `-- name: GetApplicationsByStatus :many
-SELECT id, title_application, company, sent_date, status, notes, url_application, user_id, created_at, updated_at FROM applications WHERE status = $1 AND user_id = $2
+SELECT id, title_application, company, sent_date, status, notes, url_application, user_id, created_at, updated_at FROM applications WHERE status = $1 AND user_id = $2 ORDER BY updated_at DESC, created_at DESC
 `
 
 type GetApplicationsByStatusParams struct {
