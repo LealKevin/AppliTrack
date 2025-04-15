@@ -76,11 +76,16 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 }
 
 const deleteOneApplicationByID = `-- name: DeleteOneApplicationByID :one
-DELETE FROM applications WHERE id = $1 RETURNING id, title_application, company, sent_date, status, notes, url_application, user_id, created_at, updated_at
+DELETE FROM applications WHERE id = $1 AND user_id = $2 RETURNING id, title_application, company, sent_date, status, notes, url_application, user_id, created_at, updated_at
 `
 
-func (q *Queries) DeleteOneApplicationByID(ctx context.Context, id int32) (Application, error) {
-	row := q.db.QueryRow(ctx, deleteOneApplicationByID, id)
+type DeleteOneApplicationByIDParams struct {
+	ID     int32
+	UserID int32
+}
+
+func (q *Queries) DeleteOneApplicationByID(ctx context.Context, arg DeleteOneApplicationByIDParams) (Application, error) {
+	row := q.db.QueryRow(ctx, deleteOneApplicationByID, arg.ID, arg.UserID)
 	var i Application
 	err := row.Scan(
 		&i.ID,

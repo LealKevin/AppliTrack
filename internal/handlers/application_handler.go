@@ -89,16 +89,22 @@ func GetOneApplicationByID(w http.ResponseWriter, r *http.Request) {
 
 func DeleteOneApplicationByID(w http.ResponseWriter, r *http.Request) {
 	ctx := context.Background()
+	userID := r.Context().Value("userID").(int)
 
 	idInt, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	id := int32(idInt)
+	appId := int32(idInt)
+
+	args := db.DeleteOneApplicationByIDParams{
+		ID:     appId,
+		UserID: int32(userID),
+	}
 
 	queries := db.New(client.Conn)
-	deleted, err := queries.DeleteOneApplicationByID(ctx, id)
+	deleted, err := queries.DeleteOneApplicationByID(ctx, args)
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
 		return
