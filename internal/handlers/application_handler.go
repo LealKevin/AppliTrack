@@ -385,6 +385,7 @@ type UserConnection struct {
 }
 
 func Login(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Login handler")
 	ctx := context.Background()
 
 	var userParams UserConnection
