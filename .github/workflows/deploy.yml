@@ -19,6 +19,8 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
             cd /root/AppliTrack
+            git config user.email "kevinleal@hotmail.com"
+            git config user.name "kevin"
             git config pull.rebase false
             git pull origin main
             docker compose down
