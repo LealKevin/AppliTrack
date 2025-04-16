@@ -11,11 +11,12 @@ COPY go.sum ./
 RUN go mod download
 
 COPY . .
+COPY ./migrations/tern.conf ./tern.conf
 
 RUN go build -o main main.go
 
 RUN chmod +x ./entrypoint.sh
 
-CMD sh -c "tern migrate -d /app/migrations && ./main"
+CMD ["./entrypoint.sh"]
 
 EXPOSE 8080
