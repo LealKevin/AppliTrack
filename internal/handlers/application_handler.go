@@ -216,7 +216,6 @@ func UpdateOneApplicationByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer r.Body.Close()
-
 	parsedDate, err := time.Parse("2006-01-02", input.SentDate)
 	if err != nil {
 		log.Println("Invalid date format:", err)
