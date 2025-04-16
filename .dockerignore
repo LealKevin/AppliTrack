@@ -1,0 +1,13 @@
+frontend/
+tmp/
+
+
+.DS_Store
+.zshrc
+.air.toml
+.env
+.dockerignore
+Makefile
+docker-compose.yml
+.git
+.gitignore
