@@ -14,6 +14,7 @@ var Conn *pgxpool.Pool
 
 func InitDB() {
 
+	var err error
 	if err := godotenv.Load(".env"); err != nil {
 		fmt.Print("Unable to find .env")
 		return
@@ -43,7 +44,7 @@ func InitDB() {
 		return
 	}
 
-	if err := Conn.Ping(context.Background()); err != nil {
+	if err = Conn.Ping(context.Background()); err != nil {
 		fmt.Printf("Unable to Ping, error: %v", err)
 	}
 
