@@ -11,6 +11,7 @@ COPY go.sum ./
 RUN go mod download
 
 COPY . .
+COPY ./migrations /app/migrations
 COPY ./migrations/tern.conf ./tern.conf
 
 RUN go build -o main main.go
