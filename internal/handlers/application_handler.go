@@ -273,6 +273,8 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 	ctx := context.Background()
 	var req CreateUserRequest
 
+	log.Println("Received CreateUser request")
+	log.Printf("Decoded body: %+v\n", req)
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
