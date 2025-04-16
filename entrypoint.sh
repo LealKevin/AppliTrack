@@ -1,9 +1,11 @@
 #!/bin/sh
 
-cd /app
+cd migrations
 
 echo " Running DB migrations with Tern..."
-tern migrate -c /app/migrations/tern.conf -d /app/migrations 
+tern migrate 
+
+cd ..
 
 echo " Starting API server..."
 ./main
