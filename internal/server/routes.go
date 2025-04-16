@@ -13,6 +13,7 @@ func Router() *chi.Mux {
 	router.Route("/api", func(r chi.Router) {
 
 		r.Post("/users", handlers.CreateUser)
+		r.Get("/pong", handlers.Pong)
 		r.Post("/login", handlers.Login)
 		r.Post("/logout", handlers.Logout)
 
