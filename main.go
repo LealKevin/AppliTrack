@@ -9,6 +9,7 @@ import (
 )
 
 func main() {
+	fmt.Println("Starting server...")
 	db.InitDB()
 	server.InitServer()
 
