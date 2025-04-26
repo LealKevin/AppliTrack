@@ -5,9 +5,7 @@ import {
 	IconDashboard,
 	IconFileAi,
 	IconFileDescription,
-	IconHelp,
 	IconInnerShadowTop,
-	IconSettings,
 	IconUsers,
 } from "@tabler/icons-react";
 
@@ -23,7 +21,7 @@ import {
 	SidebarMenuButton,
 	SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { useUser } from "@/hooks/useUser";
+import { useAuth } from "@/contexts/AuthContext";
 
 const data = {
 	navMain: [
@@ -95,8 +93,8 @@ const data = {
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-	const user = useUser();
-	console.log("user side bar", user.data);
+	const { user } = useAuth();
+	console.log("user sidebar", user);
 	return (
 		<Sidebar collapsible="offcanvas" {...props}>
 			<SidebarHeader>
@@ -119,7 +117,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 				<NavSecondary items={data.navSecondary} className="mt-auto" />
 			</SidebarContent>
 			<SidebarFooter>
-				<NavUser user={user.data} />
+				<NavUser user={user} />
 			</SidebarFooter>
 		</Sidebar>
 	);

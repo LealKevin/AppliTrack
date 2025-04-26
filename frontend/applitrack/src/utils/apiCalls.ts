@@ -1,3 +1,4 @@
+import type { UserInput } from "@/hooks/useConnection";
 import type { IApplication } from "@/pages/ApplicationsPage";
 import axios from "axios";
 type IUser = {
@@ -65,14 +66,13 @@ export async function createUser(
 }
 
 export async function connectUser(
-	email: string,
-	password: string,
+	input: UserInput,
 ): Promise<CreateUserResponse> {
 	const response = await axios.post<CreateUserResponse>(
 		"/api/login",
 		{
-			email: email,
-			password: password,
+			email: input.email,
+			password: input.password,
 		},
 		{
 			withCredentials: true,
@@ -86,7 +86,7 @@ export async function logoutUser(): Promise<void> {
 	await axios.post("/api/logout", {}, { withCredentials: true });
 }
 
-type UserType = {
+export type UserType = {
 	Name: string;
 	Email: string;
 };

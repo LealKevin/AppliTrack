@@ -10,8 +10,8 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useConnection } from "@/hooks/useConnection";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 
 export function LoginForm({
 	className,
@@ -21,21 +21,19 @@ export function LoginForm({
 	const [connectPassword, setConnectPassword] = useState("");
 
 	const navigate = useNavigate();
-	const { mutate: connectAccount } = useConnection();
+	const { login } = useAuth();
 
-	const handleSubmit = (e: React.FormEvent) => {
+	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
-		connectAccount(
-			{ email: connectEmail, password: connectPassword },
-			{
-				onSuccess: () => {
-					navigate("/applications");
-				},
-				onError: (err) => {
-					console.error("Login failed", err);
-				},
-			},
-		);
+
+		const input = { email: connectEmail, password: connectPassword };
+		try {
+			await login(input);
+		} catch (error) {
+			console.error("Unable to login: ", error);
+			return;
+		}
+		navigate("/applications");
 	};
 
 	return (

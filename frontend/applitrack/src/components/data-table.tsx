@@ -5,7 +5,7 @@ import {
 	IconLoader,
 	IconTrendingUp,
 } from "@tabler/icons-react";
-import { ColumnDef } from "@tanstack/react-table";
+import type { ColumnDef } from "@tanstack/react-table";
 import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
 import { z } from "zod";
 
@@ -45,13 +45,13 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ReusableTable } from "./table";
 import useApplications from "@/hooks/useApplications";
 import ApplicationCreateModal from "./ApplicationCreateModal";
 import ApplicationRemoveModal from "./ApplicationRemoveModal";
 import { useDeleteApp } from "@/hooks/useDeleteApp";
-import { IApplication } from "@/pages/ApplicationsPage";
+import type { IApplication } from "@/pages/ApplicationsPage";
 import ApplicationEditModal from "./ApplicationEditModal";
 
 export const schema = z.object({
@@ -163,6 +163,7 @@ function getColumns({
 }
 
 function parseData(apps: IApplication[]) {
+	console.log("Apps", apps);
 	const dataParse = apps.map((app) => ({
 		id: app.ID,
 		header: app.TitleApplication,

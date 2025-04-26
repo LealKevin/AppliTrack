@@ -1,22 +1,18 @@
-import { useUser } from "@/hooks/useUser";
-import { useEffect } from "react";
-import { Outlet, useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { Navigate, Outlet } from "react-router-dom";
 
 export function ProtectedRoute() {
-	console.log("Protected route");
-	const navigate = useNavigate();
-	const { data: user } = useUser();
-	console.log("user: ", user);
+	const { isLoading, isAuthenticated } = useAuth();
 
-	useEffect(() => {
-		if (!user) {
-			navigate("/login");
-		}
-	}, [navigate, user]);
-
-	if (user) {
-		return <Outlet />;
+	if (isLoading) {
+		return <div>Is Loading</div>;
 	}
 
-	return;
+	console.log("Auth:", isAuthenticated);
+
+	if (!isAuthenticated) {
+		return <Navigate to={"/login"} />;
+	}
+
+	return <Outlet />;
 }

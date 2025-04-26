@@ -15,18 +15,18 @@ import {
 	SidebarMenuItem,
 	useSidebar,
 } from "@/components/ui/sidebar";
-import useDisconnection from "@/hooks/useDisconnection";
+import type { UserType } from "@/utils/apiCalls";
+import { useAuth } from "@/contexts/AuthContext";
 
-export function NavUser({
-	user,
-}: {
-	user: {
-		Name: string;
-		Email: string;
-	};
-}) {
+type NavUserProps = {
+	user: UserType | null;
+};
+
+export function NavUser({ user }: NavUserProps) {
 	const { isMobile } = useSidebar();
-	const { mutate: disconnect } = useDisconnection();
+	const { logout } = useAuth();
+
+	console.log("User nav bar", user);
 
 	return (
 		<SidebarMenu>
@@ -39,13 +39,13 @@ export function NavUser({
 						>
 							<Avatar className="h-8 w-8 rounded-lg grayscale">
 								<AvatarFallback className="rounded-lg">
-									{/*user.Name.charAt(0)*/}
+									{user?.name.charAt(0)}
 								</AvatarFallback>
 							</Avatar>
 							<div className="grid flex-1 text-left text-sm leading-tight">
-								<span className="truncate font-medium">{user.Name}</span>
+								<span className="truncate font-medium">{user?.Name}</span>
 								<span className="text-muted-foreground truncate text-xs">
-									{user.Email}
+									{user?.email}
 								</span>
 							</div>
 							<IconDotsVertical className="ml-auto size-4" />
@@ -75,7 +75,7 @@ export function NavUser({
 						<DropdownMenuSeparator />
 						<DropdownMenuItem
 							onClick={() => {
-								disconnect();
+								logout();
 							}}
 						>
 							<IconLogout />

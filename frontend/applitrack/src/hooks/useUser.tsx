@@ -1,11 +1,16 @@
-import { getUser } from "@/utils/apiCalls";
+import { getUser, type UserType } from "@/utils/apiCalls";
 import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 
 export function useUser() {
-	const data = useQuery({
+	const [user, setUser] = useState<UserType | null>(null);
+	const query = useQuery<UserType>({
 		queryKey: ["user"],
-		queryFn: () => getUser(),
+		queryFn: getUser,
+		onSuccess: (data: UserType) => {
+			setUser(data);
+		},
 	});
 
-	return data;
+	return { ...query, user };
 }
