@@ -208,6 +208,22 @@ func (q *Queries) GetApplicationsByStatus(ctx context.Context, arg GetApplicatio
 	return items, nil
 }
 
+const getApplicationsCountByStatus = `-- name: GetApplicationsCountByStatus :one
+SELECT COUNT(*) FROM applications WHERE user_id = $1 AND status = $2
+`
+
+type GetApplicationsCountByStatusParams struct {
+	UserID int32
+	Status pgtype.Text
+}
+
+func (q *Queries) GetApplicationsCountByStatus(ctx context.Context, arg GetApplicationsCountByStatusParams) (int64, error) {
+	row := q.db.QueryRow(ctx, getApplicationsCountByStatus, arg.UserID, arg.Status)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const getOneApplicationByID = `-- name: GetOneApplicationByID :one
 SELECT id, title_application, company, sent_date, status, notes, url_application, user_id, created_at, updated_at FROM applications WHERE id = $1
 `

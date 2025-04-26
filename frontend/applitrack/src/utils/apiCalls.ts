@@ -99,3 +99,18 @@ export async function getUser(): Promise<UserType> {
 	console.log({ response });
 	return response.data;
 }
+
+export type AppsCount = {
+	all_count: number;
+	sent_count: number;
+	pending_count: number;
+	rejected_count: number;
+};
+export async function getAppsCount(): Promise<AppsCount> {
+	console.log("Count count");
+	const response = await axios.get<AppsCount>("api/applications/count", {
+		withCredentials: true,
+	});
+	console.log(response.data);
+	return response.data;
+}

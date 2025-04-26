@@ -28,5 +28,6 @@ SELECT * FROM users WHERE email = $1;
 -- name: GetOneUserByID :one
 SELECT * FROM users WHERE id = $1;
 
-
+-- name: GetApplicationsCountByStatus :one
+SELECT COUNT(*) FROM applications WHERE user_id = $1 AND status = $2;
 

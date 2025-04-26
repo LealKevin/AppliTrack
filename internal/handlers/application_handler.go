@@ -440,3 +440,65 @@ func Pong(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode("pong")
 }
+
+type AppsCountResp struct {
+	All      int `json:"all_count"`
+	Sent     int `json:"sent_count"`
+	Pending  int `json:"pending_count"`
+	Rejected int `json:"rejected_count"`
+}
+
+func AppsCount(w http.ResponseWriter, r *http.Request) {
+	userID := r.Context().Value("userID").(int)
+	if userID == 0 {
+		http.Error(w, "Invalid user", http.StatusBadRequest)
+		return
+	}
+	ctx := context.Background()
+
+	queries := db.New(client.Conn)
+
+	sentArgs := parseStatus(userID, "sent")
+	sentCount, err := queries.GetApplicationsCountByStatus(ctx, sentArgs)
+	if err != nil {
+		http.Error(w, "Unable to get count", http.StatusBadRequest)
+	}
+
+	pendingArgs := parseStatus(userID, "pending")
+	pendingCount, err := queries.GetApplicationsCountByStatus(ctx, pendingArgs)
+	if err != nil {
+		http.Error(w, "Unable to get count", http.StatusBadRequest)
+	}
+
+	rejectedArgs := parseStatus(userID, "rejected")
+	rejectedCount, err := queries.GetApplicationsCountByStatus(ctx, rejectedArgs)
+	if err != nil {
+		http.Error(w, "Unable to get count", http.StatusBadRequest)
+	}
+
+	appsCount := AppsCountResp{
+		All:      int(sentCount) + int(pendingCount) + int(rejectedCount),
+		Sent:     int(sentCount),
+		Pending:  int(pendingCount),
+		Rejected: int(rejectedCount),
+	}
+	fmt.Printf("%v", appsCount)
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(appsCount)
+
+}
+
+func parseStatus(userID int, status string) db.GetApplicationsCountByStatusParams {
+	var data pgtype.Text
+	data.String = status
+	data.Valid = true
+	arg := db.GetApplicationsCountByStatusParams{
+		UserID: int32(userID),
+		Status: data,
+	}
+
+	return arg
+
+}

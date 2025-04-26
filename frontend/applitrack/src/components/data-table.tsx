@@ -53,6 +53,7 @@ import ApplicationRemoveModal from "./ApplicationRemoveModal";
 import { useDeleteApp } from "@/hooks/useDeleteApp";
 import type { IApplication } from "@/pages/ApplicationsPage";
 import ApplicationEditModal from "./ApplicationEditModal";
+import { getAppsCount } from "@/utils/apiCalls";
 
 export const schema = z.object({
 	id: z.number(),
@@ -163,7 +164,6 @@ function getColumns({
 }
 
 function parseData(apps: IApplication[]) {
-	console.log("Apps", apps);
 	const dataParse = apps.map((app) => ({
 		id: app.ID,
 		header: app.TitleApplication,
@@ -186,9 +186,10 @@ export function DataTable() {
 		typeof schema
 	> | null>(null);
 	const columns = getColumns({ setSelectedApplication, setIsModalRemoveOpen });
-	const { applications } = useApplications(status);
+	const { applications, appsCount } = useApplications(status);
 	const dataParsed = parseData(applications);
 	const deleteApp = useDeleteApp();
+	console.log("Apps counrt", appsCount?.rejected_count);
 
 	return (
 		<Tabs defaultValue="all" className="w-full flex-col justify-start gap-6">
@@ -213,16 +214,18 @@ export function DataTable() {
 				</Select>
 				<TabsList className="**:data-[slot=badge]:bg-muted-foreground/30 hidden **:data-[slot=badge]:size-5 **:data-[slot=badge]:rounded-full **:data-[slot=badge]:px-1 @4xl/main:flex">
 					<TabsTrigger onClick={() => setStatus("all")} value="all">
-						All<Badge variant="secondary">{dataParsed.length}</Badge>
+						All<Badge variant="secondary">{appsCount?.all_count}</Badge>
 					</TabsTrigger>
 					<TabsTrigger onClick={() => setStatus("sent")} value="sent">
-						Sent <Badge variant="secondary">{dataParsed.length}</Badge>
+						Sent <Badge variant="secondary">{appsCount?.sent_count}</Badge>
 					</TabsTrigger>
 					<TabsTrigger onClick={() => setStatus("pending")} value="pending">
-						Pending <Badge variant="secondary">{dataParsed.length}</Badge>
+						Pending{" "}
+						<Badge variant="secondary">{appsCount?.pending_count}</Badge>
 					</TabsTrigger>
 					<TabsTrigger onClick={() => setStatus("rejected")} value="rejected">
-						Rejected<Badge variant="secondary">{dataParsed.length}</Badge>
+						Rejected
+						<Badge variant="secondary">{appsCount?.rejected_count}</Badge>
 					</TabsTrigger>
 				</TabsList>
 
