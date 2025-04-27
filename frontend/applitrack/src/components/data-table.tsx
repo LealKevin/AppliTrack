@@ -187,9 +187,22 @@ export function DataTable() {
 	> | null>(null);
 	const columns = getColumns({ setSelectedApplication, setIsModalRemoveOpen });
 	const { applications, appsCount } = useApplications(status);
+	const [searchText, setSearchText] = React.useState("");
+
 	const dataParsed = parseData(applications);
 	const deleteApp = useDeleteApp();
-	console.log("Apps counrt", appsCount?.rejected_count);
+
+	const filteredApplications = React.useMemo(() => {
+		if (searchText.trim() === "") {
+			return dataParsed;
+		}
+		const search = searchText.toLowerCase();
+		return dataParsed.filter(
+			(app) =>
+				app.header.toLowerCase().includes(search) ||
+				app.company.toLowerCase().includes(search),
+		);
+	}, [searchText, dataParsed]);
 
 	return (
 		<Tabs defaultValue="all" className="w-full flex-col justify-start gap-6">
@@ -197,13 +210,18 @@ export function DataTable() {
 				<Label htmlFor="view-selector" className="sr-only">
 					View
 				</Label>
-				<Select defaultValue="outline">
+				<Select
+					value={status}
+					onValueChange={(value) =>
+						setStatus(value as "all" | "sent" | "pending" | "rejected")
+					}
+				>
 					<SelectTrigger
 						className="flex w-fit @4xl/main:hidden"
 						size="sm"
 						id="view-selector"
 					>
-						<SelectValue placeholder="Select a view" />
+						<SelectValue placeholder="Status" />
 					</SelectTrigger>
 					<SelectContent>
 						<SelectItem value="all">All</SelectItem>
@@ -212,6 +230,7 @@ export function DataTable() {
 						<SelectItem value="rejected">Rejected</SelectItem>
 					</SelectContent>
 				</Select>
+
 				<TabsList className="**:data-[slot=badge]:bg-muted-foreground/30 hidden **:data-[slot=badge]:size-5 **:data-[slot=badge]:rounded-full **:data-[slot=badge]:px-1 @4xl/main:flex">
 					<TabsTrigger onClick={() => setStatus("all")} value="all">
 						All<Badge variant="secondary">{appsCount?.all_count}</Badge>
@@ -242,7 +261,13 @@ export function DataTable() {
 					Add new application{" "}
 				</Button>
 			</div>
-			<ReusableTable data={dataParsed} columns={columns} />
+			<Input
+				type="text"
+				value={searchText}
+				onChange={(e) => setSearchText(e.target.value)}
+				placeholder="Search..."
+			/>
+			<ReusableTable data={filteredApplications} columns={columns} />
 			{isModalRemoveOpen && selectedApplication && (
 				<ApplicationRemoveModal
 					submit={() => {

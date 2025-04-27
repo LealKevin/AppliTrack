@@ -107,7 +107,7 @@ function ApplicationCreateModal({
 						</Label>
 					</div>
 					<DialogFooter className="justify-between justify-center">
-						<Button variant="secondary" onClick={() => setOpen(false)}>
+						<Button variant="secondary" onClick={handleClose}>
 							Cancel
 						</Button>
 						<Button type="submit">Create new application</Button>
