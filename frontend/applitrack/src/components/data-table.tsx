@@ -53,7 +53,6 @@ import ApplicationRemoveModal from "./ApplicationRemoveModal";
 import { useDeleteApp } from "@/hooks/useDeleteApp";
 import type { IApplication } from "@/pages/ApplicationsPage";
 import ApplicationEditModal from "./ApplicationEditModal";
-import { getAppsCount } from "@/utils/apiCalls";
 
 export const schema = z.object({
 	id: z.number(),
@@ -61,17 +60,19 @@ export const schema = z.object({
 	company: z.string(),
 	status: z.enum(["pending", "sent", "rejected"]),
 	url: z.string(),
-	sentDate: z.number(),
+	sentDate: z.string(),
 });
 
 function getColumns({
 	setSelectedApplication,
 	setIsModalRemoveOpen,
+	setIsModalEditOpen,
 }: {
 	setSelectedApplication: React.Dispatch<
 		React.SetStateAction<z.infer<typeof schema> | null>
 	>;
 	setIsModalRemoveOpen: React.Dispatch<React.SetStateAction<boolean>>;
+	setIsModalEditOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }): ColumnDef<z.infer<typeof schema>>[] {
 	return [
 		{
@@ -140,7 +141,7 @@ function getColumns({
 						<DropdownMenuItem
 							onClick={() => {
 								setSelectedApplication(row.original);
-								setIsModalRemoveOpen(true);
+								setIsModalEditOpen(true);
 							}}
 							className="text-white focus:text-red-500"
 						>
@@ -185,7 +186,11 @@ export function DataTable() {
 	const [selectedApplication, setSelectedApplication] = React.useState<z.infer<
 		typeof schema
 	> | null>(null);
-	const columns = getColumns({ setSelectedApplication, setIsModalRemoveOpen });
+	const columns = getColumns({
+		setSelectedApplication,
+		setIsModalRemoveOpen,
+		setIsModalEditOpen,
+	});
 	const { applications, appsCount } = useApplications(status);
 	const [searchText, setSearchText] = React.useState("");
 
@@ -248,10 +253,6 @@ export function DataTable() {
 					</TabsTrigger>
 				</TabsList>
 
-				<ApplicationEditModal
-					handleClose={() => setIsModalEditOpen(false)}
-					isModalOpen={isModalEditOpen}
-				/>
 				<ApplicationCreateModal
 					handleClose={() => setIsModalCreateOpen(false)}
 					isModalOpen={isModalCreateOpen}
@@ -280,6 +281,21 @@ export function DataTable() {
 					}}
 					application={selectedApplication}
 					handleClose={() => setIsModalRemoveOpen(false)}
+					isModalOpen={true}
+				/>
+			)}
+			{isModalEditOpen && selectedApplication && (
+				<ApplicationEditModal
+					onSuccess={() => {
+						deleteApp.mutate(selectedApplication.id, {
+							onSuccess: () => {
+								setIsModalRemoveOpen(false);
+								setSelectedApplication(null);
+							},
+						});
+					}}
+					application={selectedApplication}
+					handleClose={() => setIsModalEditOpen(false)}
 					isModalOpen={true}
 				/>
 			)}

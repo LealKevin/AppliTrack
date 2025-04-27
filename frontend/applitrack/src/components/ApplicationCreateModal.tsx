@@ -34,7 +34,7 @@ function ApplicationCreateModal({
 			TitleApplication: formData.get("TitleApplication") as string,
 			Company: formData.get("Company") as string,
 			UrlApplication: formData.get("UrlApplication") as string,
-			SentDate: formData.get("SentDate") as string,
+			SentDate: Number(formData.get("SentDate")),
 			Status: status,
 			Notes: formData.get("Notes") as string,
 			UserID: 1,
