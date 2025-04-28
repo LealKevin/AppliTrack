@@ -11,6 +11,12 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import type { IApplication } from "@/pages/ApplicationsPage";
 import useCreateApplication from "@/hooks/useCreateApplication";
+import { Popover } from "@radix-ui/react-popover";
+import { PopoverContent, PopoverTrigger } from "@radix-ui/react-popover";
+import { cn } from "@/lib/utils";
+import { Calendar as CalendarIcon } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
+import { format } from "date-fns";
 
 type CreateModalProps = {
 	isModalOpen: boolean;
@@ -24,6 +30,8 @@ function ApplicationCreateModal({
 	const [status, setStatus] = useState<"pending" | "sent" | "rejected">(
 		"pending",
 	);
+	const [date, setDate] = useState<Date>();
+	const sentDateFormatted = date ? format(date, "yyyy-MM-dd") : "";
 
 	const createApp = useCreateApplication();
 	const handleCreateApplication = async (event: React.FormEvent) => {
@@ -34,7 +42,7 @@ function ApplicationCreateModal({
 			TitleApplication: formData.get("TitleApplication") as string,
 			Company: formData.get("Company") as string,
 			UrlApplication: formData.get("UrlApplication") as string,
-			SentDate: Number(formData.get("SentDate")),
+			SentDate: sentDateFormatted,
 			Status: status,
 			Notes: formData.get("Notes") as string,
 			UserID: 1,
@@ -71,9 +79,28 @@ function ApplicationCreateModal({
 							<Input name="UrlApplication" />
 						</Label>
 						<span>Sent Date</span>
-						<Label>
-							<Input className="center" name="SentDate" type="date" />
-						</Label>
+						<Popover>
+							<PopoverTrigger asChild>
+								<Button
+									variant={"outline"}
+									className={cn(
+										" justify-start text-left font-normal",
+										!date && "text-muted-foreground",
+									)}
+								>
+									<CalendarIcon className="mr-2 h-4 w-4" />
+									{date ? format(date, "PPP") : <span>Pick a date</span>}
+								</Button>
+							</PopoverTrigger>
+							<PopoverContent className="bg-muted w-auto p-0 rounded-sm">
+								<Calendar
+									mode="single"
+									selected={date}
+									onSelect={setDate}
+									initialFocus
+								/>
+							</PopoverContent>
+						</Popover>
 						<hr className="m-4" />
 						<span className="justify-center text-center">Status</span>
 						<div className="flex space-x-2  justify-center">

@@ -17,13 +17,11 @@ export async function fetchApplications(
 	return response.data;
 }
 
-// This function is used to delete an application from the server
 export async function deleteApplication(id: number): Promise<IApplication[]> {
 	const response = await axios.delete<IApplication[]>(`api/applications/${id}`);
 	return response.data;
 }
 
-// This function is used to fetch applications by status from the server
 export async function fetchApplicationsByStatus(status: string) {
 	const response = await axios.get<IApplication[]>(
 		`api/applications/${status}`,
@@ -31,12 +29,33 @@ export async function fetchApplicationsByStatus(status: string) {
 	return response.data;
 }
 
-// This function is used to create an application from the server
+//	TitleApplication string`json:"title"`
+//	Company          string`json:"company"`
+//	SentDate         string`json:"sent_date"`
+//	Status           string`json:"status"`
+//	Notes            string`json:"notes"`
+//	UrlApplication   string`json:"url_application"`
+//
+type bodyRequest = {
+	title: string;
+	company: string;
+	sent_date: number;
+	status: string;
+	notes: string | null;
+	url_application: string;
+};
 export async function createApplication(application: IApplication) {
 	console.log("Creating application", application);
+	const applicationRequest: bodyRequest = {
+		title: application.TitleApplication,
+		company: application.Company,
+		sent_date: application.SentDate,
+		status: application.Status,
+		notes: application.Notes,
+		url_application: application.UrlApplication,
+	};
 	const response = await axios.post<IApplication>("api/application", {
-		...application,
-		UserID: 1,
+		...applicationRequest,
 	});
 	return response.data;
 }

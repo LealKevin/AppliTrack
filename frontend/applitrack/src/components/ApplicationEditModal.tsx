@@ -137,7 +137,7 @@ function ApplicationEditModal({
 						<Button variant="secondary" onClick={handleClose}>
 							Cancel
 						</Button>
-						<Button type="submit">Create new application</Button>
+						<Button type="submit">Confirm changes</Button>
 					</DialogFooter>
 				</form>
 			</DialogContent>
