@@ -161,8 +161,8 @@ func CreateOneApplication(w http.ResponseWriter, r *http.Request) {
 			Valid:  true,
 		},
 		Notes: pgtype.Text{
-			String: "",
-			Valid:  false,
+			String: input.Notes,
+			Valid:  true,
 		},
 		UrlApplication: pgtype.Text{
 			String: input.UrlApplication,
@@ -179,7 +179,7 @@ func CreateOneApplication(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Println("Application created:", application)
+	fmt.Println("Application created:", application.Notes)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(application)
