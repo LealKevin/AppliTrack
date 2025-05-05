@@ -45,7 +45,6 @@ type bodyRequest = {
 	url_application: string;
 };
 export async function createApplication(application: IApplication) {
-	console.log("Creating application", application);
 	const applicationRequest: bodyRequest = {
 		title: application.TitleApplication,
 		company: application.Company,
@@ -64,6 +63,21 @@ type CreateUserResponse = {
 	user: IUser;
 	token: string;
 };
+
+export async function updateApplication(application: IApplication) {
+	const applicationRequest: bodyRequest = {
+		title: application.TitleApplication,
+		company: application.Company,
+		sent_date: application.SentDate,
+		status: application.Status,
+		notes: application.Notes,
+		url_application: application.UrlApplication,
+	};
+	const response = await axios.put<IApplication>(`api/applications`, {
+		...applicationRequest,
+	});
+	return response.data;
+}
 
 export async function createUser(
 	newName: string,

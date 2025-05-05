@@ -53,6 +53,7 @@ import ApplicationRemoveModal from "./ApplicationRemoveModal";
 import { useDeleteApp } from "@/hooks/useDeleteApp";
 import type { IApplication } from "@/pages/ApplicationsPage";
 import ApplicationEditModal from "./ApplicationEditModal";
+import useUpdateApp from "@/hooks/useUpdateApp";
 
 export const schema = z.object({
 	id: z.number(),
@@ -196,6 +197,7 @@ export function DataTable() {
 
 	const dataParsed = parseData(applications);
 	const deleteApp = useDeleteApp();
+	const updateApp = useUpdateApp();
 
 	const filteredApplications = React.useMemo(() => {
 		if (searchText.trim() === "") {
@@ -287,9 +289,9 @@ export function DataTable() {
 			{isModalEditOpen && selectedApplication && (
 				<ApplicationEditModal
 					onSuccess={() => {
-						deleteApp.mutate(selectedApplication.id, {
+						updateApp.mutate(selectedApplication, {
 							onSuccess: () => {
-								setIsModalRemoveOpen(false);
+								setIsModalEditOpen(false);
 								setSelectedApplication(null);
 							},
 						});
