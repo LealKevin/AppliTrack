@@ -8,8 +8,6 @@ export function ProtectedRoute() {
 		return <div>Is Loading</div>;
 	}
 
-	console.log("Auth:", isAuthenticated);
-
 	if (!isAuthenticated) {
 		return <Navigate to={"/login"} />;
 	}

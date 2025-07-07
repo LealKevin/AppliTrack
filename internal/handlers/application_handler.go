@@ -22,10 +22,6 @@ func GetHomePage(w http.ResponseWriter, r *http.Request) {
 
 func GetAllApplications(w http.ResponseWriter, r *http.Request) {
 	userID := r.Context().Value("userID").(int)
-	if userID == 0 {
-		http.Error(w, "Invalid user", http.StatusBadRequest)
-		return
-	}
 	ctx := context.Background()
 
 	statusParam := r.URL.Query().Get("status")
@@ -284,9 +280,6 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Println("Received CreateUser request")
-	log.Printf("Decoded body: %+v\n", req)
-
 	if req.Password != req.PasswordRepeat {
 		log.Print("Password do not match in account creation")
 		http.Error(w, "Passwords do not match", http.StatusBadRequest)
@@ -394,7 +387,6 @@ type UserConnection struct {
 }
 
 func Login(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Login handler")
 	ctx := context.Background()
 
 	var userParams UserConnection
