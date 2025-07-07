@@ -1,7 +1,7 @@
 package application
 
-type Service struct{}
+type ApplicationService struct{}
 
-func NewService() *Service {
-	return &Service{}
+func NewService() *ApplicationService {
+	return &ApplicationService{}
 }
