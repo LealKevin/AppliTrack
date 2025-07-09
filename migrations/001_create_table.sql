@@ -4,8 +4,10 @@ START TRANSACTION;
 
 DROP TABLE IF EXISTS users, applications, reminders;
 
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
 CREATE TABLE users (
-    id SERIAL PRIMARY KEY,
+    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
     name TEXT NOT NULL,
     email TEXT UNIQUE NOT NULL,
     password TEXT NOT NULL,
@@ -14,27 +16,29 @@ CREATE TABLE users (
 );
 
 CREATE TABLE applications (
-    id SERIAL PRIMARY KEY,
+    id UUID DEFAULT uuid_generate_v4() NOT NULL,
     title_application TEXT NOT NULL,
     company TEXT NOT NULL,
     sent_date DATE NOT NULL,
     status VARCHAR(50) CHECK (status IN ('sent', 'pending', 'rejected', 'interview_scheduled')),
     notes TEXT,
-    user_id INT NOT NULL,
+    url_application TEXT,
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 CREATE TABLE reminders (
-    id SERIAL PRIMARY KEY,
+    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
     reminder_date DATE NOT NULL,
     status VARCHAR(50) CHECK (status IN ('pending', 'sent')),
-    application_id INT NOT NULL,
+    application_id UUID NOT NULL REFERENCES applications(id) ON DELETE CASCADE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (application_id) REFERENCES applications(id) ON DELETE CASCADE
 );
+
 
 -- Create a function for updating the timestamp
 CREATE OR REPLACE FUNCTION update_modified_column()

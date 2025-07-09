@@ -1,12 +1,20 @@
 package application
 
 import (
-	db "ApplyTrack/internal/db/queries"
 	"context"
+
+	db "ApplyTrack/internal/db/queries"
+
+	"github.com/google/uuid"
 )
 
 type Store interface {
-	GetAll(userID int) ([]db.Application, error)
+	GetAll(userID uuid.UUID) ([]db.Application, error)
+	GetOne(userID, ID uuid.UUID) (db.Application, error)
+	CreateOne(application db.CreateOneApplicationParams) (db.Application, error)
+	DeleteOne(userID, ID uuid.UUID) error
+	UpdateOne(application db.UpdateOneApplicationByIDParams) (db.Application, error)
+	ApplicationsCount() int
 }
 
 type PostgresApplicationStore struct {
@@ -17,16 +25,104 @@ func NewApplicationStorage(q *db.Queries) *PostgresApplicationStore {
 	return &PostgresApplicationStore{db: q}
 }
 
-func (s *PostgresApplicationStore) GetAll(userID int) ([]db.Application, error) {
+func (s *PostgresApplicationStore) GetAll(userID uuid.UUID) ([]db.Application, error) {
 	ctx := context.Background()
 
 	var applications []db.Application
 	var err error
 
-	applications, err = s.db.GetAllApplications(ctx, int32(userID))
+	applications, err = s.db.GetAllApplications(ctx, userID)
 	if err != nil {
 		return nil, err
 	}
 
 	return applications, nil
+}
+
+func (s *PostgresApplicationStore) GetOne(UserID, ID uuid.UUID) (db.Application, error) {
+	ctx := context.Background()
+
+	application, err := s.db.GetOneApplicationByID(ctx, db.GetOneApplicationByIDParams{
+		ID:     ID,
+		UserID: UserID,
+	})
+	if err != nil {
+		return db.Application{}, err
+	}
+
+	return application, nil
+}
+
+func (s *PostgresApplicationStore) DeleteOne(userID, ID uuid.UUID) error {
+	ctx := context.Background()
+
+	err := s.db.DeleteOneApplicationByID(ctx, db.DeleteOneApplicationByIDParams{
+		ID:     ID,
+		UserID: userID,
+	})
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *PostgresApplicationStore) CreateOne(app db.CreateOneApplicationParams) (db.Application, error) {
+	ctx := context.Background()
+
+	application, err := s.db.CreateOneApplication(ctx, app)
+	if err != nil {
+		return db.Application{}, err
+	}
+	return application, nil
+}
+
+func (s *PostgresApplicationStore) UpdateOne(app db.UpdateOneApplicationByIDParams) (db.Application, error) {
+	ctx := context.Background()
+	application, err := s.db.UpdateOneApplicationByID(ctx, app)
+	if err != nil {
+		return db.Application{}, err
+	}
+	return application, nil
+}
+
+type AppsCountResp struct {
+	All      int `json:"all_count"`
+	Sent     int `json:"sent_count"`
+	Pending  int `json:"pending_count"`
+	Rejected int `json:"rejected_count"`
+}
+
+func (s *PostgresApplicationStore) ApplicationsCount() int {
+	ctx := context.Background()
+
+	sentArgs := parseStatus(userID, "sent")
+	sentCount, err := s.db.GetApplicationsCountByStatus(ctx, sentArgs)
+	if err != nil {
+		http.Error(w, "Unable to get count", http.StatusBadRequest)
+	}
+
+	pendingArgs := parseStatus(userID, "pending")
+	pendingCount, err := queries.GetApplicationsCountByStatus(ctx, pendingArgs)
+	if err != nil {
+		http.Error(w, "Unable to get count", http.StatusBadRequest)
+	}
+
+	rejectedArgs := parseStatus(userID, "rejected")
+	rejectedCount, err := queries.GetApplicationsCountByStatus(ctx, rejectedArgs)
+	if err != nil {
+		http.Error(w, "Unable to get count", http.StatusBadRequest)
+	}
+
+	appsCount := AppsCountResp{
+		All:      int(sentCount) + int(pendingCount) + int(rejectedCount),
+		Sent:     int(sentCount),
+		Pending:  int(pendingCount),
+		Rejected: int(rejectedCount),
+	}
+	fmt.Printf("%v", appsCount)
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(appsCount)
 }

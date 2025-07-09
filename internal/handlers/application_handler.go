@@ -1,262 +1,19 @@
 package handlers
 
 import (
-	client "ApplyTrack/internal/db"
-	db "ApplyTrack/internal/db/queries"
-	hash "ApplyTrack/internal/utils"
 	"context"
 	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
-	"strconv"
 	"time"
 
-	"github.com/go-chi/chi"
+	client "ApplyTrack/internal/db"
+	db "ApplyTrack/internal/db/queries"
+	hash "ApplyTrack/internal/utils"
+
 	"github.com/jackc/pgx/v5/pgtype"
 )
-
-func GetHomePage(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Hello from go chi"))
-}
-
-func GetAllApplications(w http.ResponseWriter, r *http.Request) {
-	userID := r.Context().Value("userID").(int)
-	ctx := context.Background()
-
-	statusParam := r.URL.Query().Get("status")
-
-	queries := db.New(client.Conn)
-
-	var status pgtype.Text
-	status.String = statusParam
-	status.Valid = true
-
-	var applications []db.Application
-	var err error
-
-	user, err := queries.GetOneUserByID(ctx, int32(userID))
-	if err != nil {
-		http.Error(w, "Unable to get user", http.StatusBadRequest)
-	}
-
-	if statusParam == "all" {
-		applications, err = queries.GetAllApplications(ctx, user.ID)
-	} else {
-		args := db.GetApplicationsByStatusParams{
-			Status: status,
-			UserID: user.ID,
-		}
-
-		applications, err = queries.GetApplicationsByStatus(ctx, args)
-	}
-	if err != nil {
-		log.Println("Error getting applications", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(applications)
-}
-
-func GetOneApplicationByID(w http.ResponseWriter, r *http.Request) {
-	ctx := context.Background()
-
-	idInt, err := strconv.Atoi(chi.URLParam(r, "id"))
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-	id := int32(idInt)
-
-	queries := db.New(client.Conn)
-	application, err := queries.GetOneApplicationByID(ctx, id)
-	if err != nil {
-		w.WriteHeader(http.StatusNotFound)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(application)
-}
-
-func DeleteOneApplicationByID(w http.ResponseWriter, r *http.Request) {
-	ctx := context.Background()
-	userID := r.Context().Value("userID").(int)
-
-	idInt, err := strconv.Atoi(chi.URLParam(r, "id"))
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-	appId := int32(idInt)
-
-	args := db.DeleteOneApplicationByIDParams{
-		ID:     appId,
-		UserID: int32(userID),
-	}
-
-	queries := db.New(client.Conn)
-	deleted, err := queries.DeleteOneApplicationByID(ctx, args)
-	if err != nil {
-		w.WriteHeader(http.StatusNotFound)
-		return
-	}
-	fmt.Print("Deleted application: ", deleted)
-	fmt.Println("User ID: ", userID)
-	fmt.Print("Application ID: ", appId)
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(deleted)
-}
-
-type CreateApplicationRequest struct {
-	TitleApplication string `json:"title"`
-	Company          string `json:"company"`
-	SentDate         string `json:"sent_date"`
-	Status           string `json:"status"`
-	Notes            string `json:"notes"`
-	UrlApplication   string `json:"url_application"`
-}
-
-func CreateOneApplication(w http.ResponseWriter, r *http.Request) {
-	ctx := context.Background()
-	userID := r.Context().Value("userID").(int)
-	if userID == 0 {
-		http.Error(w, "Invalid user", http.StatusBadRequest)
-		return
-	}
-
-	var input CreateApplicationRequest
-	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
-		log.Println("Error decoding json", err)
-		http.Error(w, "Invalid input", http.StatusBadRequest)
-		return
-	}
-
-	parsedDate, err := time.Parse("2006-01-02", input.SentDate)
-	if err != nil {
-		log.Println("Invalid date format:", err)
-		http.Error(w, "Invalid date format, expected YYYY-MM-DD", http.StatusBadRequest)
-		return
-	}
-
-	data := db.CreateOneApplicationParams{
-		TitleApplication: input.TitleApplication,
-		Company:          input.Company,
-		SentDate: pgtype.Date{
-			Time:  parsedDate,
-			Valid: true,
-		},
-		Status: pgtype.Text{
-			String: input.Status,
-			Valid:  true,
-		},
-		Notes: pgtype.Text{
-			String: input.Notes,
-			Valid:  true,
-		},
-		UrlApplication: pgtype.Text{
-			String: input.UrlApplication,
-			Valid:  input.UrlApplication != "",
-		},
-		UserID: int32(userID),
-	}
-
-	queries := db.New(client.Conn)
-	application, err := queries.CreateOneApplication(ctx, data)
-	if err != nil {
-		log.Println("Error creating application", err)
-		http.Error(w, "Error creating application", http.StatusInternalServerError)
-		return
-	}
-
-	fmt.Println("Application created:", application.Notes)
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(application)
-}
-
-type UpdateApplicationRequest struct {
-	ID               int32  `json:"id"`
-	TitleApplication string `json:"title"`
-	Company          string `json:"company"`
-	SentDate         string `json:"sent_date"`
-	Status           string `json:"status"`
-	Notes            string `json:"notes"`
-	UrlApplication   string `json:"url_application"`
-}
-
-func UpdateOneApplicationByID(w http.ResponseWriter, r *http.Request) {
-	ctx := context.Background()
-	userID := r.Context().Value("userID").(int)
-	if userID == 0 {
-		http.Error(w, "Invalid user", http.StatusBadRequest)
-		return
-	}
-	idInt, err := strconv.Atoi(chi.URLParam(r, "id"))
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-	id := int32(idInt)
-	var input UpdateApplicationRequest
-
-	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
-		log.Println("Error decoding json", err)
-		http.Error(w, "Invalid input", http.StatusBadRequest)
-		return
-	}
-	defer r.Body.Close()
-	parsedDate, err := time.Parse("2006-01-02", input.SentDate)
-	if err != nil {
-		log.Println("Invalid date format:", err)
-		http.Error(w, "Invalid date format, expected YYYY-MM-DD", http.StatusBadRequest)
-		return
-	}
-	input.ID = id
-
-	data := db.UpdateOneApplicationByIDParams{
-		ID:               input.ID,
-		TitleApplication: input.TitleApplication,
-		Company:          input.Company,
-		SentDate: pgtype.Date{
-			Time:  parsedDate,
-			Valid: true,
-		},
-		Status: pgtype.Text{
-			String: input.Status,
-			Valid:  true,
-		},
-		Notes: pgtype.Text{
-			String: input.Notes,
-			Valid:  input.Notes != "",
-		},
-		UrlApplication: pgtype.Text{
-			String: input.UrlApplication,
-			Valid:  input.UrlApplication != "",
-		},
-		UserID: int32(userID),
-	}
-
-	fmt.Println("Input: ", input)
-
-	queries := db.New(client.Conn)
-	application, err := queries.UpdateOneApplicationByID(ctx, data)
-	if err != nil {
-		log.Println("Error updating application", err)
-		http.Error(w, "Error updating application", http.StatusInternalServerError)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(application)
-}
 
 type CreateUserRequest struct {
 	Name           string `json:"name"`
@@ -479,7 +236,6 @@ func AppsCount(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(appsCount)
-
 }
 
 func parseStatus(userID int, status string) db.GetApplicationsCountByStatusParams {
@@ -492,5 +248,4 @@ func parseStatus(userID int, status string) db.GetApplicationsCountByStatusParam
 	}
 
 	return arg
-
 }

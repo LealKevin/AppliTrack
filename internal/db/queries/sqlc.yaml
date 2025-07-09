@@ -1,0 +1,31 @@
+version: "2"
+sql:
+  - engine: "postgresql"
+    schema: "schema.sql"
+    queries: "."
+    gen:
+      go:
+        package: "db"
+        out: "."
+        overrides:
+          - db_type: "uuid"
+            go_type: "github.com/google/uuid.UUID"
+          - db_type: "timestamp"
+            go_type: "time.Time"
+          - db_type: "timestamp"
+            go_type: "time.Time"
+          - db_type: "date"
+            go_type: "time.Time"
+          - db_type: "text"
+            nullable: true
+            go_type: "string"
+          - db_type: "text"
+            nullable: false
+            go_type: "string"
+          - db_type: "character varying"
+            nullable: false
+            go_type: "string"
+          - db_type: "character varying"
+            nullable: true
+            go_type: "string"
+
