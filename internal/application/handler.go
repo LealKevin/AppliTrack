@@ -28,7 +28,7 @@ func (h *Handler) RegisterRoutes(e *echo.Echo) {
 	e.POST("/application", h.CreateApplication)
 	e.DELETE("/applications/{id}", h.DeleteApplication)
 	e.PUT("/applications/{id}", h.UpdateApplication)
-	// e.GET("/applications/count", h.AppsCount)
+	e.GET("/applications/count", h.GetApplicationCounts)
 }
 
 type applicationResp struct {
@@ -45,6 +45,13 @@ type applicationResp struct {
 
 type applicationsResp struct {
 	Applications []applicationResp `json:"applications"`
+}
+
+type applicationCountsResp struct {
+	All      int64 `json:"all_count"`
+	Sent     int64 `json:"sent_count"`
+	Pending  int64 `json:"pending_count"`
+	Rejected int64 `json:"rejected_count"`
 }
 
 func (h *Handler) GetAllApplications(c echo.Context) error {
@@ -164,6 +171,24 @@ func (h *Handler) UpdateApplication(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "could not update application")
 	}
 	return c.JSON(http.StatusOK, mapperToApplicationResp(application))
+}
+
+func (h *Handler) GetApplicationCounts(c echo.Context) error {
+	userID := c.Get("userID").(uuid.UUID)
+
+	counts, err := h.Store.GetCounts(userID)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "could not load application counts")
+	}
+
+	response := applicationCountsResp{
+		All:      counts.TotalCount,
+		Sent:     counts.SentCount,
+		Pending:  counts.PendingCount,
+		Rejected: counts.RejectedCount,
+	}
+
+	return c.JSON(http.StatusOK, response)
 }
 
 func mapperToApplicationResp(app db.Application) applicationResp {

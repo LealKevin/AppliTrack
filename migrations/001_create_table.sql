@@ -16,7 +16,7 @@ CREATE TABLE users (
 );
 
 CREATE TABLE applications (
-    id UUID DEFAULT uuid_generate_v4() NOT NULL,
+    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
     title_application TEXT NOT NULL,
     company TEXT NOT NULL,
     sent_date DATE NOT NULL,

@@ -163,6 +163,35 @@ func (q *Queries) GetAllUsers(ctx context.Context) ([]User, error) {
 	return items, nil
 }
 
+const getApplicationCountsByUser = `-- name: GetApplicationCountsByUser :one
+SELECT 
+    COUNT(*) as total_count,
+    COUNT(*) FILTER (WHERE status = 'sent') as sent_count,
+    COUNT(*) FILTER (WHERE status = 'pending') as pending_count,
+    COUNT(*) FILTER (WHERE status = 'rejected') as rejected_count
+FROM applications 
+WHERE user_id = $1
+`
+
+type GetApplicationCountsByUserRow struct {
+	TotalCount    int64
+	SentCount     int64
+	PendingCount  int64
+	RejectedCount int64
+}
+
+func (q *Queries) GetApplicationCountsByUser(ctx context.Context, userID uuid.UUID) (GetApplicationCountsByUserRow, error) {
+	row := q.db.QueryRowContext(ctx, getApplicationCountsByUser, userID)
+	var i GetApplicationCountsByUserRow
+	err := row.Scan(
+		&i.TotalCount,
+		&i.SentCount,
+		&i.PendingCount,
+		&i.RejectedCount,
+	)
+	return i, err
+}
+
 const getApplicationsByStatus = `-- name: GetApplicationsByStatus :many
 SELECT id, title_application, company, sent_date, status, notes, url_application, user_id, created_at, updated_at FROM applications WHERE status = $1 AND user_id = $2 ORDER BY updated_at DESC, created_at DESC
 `

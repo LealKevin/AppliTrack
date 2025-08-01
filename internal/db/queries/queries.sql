@@ -21,6 +21,15 @@ SELECT COUNT(*) FROM applications WHERE user_id = $1;
 
 -- name: GetApplicationsCountByStatus :one
 SELECT COUNT(*) FROM applications WHERE user_id = $1 AND status = $2;
+
+-- name: GetApplicationCountsByUser :one
+SELECT 
+    COUNT(*) as total_count,
+    COUNT(*) FILTER (WHERE status = 'sent') as sent_count,
+    COUNT(*) FILTER (WHERE status = 'pending') as pending_count,
+    COUNT(*) FILTER (WHERE status = 'rejected') as rejected_count
+FROM applications 
+WHERE user_id = $1;
 -- name: GetAllUsers :many
 
 SELECT * FROM users;

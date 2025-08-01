@@ -14,7 +14,7 @@ type Store interface {
 	CreateOne(application db.CreateOneApplicationParams) (db.Application, error)
 	DeleteOne(userID, ID uuid.UUID) error
 	UpdateOne(application db.UpdateOneApplicationByIDParams) (db.Application, error)
-	ApplicationsCount() int
+	GetCounts(userID uuid.UUID) (db.GetApplicationCountsByUserRow, error)
 }
 
 type PostgresApplicationStore struct {
@@ -86,43 +86,11 @@ func (s *PostgresApplicationStore) UpdateOne(app db.UpdateOneApplicationByIDPara
 	return application, nil
 }
 
-type AppsCountResp struct {
-	All      int `json:"all_count"`
-	Sent     int `json:"sent_count"`
-	Pending  int `json:"pending_count"`
-	Rejected int `json:"rejected_count"`
-}
-
-func (s *PostgresApplicationStore) ApplicationsCount() int {
+func (s *PostgresApplicationStore) GetCounts(userID uuid.UUID) (db.GetApplicationCountsByUserRow, error) {
 	ctx := context.Background()
-
-	sentArgs := parseStatus(userID, "sent")
-	sentCount, err := s.db.GetApplicationsCountByStatus(ctx, sentArgs)
+	counts, err := s.db.GetApplicationCountsByUser(ctx, userID)
 	if err != nil {
-		http.Error(w, "Unable to get count", http.StatusBadRequest)
+		return db.GetApplicationCountsByUserRow{}, err
 	}
-
-	pendingArgs := parseStatus(userID, "pending")
-	pendingCount, err := queries.GetApplicationsCountByStatus(ctx, pendingArgs)
-	if err != nil {
-		http.Error(w, "Unable to get count", http.StatusBadRequest)
-	}
-
-	rejectedArgs := parseStatus(userID, "rejected")
-	rejectedCount, err := queries.GetApplicationsCountByStatus(ctx, rejectedArgs)
-	if err != nil {
-		http.Error(w, "Unable to get count", http.StatusBadRequest)
-	}
-
-	appsCount := AppsCountResp{
-		All:      int(sentCount) + int(pendingCount) + int(rejectedCount),
-		Sent:     int(sentCount),
-		Pending:  int(pendingCount),
-		Rejected: int(rejectedCount),
-	}
-	fmt.Printf("%v", appsCount)
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(appsCount)
+	return counts, nil
 }

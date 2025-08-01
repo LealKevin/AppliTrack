@@ -13,7 +13,7 @@ RUN go mod download
 COPY . .
 COPY ./migrations /app/migrations
 
-RUN go build -o main main.go
+RUN go build -o main ./cmd/api/main.go
 
 RUN chmod +x ./entrypoint.sh
 
