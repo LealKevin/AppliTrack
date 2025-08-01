@@ -6,10 +6,13 @@ export type UserInput = {
 	password: string;
 };
 
-export function useConnection() {
+export default function useConnection() {
 	const mutation = useMutation({
 		mutationKey: ["user"],
 		mutationFn: (input: UserInput) => connectUser(input),
+		onError: (error) => {
+			console.error("Failed to login:", error);
+		},
 	});
 
 	return mutation;

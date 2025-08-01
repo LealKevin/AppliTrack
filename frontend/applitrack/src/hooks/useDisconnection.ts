@@ -14,7 +14,7 @@ export default function useDisconnection() {
 			navigate("/login");
 		},
 		onError: (error) => {
-			console.error("Erreur lors de la suppression de l'application :", error);
+			console.error("Failed to logout:", error);
 		},
 	});
 	return mutation;

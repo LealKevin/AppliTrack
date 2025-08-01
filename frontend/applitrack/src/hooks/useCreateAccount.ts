@@ -8,12 +8,14 @@ type UserInput = {
 	passwordRepeat: string;
 };
 
-export function useCreateAccount() {
-	console.log("useCreateAccount");
+export default function useCreateAccount() {
 	const mutation = useMutation({
 		mutationKey: ["users"],
 		mutationFn: (user: UserInput) =>
 			createUser(user.name, user.email, user.password, user.passwordRepeat),
+		onError: (error) => {
+			console.error("Failed to create account:", error);
+		},
 	});
 
 	return mutation;

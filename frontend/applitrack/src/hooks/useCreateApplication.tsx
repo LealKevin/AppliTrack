@@ -5,10 +5,15 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 export default function useCreateApplication() {
 	const queryClient = useQueryClient();
 	const mutation = useMutation({
-		mutationKey: ["applciations"],
+		mutationKey: ["applications"],
 		mutationFn: (application: IApplication) => createApplication(application),
-		onSuccess: () =>
-			queryClient.invalidateQueries({ queryKey: ["applications"] }),
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ["applications"] });
+			queryClient.invalidateQueries({ queryKey: ["appsCount"] });
+		},
+		onError: (error) => {
+			console.error("Failed to create application:", error);
+		},
 	});
 
 	return mutation;

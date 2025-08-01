@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { deleteApplication } from "@/utils/apiCalls";
 
-export function useDeleteApp() {
+export default function useDeleteApp() {
 	const queryClient = useQueryClient();
 
 	const mutation = useMutation({
@@ -15,7 +15,7 @@ export function useDeleteApp() {
 			});
 		},
 		onError: (error) => {
-			console.error("Erreur lors de la suppression de l'application :", error);
+			console.error("Failed to delete application:", error);
 		},
 	});
 	return mutation;
