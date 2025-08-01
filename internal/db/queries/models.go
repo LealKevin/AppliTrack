@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type Application struct {
@@ -19,8 +20,8 @@ type Application struct {
 	Notes            string
 	UrlApplication   string
 	UserID           uuid.UUID
-	CreatedAt        time.Time
-	UpdatedAt        time.Time
+	CreatedAt        pgtype.Timestamptz
+	UpdatedAt        pgtype.Timestamptz
 }
 
 type Reminder struct {
@@ -28,8 +29,8 @@ type Reminder struct {
 	ReminderDate  time.Time
 	Status        string
 	ApplicationID uuid.UUID
-	CreatedAt     time.Time
-	UpdatedAt     time.Time
+	CreatedAt     pgtype.Timestamptz
+	UpdatedAt     pgtype.Timestamptz
 }
 
 type User struct {
@@ -37,6 +38,6 @@ type User struct {
 	Name      string
 	Email     string
 	Password  string
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	CreatedAt pgtype.Timestamptz
+	UpdatedAt pgtype.Timestamptz
 }

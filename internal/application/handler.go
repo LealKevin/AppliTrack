@@ -200,7 +200,7 @@ func mapperToApplicationResp(app db.Application) applicationResp {
 		Status:           app.Status,
 		Notes:            app.Notes,
 		UrlApplication:   app.UrlApplication,
-		CreatedAt:        app.CreatedAt,
-		UpdatedAt:        app.UpdatedAt,
+		CreatedAt:        app.CreatedAt.Time,
+		UpdatedAt:        app.UpdatedAt.Time,
 	}
 }

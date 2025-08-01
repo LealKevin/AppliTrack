@@ -27,7 +27,7 @@ type CreateOneApplicationParams struct {
 }
 
 func (q *Queries) CreateOneApplication(ctx context.Context, arg CreateOneApplicationParams) (Application, error) {
-	row := q.db.QueryRowContext(ctx, createOneApplication,
+	row := q.db.QueryRow(ctx, createOneApplication,
 		arg.TitleApplication,
 		arg.Company,
 		arg.SentDate,
@@ -63,7 +63,7 @@ type CreateUserParams struct {
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
-	row := q.db.QueryRowContext(ctx, createUser, arg.Name, arg.Email, arg.Password)
+	row := q.db.QueryRow(ctx, createUser, arg.Name, arg.Email, arg.Password)
 	var i User
 	err := row.Scan(
 		&i.ID,
@@ -86,7 +86,7 @@ type DeleteOneApplicationByIDParams struct {
 }
 
 func (q *Queries) DeleteOneApplicationByID(ctx context.Context, arg DeleteOneApplicationByIDParams) error {
-	_, err := q.db.ExecContext(ctx, deleteOneApplicationByID, arg.ID, arg.UserID)
+	_, err := q.db.Exec(ctx, deleteOneApplicationByID, arg.ID, arg.UserID)
 	return err
 }
 
@@ -95,7 +95,7 @@ SELECT id, title_application, company, sent_date, status, notes, url_application
 `
 
 func (q *Queries) GetAllApplications(ctx context.Context, userID uuid.UUID) ([]Application, error) {
-	rows, err := q.db.QueryContext(ctx, getAllApplications, userID)
+	rows, err := q.db.Query(ctx, getAllApplications, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -119,9 +119,6 @@ func (q *Queries) GetAllApplications(ctx context.Context, userID uuid.UUID) ([]A
 		}
 		items = append(items, i)
 	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
 	if err := rows.Err(); err != nil {
 		return nil, err
 	}
@@ -134,7 +131,7 @@ SELECT id, name, email, password, created_at, updated_at FROM users
 `
 
 func (q *Queries) GetAllUsers(ctx context.Context) ([]User, error) {
-	rows, err := q.db.QueryContext(ctx, getAllUsers)
+	rows, err := q.db.Query(ctx, getAllUsers)
 	if err != nil {
 		return nil, err
 	}
@@ -153,9 +150,6 @@ func (q *Queries) GetAllUsers(ctx context.Context) ([]User, error) {
 			return nil, err
 		}
 		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
 	}
 	if err := rows.Err(); err != nil {
 		return nil, err
@@ -181,7 +175,7 @@ type GetApplicationCountsByUserRow struct {
 }
 
 func (q *Queries) GetApplicationCountsByUser(ctx context.Context, userID uuid.UUID) (GetApplicationCountsByUserRow, error) {
-	row := q.db.QueryRowContext(ctx, getApplicationCountsByUser, userID)
+	row := q.db.QueryRow(ctx, getApplicationCountsByUser, userID)
 	var i GetApplicationCountsByUserRow
 	err := row.Scan(
 		&i.TotalCount,
@@ -202,7 +196,7 @@ type GetApplicationsByStatusParams struct {
 }
 
 func (q *Queries) GetApplicationsByStatus(ctx context.Context, arg GetApplicationsByStatusParams) ([]Application, error) {
-	rows, err := q.db.QueryContext(ctx, getApplicationsByStatus, arg.Status, arg.UserID)
+	rows, err := q.db.Query(ctx, getApplicationsByStatus, arg.Status, arg.UserID)
 	if err != nil {
 		return nil, err
 	}
@@ -226,9 +220,6 @@ func (q *Queries) GetApplicationsByStatus(ctx context.Context, arg GetApplicatio
 		}
 		items = append(items, i)
 	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
 	if err := rows.Err(); err != nil {
 		return nil, err
 	}
@@ -240,7 +231,7 @@ SELECT COUNT(*) FROM applications WHERE user_id = $1
 `
 
 func (q *Queries) GetApplicationsCount(ctx context.Context, userID uuid.UUID) (int64, error) {
-	row := q.db.QueryRowContext(ctx, getApplicationsCount, userID)
+	row := q.db.QueryRow(ctx, getApplicationsCount, userID)
 	var count int64
 	err := row.Scan(&count)
 	return count, err
@@ -256,7 +247,7 @@ type GetApplicationsCountByStatusParams struct {
 }
 
 func (q *Queries) GetApplicationsCountByStatus(ctx context.Context, arg GetApplicationsCountByStatusParams) (int64, error) {
-	row := q.db.QueryRowContext(ctx, getApplicationsCountByStatus, arg.UserID, arg.Status)
+	row := q.db.QueryRow(ctx, getApplicationsCountByStatus, arg.UserID, arg.Status)
 	var count int64
 	err := row.Scan(&count)
 	return count, err
@@ -272,7 +263,7 @@ type GetOneApplicationByIDParams struct {
 }
 
 func (q *Queries) GetOneApplicationByID(ctx context.Context, arg GetOneApplicationByIDParams) (Application, error) {
-	row := q.db.QueryRowContext(ctx, getOneApplicationByID, arg.ID, arg.UserID)
+	row := q.db.QueryRow(ctx, getOneApplicationByID, arg.ID, arg.UserID)
 	var i Application
 	err := row.Scan(
 		&i.ID,
@@ -294,7 +285,7 @@ SELECT id, name, email, password, created_at, updated_at FROM users WHERE email 
 `
 
 func (q *Queries) GetOneUserByEmail(ctx context.Context, email string) (User, error) {
-	row := q.db.QueryRowContext(ctx, getOneUserByEmail, email)
+	row := q.db.QueryRow(ctx, getOneUserByEmail, email)
 	var i User
 	err := row.Scan(
 		&i.ID,
@@ -312,7 +303,7 @@ SELECT id, name, email, password, created_at, updated_at FROM users WHERE id = $
 `
 
 func (q *Queries) GetOneUserByID(ctx context.Context, id uuid.UUID) (User, error) {
-	row := q.db.QueryRowContext(ctx, getOneUserByID, id)
+	row := q.db.QueryRow(ctx, getOneUserByID, id)
 	var i User
 	err := row.Scan(
 		&i.ID,
@@ -341,7 +332,7 @@ type UpdateOneApplicationByIDParams struct {
 }
 
 func (q *Queries) UpdateOneApplicationByID(ctx context.Context, arg UpdateOneApplicationByIDParams) (Application, error) {
-	row := q.db.QueryRowContext(ctx, updateOneApplicationByID,
+	row := q.db.QueryRow(ctx, updateOneApplicationByID,
 		arg.TitleApplication,
 		arg.Company,
 		arg.SentDate,

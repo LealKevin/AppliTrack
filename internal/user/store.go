@@ -26,7 +26,7 @@ type CreateUserParams struct {
 
 type Store interface {
 	GetAll() ([]User, error)
-	GetOneByID(userID int32) (User, error)
+	GetOneByID(userID uuid.UUID) (User, error)
 	GetOneByEmail(email string) (User, error)
 	CreateOne(params CreateUserParams) (User, error)
 }
@@ -100,8 +100,8 @@ func mapFromDBUser(dbUser db.User) User {
 		Name:      dbUser.Name,
 		Email:     dbUser.Email,
 		Password:  dbUser.Password,
-		CreatedAt: dbUser.CreatedAt,
-		UpdatedAt: dbUser.UpdatedAt,
+		CreatedAt: dbUser.CreatedAt.Time,
+		UpdatedAt: dbUser.UpdatedAt.Time,
 	}
 }
 
