@@ -9,6 +9,7 @@ import (
 	"ApplyTrack/internal/db"
 	dbQueries "ApplyTrack/internal/db/queries"
 	"ApplyTrack/internal/user"
+	"ApplyTrack/internal/utils"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -36,8 +37,12 @@ func main() {
 
 	api := e.Group("/api")
 	
-	appHandler.RegisterRoutes(api)
 	userHandler.RegisterRoutes(api)
+	
+	protected := api.Group("")
+	protected.Use(utils.EchoAuthMiddleware())
+	appHandler.RegisterRoutes(protected)
+	userHandler.RegisterProtectedRoutes(protected)
 
 	go func() {
 		if err := e.Start(":8080"); err != nil {

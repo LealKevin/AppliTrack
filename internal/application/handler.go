@@ -22,7 +22,7 @@ func NewHandler(service *ApplicationService, store Store) *Handler {
 	}
 }
 
-func (h *Handler) RegisterRoutes(e *echo.Echo) {
+func (h *Handler) RegisterRoutes(e *echo.Group) {
 	e.GET("/applications", h.GetAllApplications)
 	e.GET("/applications/{id}", h.GetOneApplication)
 	e.POST("/application", h.CreateApplication)

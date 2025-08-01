@@ -11,11 +11,11 @@ import (
 var jwtSecret = []byte(os.Getenv("JWTSECRET"))
 
 type Claims struct {
-	UserId int `json:"user_id"`
+	UserId string `json:"user_id"`
 	jwt.RegisteredClaims
 }
 
-func CreateToken(userId int) (string, error) {
+func CreateToken(userId string) (string, error) {
 	claims := Claims{
 		UserId: userId,
 		RegisteredClaims: jwt.RegisteredClaims{

@@ -18,10 +18,13 @@ func NewHandler(service *UserService) *Handler {
 	}
 }
 
-func (h *Handler) RegisterRoutes(e *echo.Echo) {
+func (h *Handler) RegisterRoutes(e *echo.Group) {
 	e.POST("/register", h.Register)
 	e.POST("/login", h.Login)
 	e.POST("/logout", h.Logout)
+}
+
+func (h *Handler) RegisterProtectedRoutes(e *echo.Group) {
 	e.GET("/users", h.GetAllUsers)
 	e.GET("/user/current", h.GetCurrentUser)
 }
@@ -147,15 +150,12 @@ func (h *Handler) GetAllUsers(c echo.Context) error {
 }
 
 func (h *Handler) GetCurrentUser(c echo.Context) error {
-	userIDStr := c.Get("userID")
-	if userIDStr == nil {
+	userIDValue := c.Get("userID")
+	if userIDValue == nil {
 		return echo.NewHTTPError(http.StatusUnauthorized, "invalid user")
 	}
 
-	userID, err := uuid.Parse(userIDStr.(string))
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "invalid user ID")
-	}
+	userID := userIDValue.(uuid.UUID)
 
 	user, err := h.Service.GetUserByID(userID)
 	if err != nil {
