@@ -4,6 +4,7 @@ import (
 	"errors"
 
 	hash "ApplyTrack/internal/utils"
+	"github.com/google/uuid"
 )
 
 type RegisterRequest struct {
@@ -58,7 +59,7 @@ func (s *UserService) Register(req RegisterRequest) (AuthResponse, error) {
 		return AuthResponse{}, errors.New("failed to create user")
 	}
 
-	token, err := hash.CreateToken(int(user.ID))
+	token, err := hash.CreateToken(user.ID.String())
 	if err != nil {
 		return AuthResponse{}, errors.New("failed to create token")
 	}
@@ -80,7 +81,7 @@ func (s *UserService) Login(req LoginRequest) (AuthResponse, error) {
 		return AuthResponse{}, errors.New("invalid email or password")
 	}
 
-	token, err := hash.CreateToken(int(user.ID))
+	token, err := hash.CreateToken(user.ID.String())
 	if err != nil {
 		return AuthResponse{}, errors.New("failed to create token")
 	}
@@ -91,7 +92,7 @@ func (s *UserService) Login(req LoginRequest) (AuthResponse, error) {
 	}, nil
 }
 
-func (s *UserService) GetUserByID(userID int32) (User, error) {
+func (s *UserService) GetUserByID(userID uuid.UUID) (User, error) {
 	return s.Store.GetOneByID(userID)
 }
 

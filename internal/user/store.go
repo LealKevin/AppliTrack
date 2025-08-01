@@ -5,10 +5,12 @@ import (
 	"time"
 
 	db "ApplyTrack/internal/db/queries"
+
+	"github.com/google/uuid"
 )
 
 type User struct {
-	ID        int32     `json:"id"`
+	ID        uuid.UUID `json:"id"`
 	Name      string    `json:"name"`
 	Email     string    `json:"email"`
 	Password  string    `json:"-"`
@@ -39,56 +41,56 @@ func NewUserStorage(q *db.Queries) *PostgresUserStore {
 
 func (s *PostgresUserStore) GetAll() ([]User, error) {
 	ctx := context.Background()
-	
+
 	dbUsers, err := s.db.GetAllUsers(ctx)
 	if err != nil {
 		return nil, err
 	}
-	
+
 	users := make([]User, len(dbUsers))
 	for i, dbUser := range dbUsers {
 		users[i] = mapFromDBUser(dbUser)
 	}
-	
+
 	return users, nil
 }
 
-func (s *PostgresUserStore) GetOneByID(userID int32) (User, error) {
+func (s *PostgresUserStore) GetOneByID(userID uuid.UUID) (User, error) {
 	ctx := context.Background()
-	
+
 	dbUser, err := s.db.GetOneUserByID(ctx, userID)
 	if err != nil {
 		return User{}, err
 	}
-	
+
 	return mapFromDBUser(dbUser), nil
 }
 
 func (s *PostgresUserStore) GetOneByEmail(email string) (User, error) {
 	ctx := context.Background()
-	
+
 	dbUser, err := s.db.GetOneUserByEmail(ctx, email)
 	if err != nil {
 		return User{}, err
 	}
-	
+
 	return mapFromDBUser(dbUser), nil
 }
 
 func (s *PostgresUserStore) CreateOne(params CreateUserParams) (User, error) {
 	ctx := context.Background()
-	
+
 	dbParams := db.CreateUserParams{
 		Name:     params.Name,
 		Email:    params.Email,
 		Password: params.Password,
 	}
-	
+
 	dbUser, err := s.db.CreateUser(ctx, dbParams)
 	if err != nil {
 		return User{}, err
 	}
-	
+
 	return mapFromDBUser(dbUser), nil
 }
 
@@ -102,3 +104,4 @@ func mapFromDBUser(dbUser db.User) User {
 		UpdatedAt: dbUser.UpdatedAt,
 	}
 }
+
