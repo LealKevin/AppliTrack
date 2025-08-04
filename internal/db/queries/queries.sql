@@ -43,5 +43,49 @@ SELECT * FROM users WHERE email = $1;
 -- name: GetOneUserByID :one
 SELECT * FROM users WHERE id = $1;
 
+-- name: GetAnalyticsOverview :one
+SELECT 
+    COUNT(*) as total_applications,
+    CAST(ROUND(
+        CAST((COUNT(*) FILTER (WHERE status = 'pending')::float / 
+         NULLIF(COUNT(*), 0)) * 100 AS numeric), 2
+    ) AS float) as success_rate,
+    COUNT(*) FILTER (WHERE sent_date >= CURRENT_DATE - INTERVAL '7 days') as applications_this_week
+FROM applications 
+WHERE user_id = $1;
+
+-- name: GetAnalyticsTrends :many
+SELECT 
+    sent_date::text as date,
+    COUNT(*) as count
+FROM applications 
+WHERE user_id = $1 
+    AND sent_date >= $2 
+    AND sent_date <= $3
+GROUP BY sent_date 
+ORDER BY sent_date;
+
+-- name: GetAnalyticsCompanies :many
+SELECT 
+    company as name,
+    COUNT(*) as applications,
+    CAST(ROUND(
+        CAST((COUNT(*) FILTER (WHERE status = 'pending')::float / 
+         NULLIF(COUNT(*), 0)) * 100 AS numeric), 2
+    ) AS float) as success_rate
+FROM applications 
+WHERE user_id = $1
+GROUP BY company 
+ORDER BY applications DESC 
+LIMIT 10;
+
+-- name: GetTopCompanyByUser :one
+SELECT company
+FROM applications 
+WHERE user_id = $1
+GROUP BY company 
+ORDER BY COUNT(*) DESC 
+LIMIT 1;
+
 
 

@@ -38,21 +38,6 @@ const chartConfig = {
 
 export function ChartAreaInteractive() {
 	const { applications } = useApplications("all");
-	const dateCountsMap = new Map();
-
-	applications.forEach((app) => {
-		const date = app.SentDate;
-		if (dateCountsMap.has(date)) {
-			dateCountsMap.set(date, dateCountsMap.get(date) + 1);
-		} else {
-			dateCountsMap.set(date, 1);
-		}
-	});
-
-	const dateCountsArray = Array.from(dateCountsMap, ([date, count]) => ({
-		date,
-		count,
-	}));
 	const isMobile = useIsMobile();
 	const [timeRange, setTimeRange] = React.useState("90d");
 
@@ -62,19 +47,52 @@ export function ChartAreaInteractive() {
 		}
 	}, [isMobile]);
 
-	const filteredData = dateCountsArray.filter((item) => {
-		const date = new Date(item.date);
-		const referenceDate = new Date("2025-03-30");
-		let daysToSubtract = 90;
-		if (timeRange === "30d") {
-			daysToSubtract = 30;
-		} else if (timeRange === "7d") {
-			daysToSubtract = 7;
+	const chartData = React.useMemo(() => {
+		if (!applications.length) return [];
+
+		const dateCountsMap = new Map();
+		const now = new Date();
+		const endDate = new Date();
+		endDate.setDate(now.getDate() + 30); // Allow future dates up to 30 days ahead
+		
+		let startDate = new Date();
+
+		switch (timeRange) {
+			case "7d":
+				startDate.setDate(now.getDate() - 7);
+				break;
+			case "30d":
+				startDate.setDate(now.getDate() - 30);
+				break;
+			case "90d":
+			default:
+				startDate.setDate(now.getDate() - 90);
+				break;
 		}
-		const startDate = new Date(referenceDate);
-		startDate.setDate(startDate.getDate() - daysToSubtract);
-		return date >= startDate;
-	});
+
+		applications.forEach((app) => {
+			const dateStr = app.sent_date || app.SentDate;
+			if (!dateStr) return;
+
+			const appDate = new Date(dateStr);
+			const isInRange = appDate >= startDate && appDate <= endDate;
+			
+			if (isInRange) {
+				const year = appDate.getFullYear();
+				const month = String(appDate.getMonth() + 1).padStart(2, '0');
+				const day = String(appDate.getDate()).padStart(2, '0');
+				const dateKey = `${year}-${month}-${day}`;
+				dateCountsMap.set(dateKey, (dateCountsMap.get(dateKey) || 0) + 1);
+			}
+		});
+
+		return Array.from(dateCountsMap, ([date, count]) => ({
+			date,
+			count,
+		})).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+	}, [applications, timeRange]);
+
+	const filteredData = chartData;
 
 	return (
 		<Card className="@container/card">

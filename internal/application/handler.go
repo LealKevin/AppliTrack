@@ -29,6 +29,9 @@ func (h *Handler) RegisterRoutes(e *echo.Group) {
 	e.DELETE("/applications/{id}", h.DeleteApplication)
 	e.PUT("/applications/{id}", h.UpdateApplication)
 	e.GET("/applications/count", h.GetApplicationCounts)
+	e.GET("/analytics/overview", h.GetAnalyticsOverview)
+	e.GET("/analytics/trends", h.GetAnalyticsTrends)
+	e.GET("/analytics/companies", h.GetAnalyticsCompanies)
 }
 
 type applicationResp struct {
@@ -52,6 +55,32 @@ type applicationCountsResp struct {
 	Sent     int64 `json:"sent_count"`
 	Pending  int64 `json:"pending_count"`
 	Rejected int64 `json:"rejected_count"`
+}
+
+type analyticsOverviewResp struct {
+	TotalApplications    int64   `json:"total_applications"`
+	SuccessRate          float64 `json:"success_rate"`
+	ApplicationsThisWeek int64   `json:"applications_this_week"`
+	TopCompany           string  `json:"top_company"`
+}
+
+type analyticsTrendsResp struct {
+	Trends []dailyTrend `json:"trends"`
+}
+
+type dailyTrend struct {
+	Date  string `json:"date"`
+	Count int64  `json:"count"`
+}
+
+type analyticsCompaniesResp struct {
+	Companies []companyStats `json:"companies"`
+}
+
+type companyStats struct {
+	Name         string  `json:"name"`
+	Applications int64   `json:"applications"`
+	SuccessRate  float64 `json:"success_rate"`
 }
 
 func (h *Handler) GetAllApplications(c echo.Context) error {
@@ -188,6 +217,90 @@ func (h *Handler) GetApplicationCounts(c echo.Context) error {
 		Rejected: counts.RejectedCount,
 	}
 
+	return c.JSON(http.StatusOK, response)
+}
+
+func (h *Handler) GetAnalyticsOverview(c echo.Context) error {
+	userID := c.Get("userID").(uuid.UUID)
+	
+	overview, err := h.Store.GetAnalyticsOverview(userID)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "could not load analytics overview")
+	}
+	
+	topCompany, err := h.Store.GetTopCompany(userID)
+	if err != nil {
+		topCompany = "N/A"
+	}
+	
+	successRate := overview.SuccessRate
+	
+	response := analyticsOverviewResp{
+		TotalApplications:    overview.TotalApplications,
+		SuccessRate:          successRate,
+		ApplicationsThisWeek: overview.ApplicationsThisWeek,
+		TopCompany:           topCompany,
+	}
+	
+	return c.JSON(http.StatusOK, response)
+}
+
+func (h *Handler) GetAnalyticsTrends(c echo.Context) error {
+	userID := c.Get("userID").(uuid.UUID)
+	
+	startDate := c.QueryParam("start_date")
+	endDate := c.QueryParam("end_date")
+	
+	if startDate == "" {
+		startDate = time.Now().AddDate(0, 0, -30).Format("2006-01-02")
+	}
+	if endDate == "" {
+		endDate = time.Now().Format("2006-01-02")
+	}
+	
+	trends, err := h.Store.GetAnalyticsTrends(userID, startDate, endDate)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "could not load analytics trends")
+	}
+	
+	var trendData []dailyTrend
+	for _, trend := range trends {
+		trendData = append(trendData, dailyTrend{
+			Date:  trend.Date,
+			Count: trend.Count,
+		})
+	}
+	
+	response := analyticsTrendsResp{
+		Trends: trendData,
+	}
+	
+	return c.JSON(http.StatusOK, response)
+}
+
+func (h *Handler) GetAnalyticsCompanies(c echo.Context) error {
+	userID := c.Get("userID").(uuid.UUID)
+	
+	companies, err := h.Store.GetAnalyticsCompanies(userID)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "could not load analytics companies")
+	}
+	
+	var companyData []companyStats
+	for _, company := range companies {
+		successRate := company.SuccessRate
+		
+		companyData = append(companyData, companyStats{
+			Name:         company.Name,
+			Applications: company.Applications,
+			SuccessRate:  successRate,
+		})
+	}
+	
+	response := analyticsCompaniesResp{
+		Companies: companyData,
+	}
+	
 	return c.JSON(http.StatusOK, response)
 }
 
