@@ -11,8 +11,8 @@ import {
 	CardHeader,
 } from "./ui/card";
 import { useState } from "react";
-import { useCreateAccount } from "@/hooks/useCreateAccount";
-import { useConnection } from "@/hooks/useConnection";
+import useCreateAccount from "@/hooks/useCreateAccount";
+import useConnection from "@/hooks/useConnection";
 
 type UserConnectionModalProps = {
 	isModalOpen: boolean;

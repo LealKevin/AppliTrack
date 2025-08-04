@@ -11,22 +11,24 @@ type IUser = {
 export async function fetchApplications(
 	status: string,
 ): Promise<IApplication[]> {
-	const response = await axios.get<IApplication[]>(
-		`api/applications?status=${status ?? ""}`,
+	const response = await axios.get<{applications: IApplication[]}>(
+		`/api/applications?status=${status ?? ""}`,
+		{ withCredentials: true }
 	);
-	return response.data;
+	return response.data.applications;
 }
 
 export async function deleteApplication(id: number): Promise<IApplication[]> {
-	const response = await axios.delete<IApplication[]>(`api/applications/${id}`);
-	return response.data;
+	const response = await axios.delete<{applications: IApplication[]}>(`/api/applications/${id}`, { withCredentials: true });
+	return response.data.applications;
 }
 
 export async function fetchApplicationsByStatus(status: string) {
-	const response = await axios.get<IApplication[]>(
-		`api/applications/${status}`,
+	const response = await axios.get<{applications: IApplication[]}>(
+		`/api/applications/${status}`,
+		{ withCredentials: true }
 	);
-	return response.data;
+	return response.data.applications;
 }
 
 //	TitleApplication string`json:"title"`
@@ -45,17 +47,15 @@ type bodyRequest = {
 	url_application: string;
 };
 export async function createApplication(application: IApplication) {
-	const applicationRequest: bodyRequest = {
+	const applicationRequest = {
 		title: application.TitleApplication,
 		company: application.Company,
-		sent_date: application.SentDate,
+		sent_date: application.SentDate, // Backend expects ISO string, will parse as time.Time
 		status: application.Status,
-		notes: application.Notes,
+		notes: application.Notes || "",
 		url_application: application.UrlApplication,
 	};
-	const response = await axios.post<IApplication>("api/application", {
-		...applicationRequest,
-	});
+	const response = await axios.post<IApplication>("/api/application", applicationRequest, { withCredentials: true });
 	return response.data;
 }
 
@@ -73,9 +73,9 @@ export async function updateApplication(application: IApplication) {
 		notes: application.Notes,
 		url_application: application.UrlApplication,
 	};
-	const response = await axios.put<IApplication>(`api/applications`, {
+	const response = await axios.put<IApplication>(`/api/applications`, {
 		...applicationRequest,
-	});
+	}, { withCredentials: true });
 	return response.data;
 }
 
@@ -86,7 +86,7 @@ export async function createUser(
 	newPassWordRepeat: string,
 ): Promise<CreateUserResponse> {
 	const response = await axios.post<CreateUserResponse>(
-		"api/users",
+		"/api/register",
 		{
 			name: newName,
 			email: newEmail,
@@ -120,12 +120,15 @@ export async function logoutUser(): Promise<void> {
 }
 
 export type UserType = {
-	Name: string;
-	Email: string;
+	id: string;
+	name: string;
+	email: string;
+	created_at: string;
+	updated_at: string;
 };
 
 export async function getUser(): Promise<UserType> {
-	const response = await axios.get<UserType>("/api/me", {
+	const response = await axios.get<UserType>("/api/user/current", {
 		withCredentials: true,
 	});
 	console.log("Here");
@@ -141,7 +144,7 @@ export type AppsCount = {
 };
 export async function getAppsCount(): Promise<AppsCount> {
 	console.log("Count count");
-	const response = await axios.get<AppsCount>("api/applications/count", {
+	const response = await axios.get<AppsCount>("/api/applications/count", {
 		withCredentials: true,
 	});
 	console.log(response.data);

@@ -43,7 +43,7 @@ export function NavUser({ user }: NavUserProps) {
 								</AvatarFallback>
 							</Avatar>
 							<div className="grid flex-1 text-left text-sm leading-tight">
-								<span className="truncate font-medium">{user?.Name}</span>
+								<span className="truncate font-medium">{user?.name}</span>
 								<span className="text-muted-foreground truncate text-xs">
 									{user?.email}
 								</span>
@@ -65,9 +65,9 @@ export function NavUser({ user }: NavUserProps) {
 									</AvatarFallback>
 								</Avatar>
 								<div className="grid flex-1 text-left text-sm leading-tight">
-									<span className="truncate font-medium">{user.Name}</span>
+									<span className="truncate font-medium">{user?.name}</span>
 									<span className="text-muted-foreground truncate text-xs">
-										{user.Email}
+										{user?.email}
 									</span>
 								</div>
 							</div>

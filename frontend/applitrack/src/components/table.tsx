@@ -141,7 +141,7 @@ export function ReusableTable<T extends { id: number }>({
 			columnFilters,
 			pagination,
 		},
-		getRowId: (row) => row.id.toString(),
+		getRowId: (row) => row.id?.toString() || Math.random().toString(),
 		enableRowSelection: true,
 		onRowSelectionChange: setRowSelection,
 		onSortingChange: setSorting,

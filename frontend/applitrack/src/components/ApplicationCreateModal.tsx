@@ -31,7 +31,7 @@ function ApplicationCreateModal({
 		"pending",
 	);
 	const [date, setDate] = useState<Date>();
-	const sentDateFormatted = date ? format(date, "yyyy-MM-dd") : "";
+	const sentDateFormatted = date ? date.toISOString() : new Date().toISOString();
 
 	const createApp = useCreateApplication();
 	const handleCreateApplication = async (event: React.FormEvent) => {
@@ -45,7 +45,6 @@ function ApplicationCreateModal({
 			SentDate: sentDateFormatted,
 			Status: status,
 			Notes: formData.get("Notes") as string,
-			UserID: 1,
 		};
 		await createApp.mutateAsync(newApplication);
 		handleClose();

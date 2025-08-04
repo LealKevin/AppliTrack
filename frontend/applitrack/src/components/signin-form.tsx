@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useNavigate } from "react-router-dom";
-import { useCreateAccount } from "@/hooks/useCreateAccount";
+import useCreateAccount from "@/hooks/useCreateAccount";
 
 export function SigninForm({
 	className,

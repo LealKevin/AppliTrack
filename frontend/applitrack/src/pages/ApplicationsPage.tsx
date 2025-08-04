@@ -13,20 +13,30 @@ import AddButton from "@/components/AddButton";
 import ApplicationCreateModal from "@/components/ApplicationCreateModal";
 import ApplicationDate from "@/components/ApplicationDate";
 import ApplicationRemoveModal from "@/components/ApplicationRemoveModal";
-import { useDeleteApp } from "@/hooks/useDeleteApp";
+import useDeleteApp from "@/hooks/useDeleteApp";
 import useApplications from "@/hooks/useApplications";
 
 export type IApplication = {
-	Company: string;
-	CreatedAt: number;
-	ID: number;
-	Notes: string | null;
-	UrlApplication: string;
-	SentDate: number;
-	Status: "pending" | "sent" | "rejected";
-	TitleApplication: string;
-	UpdatedAt: number;
-	UserID: number;
+	company?: string;
+	created_at?: string;
+	id?: string;
+	notes?: string | null;
+	url_application?: string;
+	sent_date?: string;
+	status?: "pending" | "sent" | "rejected";
+	title_application?: string;
+	updated_at?: string;
+	// For create requests, we might still use PascalCase
+	Company?: string;
+	CreatedAt?: number;
+	ID?: string;
+	Notes?: string | null;
+	UrlApplication?: string;
+	SentDate?: string;
+	Status?: "pending" | "sent" | "rejected";
+	TitleApplication?: string;
+	UpdatedAt?: number;
+	UserID?: number;
 };
 
 function toCamelCase(str: string) {
