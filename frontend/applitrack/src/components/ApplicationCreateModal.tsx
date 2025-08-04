@@ -31,7 +31,10 @@ function ApplicationCreateModal({
 		"pending",
 	);
 	const [date, setDate] = useState<Date>();
-	const sentDateFormatted = date ? date.toISOString() : new Date().toISOString();
+	const sentDateFormatted = date 
+		? new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())).toISOString()
+		: new Date().toISOString();
+	
 
 	const createApp = useCreateApplication();
 	const handleCreateApplication = async (event: React.FormEvent) => {

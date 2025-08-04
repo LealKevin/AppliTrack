@@ -2,6 +2,7 @@ package application
 
 import (
 	"context"
+	"time"
 
 	db "ApplyTrack/internal/db/queries"
 
@@ -15,6 +16,10 @@ type Store interface {
 	DeleteOne(userID, ID uuid.UUID) error
 	UpdateOne(application db.UpdateOneApplicationByIDParams) (db.Application, error)
 	GetCounts(userID uuid.UUID) (db.GetApplicationCountsByUserRow, error)
+	GetAnalyticsOverview(userID uuid.UUID) (db.GetAnalyticsOverviewRow, error)
+	GetAnalyticsTrends(userID uuid.UUID, startDate, endDate string) ([]db.GetAnalyticsTrendsRow, error)
+	GetAnalyticsCompanies(userID uuid.UUID) ([]db.GetAnalyticsCompaniesRow, error)
+	GetTopCompany(userID uuid.UUID) (string, error)
 }
 
 type PostgresApplicationStore struct {
@@ -93,4 +98,55 @@ func (s *PostgresApplicationStore) GetCounts(userID uuid.UUID) (db.GetApplicatio
 		return db.GetApplicationCountsByUserRow{}, err
 	}
 	return counts, nil
+}
+
+func (s *PostgresApplicationStore) GetAnalyticsOverview(userID uuid.UUID) (db.GetAnalyticsOverviewRow, error) {
+	ctx := context.Background()
+	overview, err := s.db.GetAnalyticsOverview(ctx, userID)
+	if err != nil {
+		return db.GetAnalyticsOverviewRow{}, err
+	}
+	return overview, nil
+}
+
+func (s *PostgresApplicationStore) GetAnalyticsTrends(userID uuid.UUID, startDate, endDate string) ([]db.GetAnalyticsTrendsRow, error) {
+	ctx := context.Background()
+	
+	startDateTime, err := time.Parse("2006-01-02", startDate)
+	if err != nil {
+		return nil, err
+	}
+	
+	endDateTime, err := time.Parse("2006-01-02", endDate)
+	if err != nil {
+		return nil, err
+	}
+	
+	trends, err := s.db.GetAnalyticsTrends(ctx, db.GetAnalyticsTrendsParams{
+		UserID:     userID,
+		SentDate:   startDateTime,
+		SentDate_2: endDateTime,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return trends, nil
+}
+
+func (s *PostgresApplicationStore) GetAnalyticsCompanies(userID uuid.UUID) ([]db.GetAnalyticsCompaniesRow, error) {
+	ctx := context.Background()
+	companies, err := s.db.GetAnalyticsCompanies(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+	return companies, nil
+}
+
+func (s *PostgresApplicationStore) GetTopCompany(userID uuid.UUID) (string, error) {
+	ctx := context.Background()
+	company, err := s.db.GetTopCompanyByUser(ctx, userID)
+	if err != nil {
+		return "", err
+	}
+	return company, nil
 }

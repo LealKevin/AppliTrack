@@ -157,6 +157,115 @@ func (q *Queries) GetAllUsers(ctx context.Context) ([]User, error) {
 	return items, nil
 }
 
+const getAnalyticsCompanies = `-- name: GetAnalyticsCompanies :many
+SELECT 
+    company as name,
+    COUNT(*) as applications,
+    CAST(ROUND(
+        CAST((COUNT(*) FILTER (WHERE status = 'pending')::float / 
+         NULLIF(COUNT(*), 0)) * 100 AS numeric), 2
+    ) AS float) as success_rate
+FROM applications 
+WHERE user_id = $1
+GROUP BY company 
+ORDER BY applications DESC 
+LIMIT 10
+`
+
+type GetAnalyticsCompaniesRow struct {
+	Name         string
+	Applications int64
+	SuccessRate  float64
+}
+
+func (q *Queries) GetAnalyticsCompanies(ctx context.Context, userID uuid.UUID) ([]GetAnalyticsCompaniesRow, error) {
+	rows, err := q.db.Query(ctx, getAnalyticsCompanies, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetAnalyticsCompaniesRow
+	for rows.Next() {
+		var i GetAnalyticsCompaniesRow
+		if err := rows.Scan(&i.Name, &i.Applications, &i.SuccessRate); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getAnalyticsOverview = `-- name: GetAnalyticsOverview :one
+SELECT 
+    COUNT(*) as total_applications,
+    CAST(ROUND(
+        CAST((COUNT(*) FILTER (WHERE status = 'pending')::float / 
+         NULLIF(COUNT(*), 0)) * 100 AS numeric), 2
+    ) AS float) as success_rate,
+    COUNT(*) FILTER (WHERE sent_date >= CURRENT_DATE - INTERVAL '7 days') as applications_this_week
+FROM applications 
+WHERE user_id = $1
+`
+
+type GetAnalyticsOverviewRow struct {
+	TotalApplications    int64
+	SuccessRate          float64
+	ApplicationsThisWeek int64
+}
+
+func (q *Queries) GetAnalyticsOverview(ctx context.Context, userID uuid.UUID) (GetAnalyticsOverviewRow, error) {
+	row := q.db.QueryRow(ctx, getAnalyticsOverview, userID)
+	var i GetAnalyticsOverviewRow
+	err := row.Scan(&i.TotalApplications, &i.SuccessRate, &i.ApplicationsThisWeek)
+	return i, err
+}
+
+const getAnalyticsTrends = `-- name: GetAnalyticsTrends :many
+SELECT 
+    sent_date::text as date,
+    COUNT(*) as count
+FROM applications 
+WHERE user_id = $1 
+    AND sent_date >= $2 
+    AND sent_date <= $3
+GROUP BY sent_date 
+ORDER BY sent_date
+`
+
+type GetAnalyticsTrendsParams struct {
+	UserID     uuid.UUID
+	SentDate   time.Time
+	SentDate_2 time.Time
+}
+
+type GetAnalyticsTrendsRow struct {
+	Date  string
+	Count int64
+}
+
+func (q *Queries) GetAnalyticsTrends(ctx context.Context, arg GetAnalyticsTrendsParams) ([]GetAnalyticsTrendsRow, error) {
+	rows, err := q.db.Query(ctx, getAnalyticsTrends, arg.UserID, arg.SentDate, arg.SentDate_2)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetAnalyticsTrendsRow
+	for rows.Next() {
+		var i GetAnalyticsTrendsRow
+		if err := rows.Scan(&i.Date, &i.Count); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getApplicationCountsByUser = `-- name: GetApplicationCountsByUser :one
 SELECT 
     COUNT(*) as total_count,
@@ -314,6 +423,22 @@ func (q *Queries) GetOneUserByID(ctx context.Context, id uuid.UUID) (User, error
 		&i.UpdatedAt,
 	)
 	return i, err
+}
+
+const getTopCompanyByUser = `-- name: GetTopCompanyByUser :one
+SELECT company
+FROM applications 
+WHERE user_id = $1
+GROUP BY company 
+ORDER BY COUNT(*) DESC 
+LIMIT 1
+`
+
+func (q *Queries) GetTopCompanyByUser(ctx context.Context, userID uuid.UUID) (string, error) {
+	row := q.db.QueryRow(ctx, getTopCompanyByUser, userID)
+	var company string
+	err := row.Scan(&company)
+	return company, err
 }
 
 const updateOneApplicationByID = `-- name: UpdateOneApplicationByID :one
