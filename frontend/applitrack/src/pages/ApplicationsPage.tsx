@@ -18,6 +18,7 @@ import useApplications from "@/hooks/useApplications";
 
 export type IApplication = {
   company: string;
+  location: string;
   created_at: string;
   id: string;
   notes?: string | null;
@@ -85,7 +86,6 @@ function ApplicationsPage() {
         {isModalRemoveOpen && selectedApplication && (
           <ApplicationRemoveModal
             submit={() => {
-              console.log("Selected", selectedApplication);
               deleteApp.mutate(selectedApplication.ID);
             }}
             application={selectedApplication}

@@ -104,4 +104,3 @@ func mapFromDBUser(dbUser db.User) User {
 		UpdatedAt: dbUser.UpdatedAt.Time,
 	}
 }
-

@@ -42,12 +42,16 @@ function ApplicationCreateModal({
 		const form = event.currentTarget as HTMLFormElement;
 		const formData = new FormData(form);
 		const newApplication: IApplication = {
-			TitleApplication: formData.get("TitleApplication") as string,
-			Company: formData.get("Company") as string,
-			UrlApplication: formData.get("UrlApplication") as string,
-			SentDate: sentDateFormatted,
-			Status: status,
-			Notes: formData.get("Notes") as string,
+			title_application: formData.get("TitleApplication") as string,
+			company: formData.get("Company") as string,
+			location: formData.get("Location") as string || "",
+			url_application: formData.get("UrlApplication") as string,
+			sent_date: sentDateFormatted,
+			status: status,
+			notes: formData.get("Notes") as string,
+			id: "",
+			created_at: "",
+			updated_at: "",
 		};
 		await createApp.mutateAsync(newApplication);
 		handleClose();
@@ -75,6 +79,10 @@ function ApplicationCreateModal({
 						<span>Company Name</span>
 						<Label>
 							<Input name="Company" />
+						</Label>
+						<span>Location</span>
+						<Label>
+							<Input name="Location" />
 						</Label>
 						<span>URL Website</span>
 						<Label>

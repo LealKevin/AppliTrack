@@ -2,16 +2,18 @@ package application
 
 import (
 	"context"
-	"fmt"
+	"strings"
 	"time"
 
 	db "ApplyTrack/internal/db/queries"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgconn"
 )
 
 type Store interface {
 	GetAll(userID uuid.UUID) ([]db.Application, error)
+	GetApplicationsByStatus(userID uuid.UUID, status string) ([]db.Application, error)
 	GetOne(userID, ID uuid.UUID) (db.Application, error)
 	CreateOne(application db.CreateOneApplicationParams) (db.Application, error)
 	DeleteOne(userID, ID uuid.UUID) error
@@ -38,6 +40,20 @@ func (s *PostgresApplicationStore) GetAll(userID uuid.UUID) ([]db.Application, e
 	var err error
 
 	applications, err = s.db.GetAllApplications(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+
+	return applications, nil
+}
+
+func (s *PostgresApplicationStore) GetApplicationsByStatus(userID uuid.UUID, status string) ([]db.Application, error) {
+	ctx := context.Background()
+
+	applications, err := s.db.GetApplicationsByStatus(ctx, db.GetApplicationsByStatusParams{
+		Status: status,
+		UserID: userID,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -78,9 +94,13 @@ func (s *PostgresApplicationStore) CreateOne(app db.CreateOneApplicationParams) 
 
 	application, err := s.db.CreateOneApplication(ctx, app)
 	if err != nil {
+		if pgErr, ok := err.(*pgconn.PgError); ok {
+			if pgErr.Code == "23505" && strings.Contains(pgErr.ConstraintName, "unique_title_company_user_date") {
+				return db.Application{}, ErrDuplicateApplication
+			}
+		}
 		return db.Application{}, err
 	}
-	fmt.Println("Created application:", application.ID)
 	return application, nil
 }
 

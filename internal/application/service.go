@@ -75,7 +75,11 @@ func (s *ApplicationService) ImportApplicationsFromCSV(userID uuid.UUID, csvData
 		_, err = s.Store.CreateOne(storeRequest)
 		if err != nil {
 			importResult.FailureCount++
-			importResult.Failures = append(importResult.Failures, "Row "+lineNumber+": "+err.Error())
+			if IsDuplicateError(err) {
+				importResult.Failures = append(importResult.Failures, "Row "+lineNumber+": duplicate application")
+			} else {
+				importResult.Failures = append(importResult.Failures, "Row "+lineNumber+": "+err.Error())
+			}
 			continue
 		}
 		importResult.SuccessCount++

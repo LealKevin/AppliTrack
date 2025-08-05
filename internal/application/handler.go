@@ -1,7 +1,6 @@
 package application
 
 import (
-	"fmt"
 	"io"
 	"net/http"
 	"time"
@@ -41,6 +40,7 @@ type applicationResp struct {
 	ID               uuid.UUID `json:"id"`
 	TitleApplication string    `json:"title_application"`
 	Company          string    `json:"company"`
+	Location         string    `json:"location"`
 	SentDate         time.Time `json:"sent_date"`
 	Status           string    `json:"status"`
 	Notes            string    `json:"notes"`
@@ -88,7 +88,17 @@ type companyStats struct {
 
 func (h *Handler) GetAllApplications(c echo.Context) error {
 	userID := c.Get("userID").(uuid.UUID)
-	applications, err := h.Store.GetAll(userID)
+	status := c.QueryParam("status")
+	
+	var applications []db.Application
+	var err error
+	
+	if status != "" && status != "all" {
+		applications, err = h.Store.GetApplicationsByStatus(userID, status)
+	} else {
+		applications, err = h.Store.GetAll(userID)
+	}
+	
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "could not load applications")
 	}
@@ -123,8 +133,6 @@ func (h *Handler) DeleteApplication(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "invalid application ID")
 	}
-	fmt.Println("userID:", userID)
-	fmt.Println("appID:", appID)
 
 	if err := h.Store.DeleteOne(userID, appID); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "could not delete application")
@@ -136,6 +144,7 @@ func (h *Handler) DeleteApplication(c echo.Context) error {
 type CreateApplicationRequest struct {
 	TitleApplication string    `json:"title"`
 	Company          string    `json:"company"`
+	Location         string    `json:"location"`
 	SentDate         time.Time `json:"sent_date"`
 	Status           string    `json:"status"`
 	Notes            string    `json:"notes"`
@@ -152,16 +161,19 @@ func (h *Handler) CreateApplication(c echo.Context) error {
 	app := db.CreateOneApplicationParams{
 		TitleApplication: appRequest.TitleApplication,
 		Company:          appRequest.Company,
+		Location:         appRequest.Location,
 		SentDate:         appRequest.SentDate,
 		Status:           appRequest.Status,
 		Notes:            appRequest.Notes,
 		UrlApplication:   appRequest.UrlApplication,
 		UserID:           userID,
 	}
-	fmt.Println("Creating application with params:", appRequest)
 
 	application, err := h.Store.CreateOne(app)
 	if err != nil {
+		if IsDuplicateError(err) {
+			return echo.NewHTTPError(http.StatusConflict, "Application with same title, company, and date already exists")
+		}
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
@@ -172,6 +184,7 @@ type UpdateApplicationRequest struct {
 	ID               uuid.UUID `json:"id"`
 	TitleApplication string    `json:"title"`
 	Company          string    `json:"company"`
+	Location         string    `json:"location"`
 	SentDate         time.Time `json:"sent_date"`
 	Status           string    `json:"status"`
 	Notes            string    `json:"notes"`
@@ -194,6 +207,7 @@ func (h *Handler) UpdateApplication(c echo.Context) error {
 		ID:               appID,
 		TitleApplication: appRequest.TitleApplication,
 		Company:          appRequest.Company,
+		Location:         appRequest.Location,
 		SentDate:         appRequest.SentDate,
 		Status:           appRequest.Status,
 		Notes:            appRequest.Notes,
@@ -338,6 +352,7 @@ func mapperToApplicationResp(app db.Application) applicationResp {
 		ID:               app.ID,
 		TitleApplication: app.TitleApplication,
 		Company:          app.Company,
+		Location:         app.Location,
 		SentDate:         app.SentDate,
 		Status:           app.Status,
 		Notes:            app.Notes,

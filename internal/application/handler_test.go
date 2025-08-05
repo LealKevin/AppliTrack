@@ -119,7 +119,7 @@ Software Engineer,TechCorp,invalid-date,San Francisco,sent,Great opportunity,htt
 func TestHandler_ImportApplications_IntegrationTests(t *testing.T) {
 	t.Run("end-to-end successful import", func(t *testing.T) {
 		mockStore := new(MockStore)
-		
+
 		mockStore.On("CreateOne", matchCreateOneParams("Software Engineer", "TechCorp")).Return(
 			createMockApplication("Software Engineer", "TechCorp"), nil)
 		mockStore.On("CreateOne", matchCreateOneParams("Backend Developer", "StartupInc")).Return(
@@ -146,14 +146,14 @@ Backend Developer,StartupInc,2024-01-16,New York,pending,Remote work,https://sta
 		require.NoError(t, err)
 
 		assert.Equal(t, http.StatusOK, rec.Code)
-		
+
 		assert.JSONEq(t, `{"total_records":2,"success_count":2,"failure_count":0,"failures":null}`, rec.Body.String())
 		mockStore.AssertExpectations(t)
 	})
 
 	t.Run("partial success with validation errors", func(t *testing.T) {
 		mockStore := new(MockStore)
-		
+
 		mockStore.On("CreateOne", matchCreateOneParams("Software Engineer", "TechCorp")).Return(
 			createMockApplication("Software Engineer", "TechCorp"), nil)
 		mockStore.On("CreateOne", matchCreateOneParams("Frontend Developer", "BigCorp")).Return(
@@ -191,7 +191,7 @@ Frontend Developer,BigCorp,2024-01-17,Boston,rejected,Not selected,https://bigco
 
 	t.Run("database error handling", func(t *testing.T) {
 		mockStore := new(MockStore)
-		
+
 		mockStore.On("CreateOne", matchCreateOneParams("Software Engineer", "TechCorp")).Return(
 			createMockApplication("", ""), errors.New("database connection failed"))
 
@@ -247,16 +247,16 @@ Software Engineer,TechCorp,2024-01-15,San Francisco,sent,Great opportunity,https
 
 	t.Run("large CSV file handling", func(t *testing.T) {
 		mockStore := new(MockStore)
-		
+
 		mockStore.On("CreateOne", mock.AnythingOfType("db.CreateOneApplicationParams")).Return(
 			db.Application{}, errors.New("database overloaded"))
-		
+
 		service := NewService(mockStore)
 		handler := NewHandler(service, mockStore)
 
 		var csvBuilder strings.Builder
 		csvBuilder.WriteString("title,company,sent_date,location,status,notes,url\n")
-		
+
 		for i := 0; i < 10; i++ {
 			csvBuilder.WriteString("Software Engineer,TechCorp,2024-01-15,San Francisco,sent,Great opportunity,https://example.com\n")
 		}
@@ -281,7 +281,6 @@ Software Engineer,TechCorp,2024-01-15,San Francisco,sent,Great opportunity,https
 		assert.Contains(t, rec.Body.String(), `database overloaded`)
 	})
 }
-
 
 func createMultipartRequest(csvContent string) (*http.Request, error) {
 	body := &bytes.Buffer{}

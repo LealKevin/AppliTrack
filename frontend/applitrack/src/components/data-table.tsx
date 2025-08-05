@@ -55,7 +55,7 @@ import type { ImportResult } from "@/utils/apiCalls";
 import { ImportModal } from "./ImportModal";
 
 export const schema = z.object({
-  id: z.number(),
+  id: z.string(),
   header: z.string(),
   company: z.string(),
   status: z.enum(["pending", "sent", "rejected"]),
@@ -266,19 +266,16 @@ function getColumns({
 
 function parseData(apps: IApplication[]) {
   if (!Array.isArray(apps)) {
-    console.error('parseData received non-array:', apps);
     return [];
   }
-  const dataParse = apps.map((app) => {
-    return {
-      id: app.id,
-      header: app.title_application,
-      company: app.company,
-      status: (app.status) as "pending" | "sent" | "rejected",
-      url: app.url_application,
-      sentDate: app.sent_date,
-    };
-  });
+  const dataParse = apps.map((app) => ({
+    id: app.id,
+    header: app.title_application,
+    company: app.company,
+    status: app.status as "pending" | "sent" | "rejected",
+    url: app.url_application,
+    sentDate: app.sent_date,
+  }));
 
   return dataParse;
 }

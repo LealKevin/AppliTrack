@@ -17,7 +17,7 @@ export async function fetchApplications(
   return response.data.applications;
 }
 
-export async function deleteApplication(id: number): Promise<IApplication[]> {
+export async function deleteApplication(id: string): Promise<IApplication[]> {
   const response = await axios.delete<{ applications: IApplication[] }>(`/api/applications/${id}`, { withCredentials: true });
   return response.data.applications;
 }
@@ -31,16 +31,15 @@ export async function fetchApplicationsByStatus(status: string) {
 }
 
 export async function createApplication(application: IApplication) {
-  console.log("Creating application with data:", application);
   const applicationRequest = {
-    title: application.TitleApplication,
-    company: application.Company,
-    sent_date: application.SentDate,
-    status: application.Status,
-    notes: application.Notes || "",
-    url_application: application.UrlApplication,
+    title: application.title_application,
+    company: application.company,
+    location: application.location || "",
+    sent_date: application.sent_date,
+    status: application.status,
+    notes: application.notes || "",
+    url_application: application.url_application,
   };
-  console.log("Creating application with request:", applicationRequest);
   const response = await axios.post<IApplication>("/api/application", applicationRequest, { withCredentials: true });
   return response.data;
 }
@@ -53,6 +52,7 @@ type CreateUserResponse = {
 type bodyRequest = {
   title: string;
   company: string;
+  location: string;
   sent_date: string;
   status: string;
   notes?: string | null;
@@ -61,12 +61,13 @@ type bodyRequest = {
 
 export async function updateApplication(application: IApplication) {
   const applicationRequest: bodyRequest = {
-    title: application.TitleApplication,
-    company: application.Company,
-    sent_date: application.SentDate,
-    status: application.Status,
-    notes: application.Notes,
-    url_application: application.UrlApplication,
+    title: application.title_application,
+    company: application.company,
+    location: application.location || "",
+    sent_date: application.sent_date,
+    status: application.status,
+    notes: application.notes,
+    url_application: application.url_application,
   };
   const response = await axios.put<IApplication>(`/api/applications`, {
     ...applicationRequest,
@@ -126,8 +127,6 @@ export async function getUser(): Promise<UserType> {
   const response = await axios.get<UserType>("/api/user/current", {
     withCredentials: true,
   });
-  console.log("Here");
-  console.log({ response });
   return response.data;
 }
 
@@ -138,11 +137,9 @@ export type AppsCount = {
   rejected_count: number;
 };
 export async function getAppsCount(): Promise<AppsCount> {
-  console.log("Count count");
   const response = await axios.get<AppsCount>("/api/applications/count", {
     withCredentials: true,
   });
-  console.log(response.data);
   return response.data;
 }
 

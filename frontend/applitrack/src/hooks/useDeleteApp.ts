@@ -5,7 +5,7 @@ export default function useDeleteApp() {
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
-    mutationFn: (id: number) => deleteApplication(id),
+    mutationFn: (id: string) => deleteApplication(id),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ["applications"],

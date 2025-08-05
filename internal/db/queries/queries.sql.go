@@ -16,16 +16,7 @@ const createOneApplication = `-- name: CreateOneApplication :one
 INSERT INTO
 applications ( title_application, company, location, sent_date, status, notes, url_application, user_id ) 
 VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-ON CONFLICT ON CONSTRAINT unique_title_company_user_date 
-DO UPDATE SET 
-    title_application = EXCLUDED.title_application,
-    company = EXCLUDED.company,
-    location = EXCLUDED.location,
-    sent_date = EXCLUDED.sent_date,
-    status = EXCLUDED.status,
-    notes = EXCLUDED.notes,
-    url_application = EXCLUDED.url_application
-    RETURNING id, title_application, company, location, sent_date, status, notes, url_application, user_id, created_at, updated_at
+RETURNING id, title_application, company, location, sent_date, status, notes, url_application, user_id, created_at, updated_at
 `
 
 type CreateOneApplicationParams struct {
@@ -459,12 +450,13 @@ func (q *Queries) GetTopCompanyByUser(ctx context.Context, userID uuid.UUID) (st
 }
 
 const updateOneApplicationByID = `-- name: UpdateOneApplicationByID :one
-UPDATE applications SET title_application = $1, company = $2, sent_date = $3, status = $4, notes = $5, url_application = $6 WHERE id = $7 AND user_id = $8 RETURNING id, title_application, company, location, sent_date, status, notes, url_application, user_id, created_at, updated_at
+UPDATE applications SET title_application = $1, company = $2, location = $3, sent_date = $4, status = $5, notes = $6, url_application = $7 WHERE id = $8 AND user_id = $9 RETURNING id, title_application, company, location, sent_date, status, notes, url_application, user_id, created_at, updated_at
 `
 
 type UpdateOneApplicationByIDParams struct {
 	TitleApplication string
 	Company          string
+	Location         string
 	SentDate         time.Time
 	Status           string
 	Notes            string
@@ -477,6 +469,7 @@ func (q *Queries) UpdateOneApplicationByID(ctx context.Context, arg UpdateOneApp
 	row := q.db.QueryRow(ctx, updateOneApplicationByID,
 		arg.TitleApplication,
 		arg.Company,
+		arg.Location,
 		arg.SentDate,
 		arg.Status,
 		arg.Notes,
