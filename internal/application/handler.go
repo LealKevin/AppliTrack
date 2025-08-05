@@ -1,6 +1,8 @@
 package application
 
 import (
+	"fmt"
+	"io"
 	"net/http"
 	"time"
 
@@ -24,10 +26,11 @@ func NewHandler(service *ApplicationService, store Store) *Handler {
 
 func (h *Handler) RegisterRoutes(e *echo.Group) {
 	e.GET("/applications", h.GetAllApplications)
-	e.GET("/applications/{id}", h.GetOneApplication)
+	e.GET("/applications/:id", h.GetOneApplication)
 	e.POST("/application", h.CreateApplication)
-	e.DELETE("/applications/{id}", h.DeleteApplication)
-	e.PUT("/applications/{id}", h.UpdateApplication)
+	e.DELETE("/applications/:id", h.DeleteApplication)
+	e.POST("/application/import", h.ImportApplications)
+	e.PUT("/applications/:id", h.UpdateApplication)
 	e.GET("/applications/count", h.GetApplicationCounts)
 	e.GET("/analytics/overview", h.GetAnalyticsOverview)
 	e.GET("/analytics/trends", h.GetAnalyticsTrends)
@@ -120,6 +123,8 @@ func (h *Handler) DeleteApplication(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "invalid application ID")
 	}
+	fmt.Println("userID:", userID)
+	fmt.Println("appID:", appID)
 
 	if err := h.Store.DeleteOne(userID, appID); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "could not delete application")
@@ -153,10 +158,11 @@ func (h *Handler) CreateApplication(c echo.Context) error {
 		UrlApplication:   appRequest.UrlApplication,
 		UserID:           userID,
 	}
+	fmt.Println("Creating application with params:", appRequest)
 
 	application, err := h.Store.CreateOne(app)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "could not create application")
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	return c.JSON(http.StatusCreated, mapperToApplicationResp(application))
@@ -220,49 +226,72 @@ func (h *Handler) GetApplicationCounts(c echo.Context) error {
 	return c.JSON(http.StatusOK, response)
 }
 
+func (h *Handler) ImportApplications(c echo.Context) error {
+	userID := c.Get("userID").(uuid.UUID)
+
+	file, err := c.FormFile("file")
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "could not read file")
+	}
+
+	src, err := file.Open()
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "could not open file")
+	}
+	srcBytes, err := io.ReadAll(src)
+
+	resultImport, err := h.Service.ImportApplicationsFromCSV(userID, srcBytes)
+	defer src.Close()
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "could not import applications")
+	}
+
+	return c.JSON(http.StatusOK, resultImport)
+}
+
 func (h *Handler) GetAnalyticsOverview(c echo.Context) error {
 	userID := c.Get("userID").(uuid.UUID)
-	
+
 	overview, err := h.Store.GetAnalyticsOverview(userID)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "could not load analytics overview")
 	}
-	
+
 	topCompany, err := h.Store.GetTopCompany(userID)
 	if err != nil {
 		topCompany = "N/A"
 	}
-	
+
 	successRate := overview.SuccessRate
-	
+
 	response := analyticsOverviewResp{
 		TotalApplications:    overview.TotalApplications,
 		SuccessRate:          successRate,
 		ApplicationsThisWeek: overview.ApplicationsThisWeek,
 		TopCompany:           topCompany,
 	}
-	
+
 	return c.JSON(http.StatusOK, response)
 }
 
 func (h *Handler) GetAnalyticsTrends(c echo.Context) error {
 	userID := c.Get("userID").(uuid.UUID)
-	
+
 	startDate := c.QueryParam("start_date")
 	endDate := c.QueryParam("end_date")
-	
+
 	if startDate == "" {
 		startDate = time.Now().AddDate(0, 0, -30).Format("2006-01-02")
 	}
 	if endDate == "" {
 		endDate = time.Now().Format("2006-01-02")
 	}
-	
+
 	trends, err := h.Store.GetAnalyticsTrends(userID, startDate, endDate)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "could not load analytics trends")
 	}
-	
+
 	var trendData []dailyTrend
 	for _, trend := range trends {
 		trendData = append(trendData, dailyTrend{
@@ -270,37 +299,37 @@ func (h *Handler) GetAnalyticsTrends(c echo.Context) error {
 			Count: trend.Count,
 		})
 	}
-	
+
 	response := analyticsTrendsResp{
 		Trends: trendData,
 	}
-	
+
 	return c.JSON(http.StatusOK, response)
 }
 
 func (h *Handler) GetAnalyticsCompanies(c echo.Context) error {
 	userID := c.Get("userID").(uuid.UUID)
-	
+
 	companies, err := h.Store.GetAnalyticsCompanies(userID)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "could not load analytics companies")
 	}
-	
+
 	var companyData []companyStats
 	for _, company := range companies {
 		successRate := company.SuccessRate
-		
+
 		companyData = append(companyData, companyStats{
 			Name:         company.Name,
 			Applications: company.Applications,
 			SuccessRate:  successRate,
 		})
 	}
-	
+
 	response := analyticsCompaniesResp{
 		Companies: companyData,
 	}
-	
+
 	return c.JSON(http.StatusOK, response)
 }
 

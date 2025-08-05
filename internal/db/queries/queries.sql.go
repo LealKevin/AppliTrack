@@ -13,12 +13,25 @@ import (
 )
 
 const createOneApplication = `-- name: CreateOneApplication :one
-INSERT INTO applications ( title_application, company, sent_date, status, notes, url_application, user_id ) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id, title_application, company, sent_date, status, notes, url_application, user_id, created_at, updated_at
+INSERT INTO
+applications ( title_application, company, location, sent_date, status, notes, url_application, user_id ) 
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+ON CONFLICT ON CONSTRAINT unique_title_company_user_date 
+DO UPDATE SET 
+    title_application = EXCLUDED.title_application,
+    company = EXCLUDED.company,
+    location = EXCLUDED.location,
+    sent_date = EXCLUDED.sent_date,
+    status = EXCLUDED.status,
+    notes = EXCLUDED.notes,
+    url_application = EXCLUDED.url_application
+    RETURNING id, title_application, company, location, sent_date, status, notes, url_application, user_id, created_at, updated_at
 `
 
 type CreateOneApplicationParams struct {
 	TitleApplication string
 	Company          string
+	Location         string
 	SentDate         time.Time
 	Status           string
 	Notes            string
@@ -30,6 +43,7 @@ func (q *Queries) CreateOneApplication(ctx context.Context, arg CreateOneApplica
 	row := q.db.QueryRow(ctx, createOneApplication,
 		arg.TitleApplication,
 		arg.Company,
+		arg.Location,
 		arg.SentDate,
 		arg.Status,
 		arg.Notes,
@@ -41,6 +55,7 @@ func (q *Queries) CreateOneApplication(ctx context.Context, arg CreateOneApplica
 		&i.ID,
 		&i.TitleApplication,
 		&i.Company,
+		&i.Location,
 		&i.SentDate,
 		&i.Status,
 		&i.Notes,
@@ -91,7 +106,7 @@ func (q *Queries) DeleteOneApplicationByID(ctx context.Context, arg DeleteOneApp
 }
 
 const getAllApplications = `-- name: GetAllApplications :many
-SELECT id, title_application, company, sent_date, status, notes, url_application, user_id, created_at, updated_at FROM applications WHERE user_id = $1
+SELECT id, title_application, company, location, sent_date, status, notes, url_application, user_id, created_at, updated_at FROM applications WHERE user_id = $1
 `
 
 func (q *Queries) GetAllApplications(ctx context.Context, userID uuid.UUID) ([]Application, error) {
@@ -107,6 +122,7 @@ func (q *Queries) GetAllApplications(ctx context.Context, userID uuid.UUID) ([]A
 			&i.ID,
 			&i.TitleApplication,
 			&i.Company,
+			&i.Location,
 			&i.SentDate,
 			&i.Status,
 			&i.Notes,
@@ -126,7 +142,6 @@ func (q *Queries) GetAllApplications(ctx context.Context, userID uuid.UUID) ([]A
 }
 
 const getAllUsers = `-- name: GetAllUsers :many
-
 SELECT id, name, email, password, created_at, updated_at FROM users
 `
 
@@ -296,7 +311,7 @@ func (q *Queries) GetApplicationCountsByUser(ctx context.Context, userID uuid.UU
 }
 
 const getApplicationsByStatus = `-- name: GetApplicationsByStatus :many
-SELECT id, title_application, company, sent_date, status, notes, url_application, user_id, created_at, updated_at FROM applications WHERE status = $1 AND user_id = $2 ORDER BY updated_at DESC, created_at DESC
+SELECT id, title_application, company, location, sent_date, status, notes, url_application, user_id, created_at, updated_at FROM applications WHERE status = $1 AND user_id = $2 ORDER BY updated_at DESC, created_at DESC
 `
 
 type GetApplicationsByStatusParams struct {
@@ -317,6 +332,7 @@ func (q *Queries) GetApplicationsByStatus(ctx context.Context, arg GetApplicatio
 			&i.ID,
 			&i.TitleApplication,
 			&i.Company,
+			&i.Location,
 			&i.SentDate,
 			&i.Status,
 			&i.Notes,
@@ -363,7 +379,7 @@ func (q *Queries) GetApplicationsCountByStatus(ctx context.Context, arg GetAppli
 }
 
 const getOneApplicationByID = `-- name: GetOneApplicationByID :one
-SELECT id, title_application, company, sent_date, status, notes, url_application, user_id, created_at, updated_at FROM applications WHERE id = $1 AND user_id = $2
+SELECT id, title_application, company, location, sent_date, status, notes, url_application, user_id, created_at, updated_at FROM applications WHERE id = $1 AND user_id = $2
 `
 
 type GetOneApplicationByIDParams struct {
@@ -378,6 +394,7 @@ func (q *Queries) GetOneApplicationByID(ctx context.Context, arg GetOneApplicati
 		&i.ID,
 		&i.TitleApplication,
 		&i.Company,
+		&i.Location,
 		&i.SentDate,
 		&i.Status,
 		&i.Notes,
@@ -442,7 +459,7 @@ func (q *Queries) GetTopCompanyByUser(ctx context.Context, userID uuid.UUID) (st
 }
 
 const updateOneApplicationByID = `-- name: UpdateOneApplicationByID :one
-UPDATE applications SET title_application = $1, company = $2, sent_date = $3, status = $4, notes = $5, url_application = $6 WHERE id = $7 AND user_id = $8 RETURNING id, title_application, company, sent_date, status, notes, url_application, user_id, created_at, updated_at
+UPDATE applications SET title_application = $1, company = $2, sent_date = $3, status = $4, notes = $5, url_application = $6 WHERE id = $7 AND user_id = $8 RETURNING id, title_application, company, location, sent_date, status, notes, url_application, user_id, created_at, updated_at
 `
 
 type UpdateOneApplicationByIDParams struct {
@@ -472,6 +489,7 @@ func (q *Queries) UpdateOneApplicationByID(ctx context.Context, arg UpdateOneApp
 		&i.ID,
 		&i.TitleApplication,
 		&i.Company,
+		&i.Location,
 		&i.SentDate,
 		&i.Status,
 		&i.Notes,

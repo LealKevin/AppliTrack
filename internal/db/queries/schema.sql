@@ -12,6 +12,7 @@ CREATE TABLE applications (
     id UUID DEFAULT uuid_generate_v4() NOT NULL,
     title_application TEXT NOT NULL,
     company TEXT NOT NULL,
+    location TEXT NOT NULL,
     sent_date DATE NOT NULL,
     status TEXT CHECK (status IN ('sent', 'pending', 'rejected', 'interview_scheduled')),
     notes TEXT,

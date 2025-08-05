@@ -2,6 +2,7 @@ package user
 
 import (
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/google/uuid"
@@ -16,6 +17,11 @@ func NewHandler(service *UserService) *Handler {
 	return &Handler{
 		Service: service,
 	}
+}
+
+func isDevelopment() bool {
+	env := os.Getenv("GO_ENV")
+	return env == "" || env == "development"
 }
 
 func (h *Handler) RegisterRoutes(e *echo.Group) {
@@ -77,7 +83,7 @@ func (h *Handler) Register(c echo.Context) error {
 		Value:    authResp.Token,
 		Path:     "/",
 		HttpOnly: true,
-		Secure:   true,
+		Secure:   !isDevelopment(),
 		SameSite: http.SameSiteLaxMode,
 		MaxAge:   60 * 60 * 24,
 	})
@@ -109,7 +115,7 @@ func (h *Handler) Login(c echo.Context) error {
 		Value:    authResp.Token,
 		Path:     "/",
 		HttpOnly: true,
-		Secure:   true,
+		Secure:   !isDevelopment(),
 		SameSite: http.SameSiteLaxMode,
 		MaxAge:   60 * 60 * 24,
 	})
@@ -126,7 +132,7 @@ func (h *Handler) Logout(c echo.Context) error {
 		Value:    "",
 		Path:     "/",
 		HttpOnly: true,
-		Secure:   true,
+		Secure:   !isDevelopment(),
 		SameSite: http.SameSiteLaxMode,
 		Expires:  time.Unix(0, 0),
 		MaxAge:   -1,

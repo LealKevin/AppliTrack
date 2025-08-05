@@ -17,119 +17,108 @@ import useDeleteApp from "@/hooks/useDeleteApp";
 import useApplications from "@/hooks/useApplications";
 
 export type IApplication = {
-	company?: string;
-	created_at?: string;
-	id?: string;
-	notes?: string | null;
-	url_application?: string;
-	sent_date?: string;
-	status?: "pending" | "sent" | "rejected";
-	title_application?: string;
-	updated_at?: string;
-	// For create requests, we might still use PascalCase
-	Company?: string;
-	CreatedAt?: number;
-	ID?: string;
-	Notes?: string | null;
-	UrlApplication?: string;
-	SentDate?: string;
-	Status?: "pending" | "sent" | "rejected";
-	TitleApplication?: string;
-	UpdatedAt?: number;
-	UserID?: number;
+  company: string;
+  created_at: string;
+  id: string;
+  notes?: string | null;
+  url_application: string;
+  sent_date: string;
+  status: "pending" | "sent" | "rejected";
+  title_application: string;
+  updated_at: string;
 };
 
 function toCamelCase(str: string) {
-	return str.charAt(0).toUpperCase() + str.slice(1);
+  return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
 function ApplicationsPage() {
-	const [isModalCreateOpen, setIsModalCreateOpen] = useState(false);
-	const [isModalEditOpen, setIsModalEditOpen] = useState(false);
-	const [isModalRemoveOpen, setIsModalRemoveOpen] = useState(false);
-	const [selectedApplication, setSelectedApplication] = useState<
-		IApplication | undefined
-	>(undefined);
+  const [isModalCreateOpen, setIsModalCreateOpen] = useState(false);
+  const [isModalEditOpen, setIsModalEditOpen] = useState(false);
+  const [isModalRemoveOpen, setIsModalRemoveOpen] = useState(false);
+  const [selectedApplication, setSelectedApplication] = useState<
+    IApplication | undefined
+  >(undefined);
 
-	const [active, setActive] = useState<"all" | "pending" | "sent" | "rejected">(
-		"all",
-	);
+  const [active, setActive] = useState<"all" | "pending" | "sent" | "rejected">(
+    "all",
+  );
 
-	const { applications, refetch: refetchApps } = useApplications(active);
-	const deleteApp = useDeleteApp();
+  const { applications, refetch: refetchApps } = useApplications(active);
+  const deleteApp = useDeleteApp();
 
-	return (
-		<Layout>
-			<nav className="flex space-x-4">
-				{(["all", "pending", "sent", "rejected"] as const).map((status) => (
-					<StatusButton
-						key={status}
-						isActive={active === status}
-						onClick={() => {
-							setActive(status);
-						}}
-					>
-						{toCamelCase(status)}
-					</StatusButton>
-				))}
-			</nav>
-			<ul className="m-8">
-				{/*Add application modal*/}
-				<ApplicationCreateModal
-					handleClose={() => setIsModalCreateOpen(false)}
-					onSuccess={refetchApps}
-					isModalOpen={isModalCreateOpen}
-				/>
-				<AddButton onClick={() => setIsModalCreateOpen(true)} />
+  return (
+    <Layout>
+      <nav className="flex space-x-4">
+        {(["all", "pending", "sent", "rejected"] as const).map((status) => (
+          <StatusButton
+            key={status}
+            isActive={active === status}
+            onClick={() => {
+              setActive(status);
+            }}
+          >
+            {toCamelCase(status)}
+          </StatusButton>
+        ))}
+      </nav>
+      <ul className="m-8">
+        {/*Add application modal*/}
+        <ApplicationCreateModal
+          handleClose={() => setIsModalCreateOpen(false)}
+          onSuccess={refetchApps}
+          isModalOpen={isModalCreateOpen}
+        />
+        <AddButton onClick={() => setIsModalCreateOpen(true)} />
 
-				{/*Edit application modal*/}
-				{isModalEditOpen && (
-					<ApplicationEditModal
-						application={selectedApplication}
-						handleClose={() => setIsModalEditOpen(false)}
-						onSuccess={refetchApps}
-						isModalOpen={true}
-					/>
-				)}
+        {/*Edit application modal*/}
+        {isModalEditOpen && (
+          <ApplicationEditModal
+            application={selectedApplication}
+            handleClose={() => setIsModalEditOpen(false)}
+            onSuccess={refetchApps}
+            isModalOpen={true}
+          />
+        )}
 
-				{/*Remove application modal*/}
-				{isModalRemoveOpen && selectedApplication && (
-					<ApplicationRemoveModal
-						submit={() => {
-							console.log("Selected", selectedApplication);
-							deleteApp.mutate(selectedApplication.ID);
-						}}
-						application={selectedApplication}
-						handleClose={() => setIsModalRemoveOpen(false)}
-						isModalOpen={true}
-					/>
-				)}
+        {/*Remove application modal*/}
+        {isModalRemoveOpen && selectedApplication && (
+          <ApplicationRemoveModal
+            submit={() => {
+              console.log("Selected", selectedApplication);
+              deleteApp.mutate(selectedApplication.ID);
+            }}
+            application={selectedApplication}
+            handleClose={() => setIsModalRemoveOpen(false)}
+            isModalOpen={true}
+          />
+        )}
 
-				{applications.map((application) => (
-					<Application key={application.ID}>
-						<ApplicationTitle title={application.TitleApplication} />
-						<ApplicationCompany company={application.Company} />
-						<ApplicationDate date={application.SentDate} />
-						<ApplicationIcons>
-							<EditButton
-								onClick={() => {
-									setIsModalEditOpen(true);
-									setSelectedApplication(application);
-								}}
-							/>
-							<TrashButton
-								onClick={() => {
-									setIsModalRemoveOpen(true);
-									setSelectedApplication(application);
-								}}
-							/>
-							<WebSiteButton url={application.UrlApplication} />
-						</ApplicationIcons>
-					</Application>
-				))}
-			</ul>
-		</Layout>
-	);
+        {applications.map((application) => (
+          <Application key={application.ID}>
+            <ApplicationTitle title={application.TitleApplication} />
+            <ApplicationCompany company={application.Company} />
+            <ApplicationDate date={application.SentDate} />
+            <ApplicationIcons>
+              <EditButton
+                onClick={() => {
+                  setIsModalEditOpen(true);
+                  setSelectedApplication(application);
+                }}
+              />
+              <TrashButton
+                onClick={() => {
+                  setIsModalRemoveOpen(true);
+                  setSelectedApplication(application);
+                }}
+              />
+              <WebSiteButton url={application.UrlApplication} />
+            </ApplicationIcons>
+          </Application>
+        ))}
+      </ul>
+    </Layout>
+  );
 }
 
 export default ApplicationsPage;

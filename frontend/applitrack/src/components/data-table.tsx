@@ -3,21 +3,16 @@ import {
   IconCircleCheckFilled,
   IconDotsVertical,
   IconLoader,
-  IconTrendingUp,
+  IconArrowUp,
+  IconArrowDown,
+  IconArrowsSort,
 } from "@tabler/icons-react";
 import type { ColumnDef } from "@tanstack/react-table";
-import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
 import { z } from "zod";
 
 import useIsMobile from "@/hooks/use-mobile";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  ChartConfig,
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-} from "@/components/ui/chart";
 import {
   Drawer,
   DrawerClose,
@@ -44,7 +39,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ReusableTable } from "./table";
 import useApplications from "@/hooks/useApplications";
@@ -55,6 +49,10 @@ import type { IApplication } from "@/pages/ApplicationsPage";
 import { formatDateToDDMMYYYY } from "@/utils/dateFormat";
 import ApplicationEditModal from "./ApplicationEditModal";
 import useUpdateApp from "@/hooks/useUpdateApp";
+import { Checkbox } from "@/components/ui/checkbox";
+import useImportApplications from "@/hooks/useImportApplications";
+import type { ImportResult } from "@/utils/apiCalls";
+import { ImportModal } from "./ImportModal";
 
 export const schema = z.object({
   id: z.number(),
@@ -64,6 +62,7 @@ export const schema = z.object({
   url: z.string(),
   sentDate: z.string(),
 });
+
 
 function getColumns({
   setSelectedApplication,
@@ -78,16 +77,73 @@ function getColumns({
 }): ColumnDef<z.infer<typeof schema>>[] {
   return [
     {
+      id: "select",
+      header: ({ table }) => (
+        <Checkbox
+          checked={
+            table.getIsAllPageRowsSelected() ||
+            (table.getIsSomePageRowsSelected() && "indeterminate")
+          }
+          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+          aria-label="Select all"
+        />
+      ),
+      cell: ({ row }) => (
+        <Checkbox
+          checked={row.getIsSelected()}
+          onCheckedChange={(value) => row.toggleSelected(!!value)}
+          aria-label="Select row"
+        />
+      ),
+      enableSorting: false,
+      enableHiding: false,
+    },
+    {
       accessorKey: "header",
-      header: "Applications",
+      header: ({ column }) => {
+        return (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            className="h-8 px-2 lg:px-3"
+          >
+            Applications
+            {column.getIsSorted() === "desc" ? (
+              <IconArrowDown className="ml-2 h-4 w-4" />
+            ) : column.getIsSorted() === "asc" ? (
+              <IconArrowUp className="ml-2 h-4 w-4" />
+            ) : (
+              <IconArrowsSort className="ml-2 h-4 w-4" />
+            )}
+          </Button>
+        );
+      },
       cell: ({ row }) => {
         return <TableCellViewer item={row.original} />;
       },
+      enableSorting: true,
       enableHiding: false,
     },
     {
       accessorKey: "company",
-      header: () => <div className="w-32">Company</div>,
+      header: ({ column }) => {
+        return (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            className="h-8 px-2 lg:px-3"
+          >
+            Company
+            {column.getIsSorted() === "desc" ? (
+              <IconArrowDown className="ml-2 h-4 w-4" />
+            ) : column.getIsSorted() === "asc" ? (
+              <IconArrowUp className="ml-2 h-4 w-4" />
+            ) : (
+              <IconArrowsSort className="ml-2 h-4 w-4" />
+            )}
+          </Button>
+        );
+      },
       cell: ({ row }) => (
         <div className="w-32">
           <Badge variant="outline" className="text-muted-foreground px-1.5">
@@ -95,10 +151,28 @@ function getColumns({
           </Badge>
         </div>
       ),
+      enableSorting: true,
     },
     {
       accessorKey: "status",
-      header: () => <div className="w-28">Status</div>,
+      header: ({ column }) => {
+        return (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            className="h-8 px-2 lg:px-3"
+          >
+            Status
+            {column.getIsSorted() === "desc" ? (
+              <IconArrowDown className="ml-2 h-4 w-4" />
+            ) : column.getIsSorted() === "asc" ? (
+              <IconArrowUp className="ml-2 h-4 w-4" />
+            ) : (
+              <IconArrowsSort className="ml-2 h-4 w-4" />
+            )}
+          </Button>
+        );
+      },
       cell: ({ row }) => (
         <div className="w-28">
           <Badge
@@ -116,14 +190,38 @@ function getColumns({
                 <IconLoader className="animate-spin" />
               )}
             {row.original.status}
-          </Badge>{" "}
+          </Badge>
         </div>
       ),
+      enableSorting: true,
     },
     {
-      accessorKey: "date",
-      header: () => <div className="w-24">Date</div>,
+      accessorKey: "sentDate",
+      header: ({ column }) => {
+        return (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            className="h-8 px-2 lg:px-3"
+          >
+            Date
+            {column.getIsSorted() === "desc" ? (
+              <IconArrowDown className="ml-2 h-4 w-4" />
+            ) : column.getIsSorted() === "asc" ? (
+              <IconArrowUp className="ml-2 h-4 w-4" />
+            ) : (
+              <IconArrowsSort className="ml-2 h-4 w-4" />
+            )}
+          </Button>
+        );
+      },
       cell: ({ row }) => <div className="w-24">{formatDateToDDMMYYYY(row.original.sentDate as string)}</div>,
+      enableSorting: true,
+      sortingFn: (rowA, rowB) => {
+        const dateA = new Date(rowA.original.sentDate as string);
+        const dateB = new Date(rowB.original.sentDate as string);
+        return dateA.getTime() - dateB.getTime();
+      },
     },
     {
       id: "actions",
@@ -171,14 +269,17 @@ function parseData(apps: IApplication[]) {
     console.error('parseData received non-array:', apps);
     return [];
   }
-  const dataParse = apps.map((app) => ({
-    id: app.id || app.ID,
-    header: app.title_application || app.TitleApplication,
-    company: app.company || app.Company,
-    status: app.status || app.Status,
-    url: app.url_application || app.UrlApplication,
-    sentDate: app.sent_date || app.SentDate,
-  }));
+  const dataParse = apps.map((app) => {
+    return {
+      id: app.id,
+      header: app.title_application,
+      company: app.company,
+      status: (app.status) as "pending" | "sent" | "rejected",
+      url: app.url_application,
+      sentDate: app.sent_date,
+    };
+  });
+
   return dataParse;
 }
 
@@ -192,29 +293,49 @@ export function DataTable() {
   const [selectedApplication, setSelectedApplication] = React.useState<z.infer<
     typeof schema
   > | null>(null);
+  const [searchText, setSearchText] = React.useState("");
+  const [importResult, setImportResult] = React.useState<ImportResult | null>(null);
+  const [isImportModalOpen, setIsImportModalOpen] = React.useState(false);
+
   const columns = getColumns({
     setSelectedApplication,
     setIsModalRemoveOpen,
     setIsModalEditOpen,
   });
   const { applications, appsCount } = useApplications(status);
-  const [searchText, setSearchText] = React.useState("");
-
-  const dataParsed = parseData(applications);
   const deleteApp = useDeleteApp();
   const updateApp = useUpdateApp();
+  const importMutation = useImportApplications();
 
-  const filteredApplications = React.useMemo(() => {
-    if (searchText.trim() === "") {
-      return dataParsed;
-    }
-    const search = searchText.toLowerCase();
-    return dataParsed.filter(
-      (app) =>
-        app.header.toLowerCase().includes(search) ||
-        app.company.toLowerCase().includes(search),
-    );
-  }, [searchText, dataParsed]);
+  const dataParsed = parseData(applications);
+
+
+  const handleImportClick = () => {
+    setIsImportModalOpen(true);
+  };
+
+  const handleImport = (file: File) => {
+    importMutation.mutate(file, {
+      onSuccess: (result: ImportResult) => {
+        setImportResult(result);
+      },
+      onError: (error: unknown) => {
+        console.error('Import failed:', error);
+        const errorMessage = error instanceof Error
+          ? error.message
+          : typeof error === 'object' && error !== null && 'response' in error
+            ? (error as { response?: { data?: { message?: string } } }).response?.data?.message || 'Unknown error'
+            : 'Unknown error';
+        alert(`Import failed: ${errorMessage}`);
+      }
+    });
+  };
+
+  const handleBulkDelete = (selectedApps: z.infer<typeof schema>[]) => {
+    selectedApps.forEach((app) => {
+      deleteApp.mutate(app.id);
+    });
+  };
 
   return (
     <Tabs defaultValue="all" className="w-full flex-col justify-start gap-6">
@@ -269,13 +390,49 @@ export function DataTable() {
           Add new application{" "}
         </Button>
       </div>
-      <Input
-        type="text"
-        value={searchText}
-        onChange={(e) => setSearchText(e.target.value)}
-        placeholder="Search..."
-      />
-      <ReusableTable data={filteredApplications} columns={columns} />
+      <div className="space-y-4">
+        <div className="flex items-center justify-between px-4 lg:px-6">
+          <div className="flex flex-1 items-center space-x-2">
+            <Input
+              type="text"
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+              placeholder="Search applications, companies, status..."
+              className="h-8 w-[150px] lg:w-[250px]"
+            />
+            {searchText && (
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  setSearchText("");
+                }}
+                className="h-8 px-2 lg:px-3"
+              >
+                Reset
+              </Button>
+            )}
+          </div>
+          <div className="flex items-center space-x-2">
+            <div className="text-sm text-muted-foreground">
+              {dataParsed.length} application(s)
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="px-4 lg:px-6">
+        <ReusableTable
+          data={dataParsed}
+          columns={columns}
+          showColumnCustomization={true}
+          showPagination={true}
+          enableDragAndDrop={false}
+          onImport={handleImportClick}
+          isImporting={importMutation.isPending}
+          onBulkDelete={handleBulkDelete}
+          globalFilter={searchText}
+          onGlobalFilterChange={setSearchText}
+        />
+      </div>
       {isModalRemoveOpen && selectedApplication && (
         <ApplicationRemoveModal
           submit={() => {
@@ -286,7 +443,14 @@ export function DataTable() {
               },
             });
           }}
-          application={selectedApplication}
+          application={{
+            id: selectedApplication.id,
+            header: selectedApplication.header,
+            company: selectedApplication.company,
+            status: selectedApplication.status,
+            url: selectedApplication.url,
+            sentDate: selectedApplication.sentDate ? new Date(selectedApplication.sentDate).getTime() : Date.now(),
+          }}
           handleClose={() => setIsModalRemoveOpen(false)}
           isModalOpen={true}
         />
@@ -294,41 +458,49 @@ export function DataTable() {
       {isModalEditOpen && selectedApplication && (
         <ApplicationEditModal
           onSuccess={() => {
-            updateApp.mutate(selectedApplication, {
+            const appData = {
+              id: selectedApplication.id.toString(),
+              title_application: selectedApplication.header,
+              company: selectedApplication.company,
+              sent_date: selectedApplication.sentDate,
+              status: selectedApplication.status,
+              notes: "",
+              url_application: selectedApplication.url,
+            };
+            updateApp.mutate(appData, {
               onSuccess: () => {
                 setIsModalEditOpen(false);
                 setSelectedApplication(null);
               },
             });
           }}
-          application={selectedApplication}
+          application={{
+            id: selectedApplication.id,
+            header: selectedApplication.header,
+            company: selectedApplication.company,
+            status: selectedApplication.status,
+            url: selectedApplication.url,
+            sentDate: selectedApplication.sentDate ? new Date(selectedApplication.sentDate).getTime() : Date.now(),
+          }}
           handleClose={() => setIsModalEditOpen(false)}
           isModalOpen={true}
         />
       )}
+
+      <ImportModal
+        isOpen={isImportModalOpen}
+        onClose={() => {
+          setIsImportModalOpen(false);
+          setImportResult(null);
+        }}
+        onImport={handleImport}
+        isImporting={importMutation.isPending}
+        result={importResult}
+      />
     </Tabs>
   );
 }
 
-const chartData = [
-  { month: "January", desktop: 186, mobile: 80 },
-  { month: "February", desktop: 305, mobile: 200 },
-  { month: "March", desktop: 237, mobile: 120 },
-  { month: "April", desktop: 73, mobile: 190 },
-  { month: "May", desktop: 209, mobile: 130 },
-  { month: "June", desktop: 214, mobile: 140 },
-];
-
-const chartConfig = {
-  desktop: {
-    label: "Desktop",
-    color: "var(--primary)",
-  },
-  mobile: {
-    label: "Mobile",
-    color: "var(--primary)",
-  },
-} satisfies ChartConfig;
 
 function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
   const isMobile = useIsMobile();
@@ -344,142 +516,40 @@ function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
         <DrawerHeader className="gap-1">
           <DrawerTitle>{item.header}</DrawerTitle>
           <DrawerDescription>
-            Showing total visitors for the last 6 months
+            Application Details
           </DrawerDescription>
         </DrawerHeader>
         <div className="flex flex-col gap-4 overflow-y-auto px-4 text-sm">
-          {!isMobile && (
-            <>
-              <ChartContainer config={chartConfig}>
-                <AreaChart
-                  accessibilityLayer
-                  data={chartData}
-                  margin={{
-                    left: 0,
-                    right: 10,
-                  }}
-                >
-                  <CartesianGrid vertical={false} />
-                  <XAxis
-                    dataKey="month"
-                    tickLine={false}
-                    axisLine={false}
-                    tickMargin={8}
-                    tickFormatter={(value) => value.slice(0, 3)}
-                    hide
-                  />
-                  <ChartTooltip
-                    cursor={false}
-                    content={<ChartTooltipContent indicator="dot" />}
-                  />
-                  <Area
-                    dataKey="mobile"
-                    type="natural"
-                    fill="var(--color-mobile)"
-                    fillOpacity={0.6}
-                    stroke="var(--color-mobile)"
-                    stackId="a"
-                  />
-                  <Area
-                    dataKey="desktop"
-                    type="natural"
-                    fill="var(--color-desktop)"
-                    fillOpacity={0.4}
-                    stroke="var(--color-desktop)"
-                    stackId="a"
-                  />
-                </AreaChart>
-              </ChartContainer>
-              <Separator />
-              <div className="grid gap-2">
-                <div className="flex gap-2 leading-none font-medium">
-                  Trending up by 5.2% this month{" "}
-                  <IconTrendingUp className="size-4" />
-                </div>
-                <div className="text-muted-foreground">
-                  Showing total visitors for the last 6 months. This is just
-                  some random text to test the layout. It spans multiple lines
-                  and should wrap around.
-                </div>
-              </div>
-              <Separator />
-            </>
-          )}
           <form className="flex flex-col gap-4">
             <div className="flex flex-col gap-3">
-              <Label htmlFor="header">Header</Label>
-              <Input id="header" defaultValue={item.header} />
+              <Label htmlFor="header">Application Title</Label>
+              <Input id="header" defaultValue={item.header} readOnly />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="flex flex-col gap-3">
-                <Label htmlFor="type">Type</Label>
-                <Select defaultValue={item.type}>
-                  <SelectTrigger id="type" className="w-full">
-                    <SelectValue placeholder="Select a type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Table of Contents">
-                      Table of Contents
-                    </SelectItem>
-                    <SelectItem value="Executive Summary">
-                      Executive Summary
-                    </SelectItem>
-                    <SelectItem value="Technical Approach">
-                      Technical Approach
-                    </SelectItem>
-                    <SelectItem value="Design">Design</SelectItem>
-                    <SelectItem value="Capabilities">Capabilities</SelectItem>
-                    <SelectItem value="rejected">Rejected</SelectItem>
-                    <SelectItem value="Narrative">Narrative</SelectItem>
-                    <SelectItem value="Cover Page">Cover Page</SelectItem>
-                  </SelectContent>
-                </Select>
+                <Label htmlFor="company">Company</Label>
+                <Input id="company" defaultValue={item.company} readOnly />
               </div>
               <div className="flex flex-col gap-3">
                 <Label htmlFor="status">Status</Label>
-                <Select defaultValue={item.status}>
-                  <SelectTrigger id="status" className="w-full">
-                    <SelectValue placeholder="Select a status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Done">Done</SelectItem>
-                    <SelectItem value="In Progress">In Progress</SelectItem>
-                    <SelectItem value="Not Started">Not Started</SelectItem>
-                  </SelectContent>
-                </Select>
+                <Input id="status" defaultValue={item.status} readOnly />
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="flex flex-col gap-3">
-                <Label htmlFor="target">Target</Label>
-                <Input id="target" defaultValue={item.target} />
+                <Label htmlFor="url">Application URL</Label>
+                <Input id="url" defaultValue={item.url} readOnly />
               </div>
               <div className="flex flex-col gap-3">
-                <Label htmlFor="limit">Limit</Label>
-                <Input id="limit" defaultValue={item.limit} />
+                <Label htmlFor="sentDate">Sent Date</Label>
+                <Input id="sentDate" defaultValue={formatDateToDDMMYYYY(item.sentDate)} readOnly />
               </div>
-            </div>
-            <div className="flex flex-col gap-3">
-              <Label htmlFor="reviewer">Reviewer</Label>
-              <Select defaultValue={item.reviewer}>
-                <SelectTrigger id="reviewer" className="w-full">
-                  <SelectValue placeholder="Select a reviewer" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Eddie Lake">Eddie Lake</SelectItem>
-                  <SelectItem value="Jamik Tashpulatov">
-                    Jamik Tashpulatov
-                  </SelectItem>
-                  <SelectItem value="Emily Whalen">Emily Whalen</SelectItem>
-                </SelectContent>
-              </Select>
             </div>
           </form>
         </div>
         <DrawerFooter>
-          <Button>Submit</Button>
           <DrawerClose asChild>
-            <Button variant="outline">Done</Button>
+            <Button variant="outline">Close</Button>
           </DrawerClose>
         </DrawerFooter>
       </DrawerContent>
