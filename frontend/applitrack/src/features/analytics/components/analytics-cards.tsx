@@ -38,15 +38,15 @@ export function AnalyticsCards() {
   const weeklyVelocity = weeklyApps > 0 ? (weeklyApps / 7).toFixed(1) : "0";
 
   return (
-    <div className="*:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card grid grid-cols-1 gap-4 px-4 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:shadow-xs lg:px-6 @xl/main:grid-cols-2 @4xl/main:grid-cols-3 @6xl/main:grid-cols-5">
-      
-      <Card className="@container/card">
+    <div className="*:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card grid grid-cols-1 gap-4 px-4 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:shadow-xs lg:px-6 sm:grid-cols-2 lg:grid-cols-2 lg:gap-6 lg:h-full">
+
+      <Card className="@container/card lg:h-full lg:flex lg:flex-col">
         <CardHeader>
           <CardDescription className="flex items-center gap-2">
             <FileText className="h-4 w-4" />
             Total Applications
           </CardDescription>
-          <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
+          <CardTitle className="text-xl font-semibold tabular-nums sm:text-2xl @[250px]/card:text-3xl">
             {totalApps}
           </CardTitle>
         </CardHeader>
@@ -57,41 +57,45 @@ export function AnalyticsCards() {
         </CardFooter>
       </Card>
 
-      <Card className="@container/card">
+      <Card className="@container/card lg:h-full lg:flex lg:flex-col">
         <CardHeader>
           <CardDescription className="flex items-center gap-2">
             <Target className="h-4 w-4" />
             Success Rate
           </CardDescription>
-          <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
+          <CardTitle className="text-xl font-semibold tabular-nums sm:text-2xl @[250px]/card:text-3xl">
             {successRate.toFixed(1)}%
           </CardTitle>
         </CardHeader>
         <CardFooter className="flex-col items-start gap-1.5 text-sm">
-          <div className="line-clamp-1 flex gap-2 font-medium items-center">
-            {successRate > 20 ? (
-              <Badge variant="default" className="bg-green-500 hover:bg-green-600">
-                <TrendingUp className="h-3 w-3 mr-1" />
-                Good
-              </Badge>
-            ) : (
-              <Badge variant="secondary">
-                <TrendingDown className="h-3 w-3 mr-1" />
-                Improving
-              </Badge>
-            )}
-            Applications getting responses
+          <div className="flex flex-col gap-1 w-full">
+            <div className="flex items-center gap-2">
+              {successRate > 20 ? (
+                <Badge variant="default" className="bg-green-500 hover:bg-green-600 flex-shrink-0">
+                  <TrendingUp className="h-3 w-3 mr-1" />
+                  Good
+                </Badge>
+              ) : (
+                <Badge variant="secondary" className="flex-shrink-0">
+                  <TrendingDown className="h-3 w-3 mr-1" />
+                  Improving
+                </Badge>
+              )}
+            </div>
+            <div className="line-clamp-1 text-xs font-medium">
+              Applications getting responses
+            </div>
           </div>
         </CardFooter>
       </Card>
 
-      <Card className="@container/card">
+      <Card className="@container/card lg:h-full lg:flex lg:flex-col">
         <CardHeader>
           <CardDescription className="flex items-center gap-2">
             <Clock className="h-4 w-4" />
             Avg Response Time
           </CardDescription>
-          <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
+          <CardTitle className="text-xl font-semibold tabular-nums sm:text-2xl @[250px]/card:text-3xl">
             {avgResponseDays} days
           </CardTitle>
         </CardHeader>
@@ -102,13 +106,13 @@ export function AnalyticsCards() {
         </CardFooter>
       </Card>
 
-      <Card className="@container/card">
+      <Card className="@container/card lg:h-full lg:flex lg:flex-col">
         <CardHeader>
           <CardDescription className="flex items-center gap-2">
             <Zap className="h-4 w-4" />
             Weekly Velocity
           </CardDescription>
-          <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
+          <CardTitle className="text-xl font-semibold tabular-nums sm:text-2xl @[250px]/card:text-3xl">
             {weeklyVelocity}/day
           </CardTitle>
         </CardHeader>
@@ -119,7 +123,7 @@ export function AnalyticsCards() {
         </CardFooter>
       </Card>
 
-      <Card className="@container/card">
+      {/*<Card className="@container/card">
         <CardHeader>
           <CardDescription className="flex items-center gap-2">
             <Building2 className="h-4 w-4" />
@@ -134,7 +138,7 @@ export function AnalyticsCards() {
             Most applications sent
           </div>
         </CardFooter>
-      </Card>
+      </Card>*/}
     </div>
   );
 }

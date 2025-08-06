@@ -1,5 +1,5 @@
 type ApplicationDataProps = {
-	date: number;
+	date: string;
 };
 
 function ApplicationDate({ date }: ApplicationDataProps) {

@@ -8,7 +8,7 @@
 
 :root {
 	--radius: 0.625rem;
-	--background: oklch(1 0 0);
+	--background: #d4d4d8;
 	--foreground: oklch(0.147 0.004 49.25);
 	--card: oklch(1 0 0);
 	--card-foreground: oklch(0.147 0.004 49.25);
@@ -31,18 +31,20 @@
 	--chart-3: oklch(0.398 0.07 227.392);
 	--chart-4: oklch(0.828 0.189 84.429);
 	--chart-5: oklch(0.769 0.188 70.08);
-	--sidebar: oklch(0.985 0.001 106.423);
-	--sidebar-foreground: oklch(0.147 0.004 49.25);
+	--sidebar: #d4d4d8;
+	--sidebar-foreground: #374151;
 	--sidebar-primary: oklch(0.216 0.006 56.043);
 	--sidebar-primary-foreground: oklch(0.985 0.001 106.423);
 	--sidebar-accent: oklch(0.97 0.001 106.424);
 	--sidebar-accent-foreground: oklch(0.216 0.006 56.043);
 	--sidebar-border: oklch(0.923 0.003 48.717);
 	--sidebar-ring: oklch(0.709 0.01 56.259);
+	--card-bg: #d4d4d8;
+	--card-shadow: 20px 20px 60px #a1a1aa, -20px -20px 60px #ffffff;
 }
 
 .dark {
-	--background: oklch(0.147 0.004 49.25);
+	--background: #212121;
 	--foreground: oklch(0.985 0.001 106.423);
 	--card: oklch(0.216 0.006 56.043);
 	--card-foreground: oklch(0.985 0.001 106.423);
@@ -65,14 +67,16 @@
 	--chart-3: oklch(0.769 0.188 70.08);
 	--chart-4: oklch(0.627 0.265 303.9);
 	--chart-5: oklch(0.645 0.246 16.439);
-	--sidebar: oklch(0.216 0.006 56.043);
-	--sidebar-foreground: oklch(0.985 0.001 106.423);
+	--sidebar: #212121;
+	--sidebar-foreground: #e5e7eb;
 	--sidebar-primary: oklch(0.488 0.243 264.376);
 	--sidebar-primary-foreground: oklch(0.985 0.001 106.423);
 	--sidebar-accent: oklch(0.268 0.007 34.298);
 	--sidebar-accent-foreground: oklch(0.985 0.001 106.423);
 	--sidebar-border: oklch(1 0 0 / 10%);
 	--sidebar-ring: oklch(0.553 0.013 58.071);
+	--card-bg: #212121;
+	--card-shadow: 15px 15px 30px rgb(25, 25, 25), -15px -15px 30px rgb(60, 60, 60);
 }
 
 @theme inline {
@@ -118,7 +122,33 @@
 		@apply border-border outline-ring/50;
 	}
 
+
 	body {
 		@apply bg-background text-foreground;
+	}
+
+	button.neumorphic-button,
+	[data-sidebar="trigger"].neumorphic-button {
+		background: var(--card-bg) !important;
+		box-shadow: var(--card-shadow) !important;
+		border: none !important;
+		border-radius: 15px !important;
+		color: var(--foreground) !important;
+	}
+
+	button.neumorphic-button:hover,
+	[data-sidebar="trigger"].neumorphic-button:hover {
+		background: var(--card-bg) !important;
+		box-shadow: var(--card-shadow), 0 0 15px rgba(59, 130, 246, 0.3) !important;
+		transform: translateY(-1px) !important;
+		transition: all 0.3s ease !important;
+	}
+
+	button.neumorphic-button:focus,
+	[data-sidebar="trigger"].neumorphic-button:focus {
+		background: var(--card-bg) !important;
+		box-shadow: var(--card-shadow), 0 0 15px rgba(59, 130, 246, 0.5) !important;
+		outline: none !important;
+		border: none !important;
 	}
 }

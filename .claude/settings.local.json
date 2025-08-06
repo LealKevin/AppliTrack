@@ -5,7 +5,10 @@
       "Bash(mkdir:*)",
       "Bash(npm run build:*)",
       "Bash(npm run lint)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(cd:*)",
+      "Bash(cd:*)",
+      "Bash(find:*)"
     ],
     "deny": []
   }

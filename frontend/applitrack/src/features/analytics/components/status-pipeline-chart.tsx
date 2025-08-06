@@ -34,7 +34,7 @@ export function StatusPipelineChart() {
 
   if (isLoading || !appsCount) {
     return (
-      <Card>
+      <Card className="animate-pulse">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <BarChart3 className="h-5 w-5" />
@@ -58,7 +58,7 @@ export function StatusPipelineChart() {
   const total = chartData.reduce((sum, item) => sum + item.value, 0);
 
   return (
-    <Card>
+    <Card className="h-full flex flex-col">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <BarChart3 className="h-5 w-5" />
@@ -68,7 +68,7 @@ export function StatusPipelineChart() {
           Status distribution of {total} applications
         </CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="flex-1 flex flex-col justify-center">
         <div className="flex items-center justify-center">
           <ChartContainer config={chartConfig} className="h-[200px] w-[200px]">
             <ResponsiveContainer width="100%" height="100%">
@@ -86,9 +86,9 @@ export function StatusPipelineChart() {
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Pie>
-                <ChartTooltip 
+                <ChartTooltip
                   content={
-                    <ChartTooltipContent 
+                    <ChartTooltipContent
                       formatter={(value, name) => [
                         `${value} applications`,
                         name
@@ -100,12 +100,12 @@ export function StatusPipelineChart() {
             </ResponsiveContainer>
           </ChartContainer>
         </div>
-        
+
         <div className="mt-4 flex flex-wrap gap-2 justify-center">
           {chartData.map((item) => (
             <div key={item.name} className="flex items-center gap-2">
-              <div 
-                className="w-3 h-3 rounded-full" 
+              <div
+                className="w-3 h-3 rounded-full"
                 style={{ backgroundColor: item.color }}
               />
               <Badge variant="outline" className="text-xs">

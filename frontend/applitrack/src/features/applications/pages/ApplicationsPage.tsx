@@ -75,12 +75,16 @@ function ApplicationsPage() {
         {isModalEditOpen && selectedApplication && (
           <ApplicationEditModal
             application={{
-              id: parseInt(selectedApplication.id),
-              header: selectedApplication.title_application,
+              id: selectedApplication.id,
+              title_application: selectedApplication.title_application,
               company: selectedApplication.company,
               status: selectedApplication.status,
-              url: selectedApplication.url_application,
-              sentDate: new Date(selectedApplication.sent_date).getTime(),
+              url_application: selectedApplication.url_application,
+              sent_date: selectedApplication.sent_date,
+              created_at: selectedApplication.created_at,
+              updated_at: selectedApplication.updated_at,
+              location: selectedApplication.location,
+              notes: selectedApplication.notes,
             }}
             handleClose={() => setIsModalEditOpen(false)}
             onSuccess={refetchApps}
@@ -95,12 +99,16 @@ function ApplicationsPage() {
               deleteApp.mutate(selectedApplication.id);
             }}
             application={{
-              id: parseInt(selectedApplication.id),
-              header: selectedApplication.title_application,
+              id: selectedApplication.id,
+              title_application: selectedApplication.title_application,
               company: selectedApplication.company,
               status: selectedApplication.status,
-              url: selectedApplication.url_application,
-              sentDate: new Date(selectedApplication.sent_date).getTime(),
+              url_application: selectedApplication.url_application,
+              sent_date: selectedApplication.sent_date,
+              created_at: selectedApplication.created_at,
+              updated_at: selectedApplication.updated_at,
+              location: selectedApplication.location,
+              notes: selectedApplication.notes,
             }}
             handleClose={() => setIsModalRemoveOpen(false)}
             isModalOpen={true}
@@ -111,7 +119,7 @@ function ApplicationsPage() {
           <Application key={application.id}>
             <ApplicationTitle title={application.title_application} />
             <ApplicationCompany company={application.company} />
-            <ApplicationDate date={new Date(application.sent_date).getTime()} />
+            <ApplicationDate date={application.sent_date} />
             <ApplicationIcons>
               <EditButton
                 onClick={() => {

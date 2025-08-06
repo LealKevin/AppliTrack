@@ -1,11 +1,11 @@
 import * as React from "react";
 import { IconCheck, IconX, IconFileText, IconAlertCircle, IconInfoCircle, IconUpload, IconFileImport } from "@tabler/icons-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/shared/components/ui/dialog";
+import { Button } from "@/shared/components/ui/button";
+import { Badge } from "@/shared/components/ui/badge";
+import { Separator } from "@/shared/components/ui/separator";
 import type { ImportResult } from "@/utils/apiCalls";
-import { cn } from "@/lib/utils";
+import { cn } from "@/shared/lib/utils";
 
 interface ImportModalProps {
   isOpen: boolean;

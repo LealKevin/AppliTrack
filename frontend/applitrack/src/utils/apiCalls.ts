@@ -1,5 +1,5 @@
-import type { UserInput } from "@/hooks/useConnection";
-import type { IApplication } from "@/pages/ApplicationsPage";
+import type { UserInput } from "@/features/authentication/hooks/useConnection";
+import type { IApplication } from "@/features/applications/pages/ApplicationsPage";
 import axios from "axios";
 type IUser = {
   id: number;

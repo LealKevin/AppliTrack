@@ -3,7 +3,7 @@
 import * as React from "react";
 import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
 
-import useIsMobile from "@/hooks/use-mobile";
+import useIsMobile from "@/shared/hooks/use-mobile";
 import {
   Card,
   CardAction,
@@ -11,22 +11,22 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from "@/shared/components/ui/card";
 import {
   ChartConfig,
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
-} from "@/components/ui/chart";
+} from "@/shared/components/ui/chart";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import useApplications from "@/hooks/useApplications";
+} from "@/shared/components/ui/select";
+import { ToggleGroup, ToggleGroupItem } from "@/shared/components/ui/toggle-group";
+import useApplications from "@/features/applications/hooks/useApplications";
 
 export const description = "An interactive area chart";
 
@@ -71,7 +71,7 @@ export function ChartAreaInteractive() {
     }
 
     applications.forEach((app) => {
-      const dateStr = app.SentDate || app.SentDate;
+      const dateStr = app.sent_date || app.sent_date;
       if (!dateStr) return;
 
       const appDate = new Date(dateStr);

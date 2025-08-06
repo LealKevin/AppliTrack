@@ -66,7 +66,7 @@ import {
 } from "@tabler/icons-react";
 import { DataTableToolbar } from "./data-table-toolbar";
 
-function DraggableRow<T extends { id: number }>({ row }: { row: Row<T> }) {
+function DraggableRow<T extends { id: string | number }>({ row }: { row: Row<T> }) {
 	const { transform, transition, setNodeRef, isDragging } = useSortable({
 		id: row.original.id,
 	});
