@@ -14,7 +14,20 @@ DELETE FROM applications WHERE id = $1 AND user_id = $2;
 UPDATE applications SET title_application = $1, company = $2, sent_date = $3, status = $4, notes = $5, url_application = $6 WHERE id = $7 AND user_id = $8 RETURNING *;
 
 -- name: CreateOneApplication :one
-INSERT INTO applications ( title_application, company, sent_date, status, notes, url_application, user_id ) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *;
+INSERT INTO
+applications ( title_application, company, location, sent_date, status, notes, url_application, user_id ) 
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+ON CONFLICT ON CONSTRAINT unique_title_company_user_date 
+DO UPDATE SET 
+    title_application = EXCLUDED.title_application,
+    company = EXCLUDED.company,
+    location = EXCLUDED.location,
+    sent_date = EXCLUDED.sent_date,
+    status = EXCLUDED.status,
+    notes = EXCLUDED.notes,
+    url_application = EXCLUDED.url_application
+    RETURNING *;
+
 
 -- name: GetApplicationsCount :one
 SELECT COUNT(*) FROM applications WHERE user_id = $1;
@@ -30,8 +43,8 @@ SELECT
     COUNT(*) FILTER (WHERE status = 'rejected') as rejected_count
 FROM applications 
 WHERE user_id = $1;
--- name: GetAllUsers :many
 
+-- name: GetAllUsers :many
 SELECT * FROM users;
 
 -- name: CreateUser :one

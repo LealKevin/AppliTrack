@@ -15,6 +15,7 @@ type Application struct {
 	ID               uuid.UUID
 	TitleApplication string
 	Company          string
+	Location         string
 	SentDate         time.Time
 	Status           string
 	Notes            string

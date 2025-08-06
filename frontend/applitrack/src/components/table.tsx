@@ -13,7 +13,6 @@ import {
 import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
 import {
 	SortableContext,
-	arrayMove,
 	useSortable,
 	verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
@@ -65,6 +64,7 @@ import {
 	IconChevronsRight,
 	IconLayoutColumns,
 } from "@tabler/icons-react";
+import { DataTableToolbar } from "./data-table-toolbar";
 
 function DraggableRow<T extends { id: number }>({ row }: { row: Row<T> }) {
 	const { transform, transition, setNodeRef, isDragging } = useSortable({
@@ -98,6 +98,11 @@ export interface ReusableTableProps<T extends { id: number }> {
 	showPagination?: boolean;
 	showColumnCustomization?: boolean;
 	pageSize?: number;
+	onImport?: (format: string) => void;
+	isImporting?: boolean;
+	onBulkDelete?: (selectedRows: T[]) => void;
+	globalFilter?: string;
+	onGlobalFilterChange?: (value: string) => void;
 }
 
 export function ReusableTable<T extends { id: number }>({
@@ -107,8 +112,18 @@ export function ReusableTable<T extends { id: number }>({
 	showPagination = true,
 	showColumnCustomization = false,
 	pageSize = 10,
+	onImport,
+	isImporting = false,
+	onBulkDelete,
+	globalFilter = "",
+	onGlobalFilterChange,
 }: ReusableTableProps<T>) {
 	const [rowSelection, setRowSelection] = React.useState({});
+	
+	// Reset row selection when data changes
+	React.useEffect(() => {
+		setRowSelection({});
+	}, [data]);
 	const [columnVisibility, setColumnVisibility] =
 		React.useState<VisibilityState>({});
 	const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -140,16 +155,19 @@ export function ReusableTable<T extends { id: number }>({
 			rowSelection,
 			columnFilters,
 			pagination,
+			globalFilter,
 		},
-		getRowId: (row) => row.id?.toString() || Math.random().toString(),
+		getRowId: (row, index) => row.id?.toString() || `row-${index}`,
 		enableRowSelection: true,
 		onRowSelectionChange: setRowSelection,
 		onSortingChange: setSorting,
 		onColumnFiltersChange: setColumnFilters,
 		onColumnVisibilityChange: setColumnVisibility,
 		onPaginationChange: setPagination,
+		onGlobalFilterChange: onGlobalFilterChange,
 		getCoreRowModel: getCoreRowModel(),
 		getFilteredRowModel: getFilteredRowModel(),
+		getGlobalFilteredRowModel: getFilteredRowModel(),
 		getPaginationRowModel: getPaginationRowModel(),
 		getSortedRowModel: getSortedRowModel(),
 		getFacetedRowModel: getFacetedRowModel(),
@@ -159,16 +177,18 @@ export function ReusableTable<T extends { id: number }>({
 	function handleDragEnd(event: DragEndEvent) {
 		const { active, over } = event;
 		if (active && over && active.id !== over.id) {
-			setData((data) => {
-				const oldIndex = dataIds.indexOf(active.id);
-				const newIndex = dataIds.indexOf(over.id);
-				return arrayMove(data, oldIndex, newIndex);
-			});
+			console.log('Drag and drop not implemented for data updates');
 		}
 	}
 
 	return (
 		<div className="flex flex-col gap-4 overflow-auto">
+			<DataTableToolbar 
+				table={table} 
+				onImport={onImport}
+				onBulkDelete={onBulkDelete}
+				isImporting={isImporting}
+			/>
 			{showColumnCustomization && (
 				<div className="flex justify-end mb-2">
 					<DropdownMenu>
@@ -237,14 +257,32 @@ export function ReusableTable<T extends { id: number }>({
 							</TableHeader>
 							<TableBody className="**:data-[slot=table-cell]:first:w-8">
 								{table.getRowModel().rows?.length ? (
-									<SortableContext
-										items={dataIds}
-										strategy={verticalListSortingStrategy}
-									>
-										{table.getRowModel().rows.map((row) => (
-											<DraggableRow key={row.id} row={row} />
-										))}
-									</SortableContext>
+									enableDragAndDrop ? (
+										<SortableContext
+											items={dataIds}
+											strategy={verticalListSortingStrategy}
+										>
+											{table.getRowModel().rows.map((row) => (
+												<DraggableRow key={row.id} row={row} />
+											))}
+										</SortableContext>
+									) : (
+										table.getRowModel().rows.map((row) => (
+											<TableRow
+												key={row.id}
+												data-state={row.getIsSelected() && "selected"}
+											>
+												{row.getVisibleCells().map((cell) => (
+													<TableCell key={cell.id}>
+														{flexRender(
+															cell.column.columnDef.cell,
+															cell.getContext(),
+														)}
+													</TableCell>
+												))}
+											</TableRow>
+										))
+									)
 								) : (
 									<TableRow>
 										<TableCell

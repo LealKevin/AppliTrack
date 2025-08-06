@@ -2,6 +2,7 @@ package application
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	db "ApplyTrack/internal/db/queries"
@@ -79,6 +80,7 @@ func (s *PostgresApplicationStore) CreateOne(app db.CreateOneApplicationParams) 
 	if err != nil {
 		return db.Application{}, err
 	}
+	fmt.Println("Created application:", application.ID)
 	return application, nil
 }
 
@@ -111,17 +113,17 @@ func (s *PostgresApplicationStore) GetAnalyticsOverview(userID uuid.UUID) (db.Ge
 
 func (s *PostgresApplicationStore) GetAnalyticsTrends(userID uuid.UUID, startDate, endDate string) ([]db.GetAnalyticsTrendsRow, error) {
 	ctx := context.Background()
-	
+
 	startDateTime, err := time.Parse("2006-01-02", startDate)
 	if err != nil {
 		return nil, err
 	}
-	
+
 	endDateTime, err := time.Parse("2006-01-02", endDate)
 	if err != nil {
 		return nil, err
 	}
-	
+
 	trends, err := s.db.GetAnalyticsTrends(ctx, db.GetAnalyticsTrendsParams{
 		UserID:     userID,
 		SentDate:   startDateTime,
