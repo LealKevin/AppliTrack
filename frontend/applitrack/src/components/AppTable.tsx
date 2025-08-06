@@ -5,8 +5,8 @@ import {
 	flexRender,
 } from "@tanstack/react-table";
 import { z } from "zod";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Badge } from "@/shared/components/ui/badge";
+import { Button } from "@/shared/components/ui/button";
 import {
 	Table,
 	TableBody,
@@ -14,7 +14,7 @@ import {
 	TableHead,
 	TableHeader,
 	TableRow,
-} from "@/components/ui/table";
+} from "@/shared/components/ui/table";
 
 // Adapted Zod schema from IApplication
 export const applicationSchema = z.object({
