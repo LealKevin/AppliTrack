@@ -1,6 +1,7 @@
 package application
 
 import (
+	"fmt"
 	"io"
 	"net/http"
 	"time"
@@ -133,6 +134,8 @@ func (h *Handler) DeleteApplication(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "invalid application ID")
 	}
+	fmt.Println("userID:", userID)
+	fmt.Println("appID:", appID)
 
 	if err := h.Store.DeleteOne(userID, appID); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "could not delete application")
@@ -168,6 +171,7 @@ func (h *Handler) CreateApplication(c echo.Context) error {
 		UrlApplication:   appRequest.UrlApplication,
 		UserID:           userID,
 	}
+	fmt.Println("Creating application with params:", appRequest)
 
 	application, err := h.Store.CreateOne(app)
 	if err != nil {

@@ -92,7 +92,7 @@ Backend Developer,StartupInc,2024-01-16,New York,pending,Remote work,https://sta
 			expectError:    true,
 		},
 		{
-			name:    "CSV with only headers",
+			name: "CSV with only headers",
 			csvData: `title,company,sent_date,location,status,notes,url`,
 			mockSetup: func(mockStore *MockStore) {
 			},

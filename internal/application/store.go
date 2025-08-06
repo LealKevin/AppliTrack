@@ -2,6 +2,7 @@ package application
 
 import (
 	"context"
+	"fmt"
 	"strings"
 	"time"
 
@@ -101,6 +102,7 @@ func (s *PostgresApplicationStore) CreateOne(app db.CreateOneApplicationParams) 
 		}
 		return db.Application{}, err
 	}
+	fmt.Println("Created application:", application.ID)
 	return application, nil
 }
 

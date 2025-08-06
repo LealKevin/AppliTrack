@@ -20,7 +20,6 @@ func (m *MockStore) GetApplicationsByStatus(userID uuid.UUID, status string) ([]
 	args := m.Called(userID, status)
 	return args.Get(0).([]db.Application), args.Error(1)
 }
-
 func (m *MockStore) GetOne(userID, ID uuid.UUID) (db.Application, error) {
 	args := m.Called(userID, ID)
 	return args.Get(0).(db.Application), args.Error(1)

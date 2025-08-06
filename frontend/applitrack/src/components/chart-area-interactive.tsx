@@ -55,7 +55,7 @@ export function ChartAreaInteractive() {
     const endDate = new Date();
     endDate.setDate(now.getDate() + 30); // Allow future dates up to 30 days ahead
 
-    let startDate = new Date();
+    const startDate = new Date();
 
     switch (timeRange) {
       case "7d":
