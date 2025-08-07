@@ -1,4 +1,4 @@
-import { TrendingUp, TrendingDown, Building2, Target, Clock, Zap, FileText } from "lucide-react";
+import { TrendingUp, TrendingDown, Target, Clock, Zap, FileText } from "lucide-react";
 import {
   Card,
   CardDescription,
@@ -32,7 +32,6 @@ export function AnalyticsCards() {
   const totalApps = overview?.total_applications ?? appsCount?.all_count ?? 0;
   const successRate = overview?.success_rate ?? 0;
   const weeklyApps = overview?.applications_this_week ?? 0;
-  const topCompany = overview?.top_company ?? "N/A";
 
   const avgResponseDays = 5;
   const weeklyVelocity = weeklyApps > 0 ? (weeklyApps / 7).toFixed(1) : "0";

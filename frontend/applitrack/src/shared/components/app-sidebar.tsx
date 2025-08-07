@@ -5,7 +5,6 @@ import {
   IconDashboard,
   IconFileAi,
   IconFileDescription,
-  IconInnerShadowTop,
   IconUsers,
 } from "@tabler/icons-react";
 
@@ -17,9 +16,7 @@ import {
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
+  useSidebar,
 } from "@/shared/components/ui/sidebar";
 import { useAuth } from "@/features/authentication/contexts/AuthContext";
 import { BriefcaseBusiness } from "lucide-react";
@@ -96,16 +93,31 @@ const data = {
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { user } = useAuth();
+  const { toggleSidebar, state } = useSidebar();
   console.log("user sidebar", user);
+  
+  const handleHeaderClick = () => {
+    if (state === "collapsed") {
+      toggleSidebar();
+    }
+  };
+
   return (
-    <Sidebar className="bg-red rounded-xl border boxShadow-neumorphic flex " collapsible="offcanvas" {...props}>
+    <Sidebar className="bg-red rounded-xl border boxShadow-neumorphic flex " collapsible="icon" {...props}>
       <SidebarHeader>
-        <SidebarMenu className="py-2 flex items-center justify-between">
-          <a href="#" className="flex items-center gap-2">
+        <div className="flex items-center justify-center py-4">
+          {/* Expanded state - centered icon and text */}
+          <div className="flex items-center gap-2 group-data-[collapsible=icon]:hidden">
             <BriefcaseBusiness className="!size-5" />
-            <span className="font-semibold ">ApplyTrack</span>
-          </a>
-        </SidebarMenu>
+            <span className="font-semibold">ApplyTrack</span>
+          </div>
+          
+          {/* Collapsed state - centered icon only */}
+          <BriefcaseBusiness 
+            className="!size-5 hidden group-data-[collapsible=icon]:block hover:scale-110 transition-transform cursor-pointer" 
+            onClick={handleHeaderClick}
+          />
+        </div>
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />

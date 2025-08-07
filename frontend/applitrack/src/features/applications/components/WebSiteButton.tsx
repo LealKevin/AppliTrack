@@ -14,7 +14,7 @@ function WebSiteButton({ url }: WebSiteButtonProps) {
 			xmlns="http://www.w3.org/2000/svg"
 			viewBox="0 0 24 24"
 			fill={color}
-			className="size-4"
+			className="size-3"
 		>
 			<path
 				fillRule="evenodd"
@@ -27,8 +27,15 @@ function WebSiteButton({ url }: WebSiteButtonProps) {
 	return (
 		<Button
 			onClick={url !== null ? () => window.open(url, "_blank") : undefined}
-			variant="outline"
-			className="m-2 w-8 h-8"
+			className="w-6 h-6 rounded-[8px] border-none transition-all duration-200 hover:scale-105 opacity-60 hover:opacity-100"
+			style={{
+				background: 'var(--app-card-bg)',
+				boxShadow: 'var(--app-button-shadow)',
+				color: 'var(--foreground)',
+				opacity: url === null ? 0.3 : undefined
+			}}
+			title={url ? "Visit Application URL" : "No URL provided"}
+			disabled={url === null}
 		>
 			{iconWebsite}
 		</Button>

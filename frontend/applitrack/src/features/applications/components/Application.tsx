@@ -1,14 +1,19 @@
 import type { PropsWithChildren } from "react";
-import { Button } from "@/shared/components/ui/button";
+import { Card } from "@/shared/components/ui/card";
 
 function Application({ children }: PropsWithChildren) {
 	return (
-		<Button
-			variant="ghost"
-			className=" flex  flex-row w-full border-b border-t border-gray-200 m-2 p-4"
+		<Card
+			className="relative group p-5 rounded-[20px] transition-all duration-300 hover:translate-y-[-2px] hover:shadow-lg overflow-hidden border-0"
+			style={{
+				background: 'var(--app-card-bg)',
+				boxShadow: 'var(--app-card-shadow)'
+			}}
 		>
-			{children}
-		</Button>
+			<div className="h-full min-h-[140px]">
+				{children}
+			</div>
+		</Card>
 	);
 }
 

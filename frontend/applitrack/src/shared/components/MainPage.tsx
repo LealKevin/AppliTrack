@@ -4,7 +4,9 @@ import { Outlet } from "react-router-dom";
 import { PanelLeftIcon } from "lucide-react";
 
 function CustomSidebarTrigger() {
-  const { toggleSidebar } = useSidebar();
+  const { toggleSidebar, state } = useSidebar();
+
+  if (state === "collapsed") return null;
 
   return (
     <button
