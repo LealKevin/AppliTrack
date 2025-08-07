@@ -1,4 +1,4 @@
-type ExportData = Record<string, any>;
+type ExportData = Record<string, unknown>;
 
 export function exportToCSV(data: ExportData[], filename: string = 'export.csv') {
   if (data.length === 0) {

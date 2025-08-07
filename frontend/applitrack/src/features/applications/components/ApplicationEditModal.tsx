@@ -37,7 +37,7 @@ function ApplicationEditModal({
 	const [status, setStatus] = useState<
 		"pending" | "sent" | "rejected" | undefined
 	>(application?.status);
-	const [date, setDate] = useState<Date>(application?.sentDate ? new Date(application.sentDate) : new Date());
+	const [date, setDate] = useState<Date>(application?.sent_date ? new Date(application.sent_date) : new Date());
 
 	function handleEditApplication(event: React.FormEvent<HTMLFormElement>) {
 		event.preventDefault();
@@ -67,7 +67,7 @@ function ApplicationEditModal({
 						<Label>
 							<Input
 								name="TitleApplication"
-								placeholder={application?.header}
+								placeholder={application?.title_application}
 							/>
 						</Label>
 						<span>Company Name</span>
@@ -76,7 +76,7 @@ function ApplicationEditModal({
 						</Label>
 						<span>URL Website</span>
 						<Label>
-							<Input name="UrlApplication" placeholder={application?.url} />
+							<Input name="UrlApplication" placeholder={application?.url_application} />
 						</Label>
 						<span>Sent Date</span>
 						<Popover>

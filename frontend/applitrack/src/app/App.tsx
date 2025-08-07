@@ -11,7 +11,7 @@ import { CheckUser } from "../features/authentication/pages/CheckUser";
 
 function App() {
 	return (
-		<ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+		<ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
 			<BrowserRouter>
 				<Routes>
 					<Route element={<CheckUser />}>

@@ -2,8 +2,8 @@ import * as React from "react";
 import { IconSearch } from "@tabler/icons-react";
 import { Command as CommandPrimitive } from "cmdk";
 
-import { cn } from "@/lib/utils";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { cn } from "@/shared/lib/utils";
+import { Dialog, DialogContent } from "@/shared/components/ui/dialog";
 
 const Command = React.forwardRef<
   React.ElementRef<typeof CommandPrimitive>,
@@ -20,7 +20,7 @@ const Command = React.forwardRef<
 ));
 Command.displayName = CommandPrimitive.displayName;
 
-interface CommandDialogProps extends React.ComponentPropsWithoutRef<typeof Dialog> {}
+type CommandDialogProps = React.ComponentPropsWithoutRef<typeof Dialog>
 
 const CommandDialog = ({ children, ...props }: CommandDialogProps) => {
   return (

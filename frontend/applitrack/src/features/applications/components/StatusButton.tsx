@@ -13,9 +13,15 @@ function StatusButton({
 }: PropsWithChildren<StatusButtonProps>) {
 	return (
 		<Button
-			variant={isActive ? "default" : "secondary"}
 			onClick={onClick}
-			className="flex-1"
+			className="flex-1 rounded-[15px] border-none transition-all duration-300 hover:translate-y-[-1px]"
+			style={{
+				background: 'var(--app-card-bg)',
+				boxShadow: isActive 
+					? 'var(--app-status-active-shadow)' 
+					: 'var(--app-status-inactive-shadow)',
+				color: 'var(--foreground)'
+			}}
 		>
 			{children}
 		</Button>

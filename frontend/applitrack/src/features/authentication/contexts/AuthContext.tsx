@@ -67,7 +67,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       login,
       logout,
     }),
-    [user, isLoadingUser, isAuthenticated],
+    [user, isLoadingUser, isAuthenticated, login, logout],
   );
 
   if (isLoadingUser && !isSuccess && !isError) {

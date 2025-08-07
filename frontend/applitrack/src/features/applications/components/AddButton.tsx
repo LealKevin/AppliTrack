@@ -23,10 +23,15 @@ function AddButton({ onClick }: AddButtonProps) {
 	return (
 		<Button
 			onClick={onClick}
-			variant="secondary"
-			className="w-full flex border-b border-gray-200 m-2 p-4"
+			className="px-6 py-3 rounded-[15px] border-none transition-all duration-300 hover:translate-y-[-1px] flex items-center justify-center gap-2 font-medium text-sm min-w-[160px]"
+			style={{
+				background: 'var(--primary)',
+				boxShadow: 'var(--app-button-shadow)',
+				color: 'var(--primary-foreground)'
+			}}
 		>
 			{iconPlus}
+			Add Application
 		</Button>
 	);
 }

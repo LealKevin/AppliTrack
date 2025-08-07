@@ -61,7 +61,7 @@ export const schema = z.object({
   location: z.string(),
   status: z.enum(["pending", "sent", "rejected"]),
   url: z.string(),
-  sentDate: z.string(),
+  sent_date: z.string(),
 });
 
 
@@ -71,11 +71,11 @@ function getColumns({
   setIsModalEditOpen,
 }: {
   setSelectedApplication: React.Dispatch<
-    React.SetStateAction<z.infer<typeof schema> | null>
+    React.SetStateAction<IApplication | null>
   >;
   setIsModalRemoveOpen: React.Dispatch<React.SetStateAction<boolean>>;
   setIsModalEditOpen: React.Dispatch<React.SetStateAction<boolean>>;
-}): ColumnDef<z.infer<typeof schema>>[] {
+}): ColumnDef<IApplication>[] {
   return [
     {
       id: "select",
@@ -226,7 +226,7 @@ function getColumns({
       enableSorting: true,
     },
     {
-      accessorKey: "sentDate",
+      accessorKey: "sent_date",
       header: ({ column }) => {
         return (
           <Button
@@ -245,11 +245,11 @@ function getColumns({
           </Button>
         );
       },
-      cell: ({ row }) => <div className="w-24">{formatDateToDDMMYYYY(row.original.sentDate as string)}</div>,
+      cell: ({ row }) => <div className="w-24">{formatDateToDDMMYYYY(row.original.sent_date as string)}</div>,
       enableSorting: true,
       sortingFn: (rowA, rowB) => {
-        const dateA = new Date(rowA.original.sentDate as string);
-        const dateB = new Date(rowB.original.sentDate as string);
+        const dateA = new Date(rowA.original.sent_date as string);
+        const dateB = new Date(rowB.original.sent_date as string);
         return dateA.getTime() - dateB.getTime();
       },
     },
@@ -298,17 +298,7 @@ function parseData(apps: IApplication[]) {
   if (!Array.isArray(apps)) {
     return [];
   }
-  const dataParse = apps.map((app) => ({
-    id: app.id,
-    header: app.title_application,
-    company: app.company,
-    location: app.location || "",
-    status: app.status as "pending" | "sent" | "rejected",
-    url: app.url_application,
-    sentDate: app.sent_date,
-  }));
-
-  return dataParse;
+  return apps;
 }
 
 export function DataTable() {
@@ -318,9 +308,7 @@ export function DataTable() {
   const [isModalRemoveOpen, setIsModalRemoveOpen] = React.useState(false);
   const [isModalCreateOpen, setIsModalCreateOpen] = React.useState(false);
   const [isModalEditOpen, setIsModalEditOpen] = React.useState(false);
-  const [selectedApplication, setSelectedApplication] = React.useState<z.infer<
-    typeof schema
-  > | null>(null);
+  const [selectedApplication, setSelectedApplication] = React.useState<IApplication | null>(null);
   const [searchText, setSearchText] = React.useState("");
   const [importResult, setImportResult] = React.useState<ImportResult | null>(null);
   const [isImportModalOpen, setIsImportModalOpen] = React.useState(false);
@@ -359,7 +347,7 @@ export function DataTable() {
     });
   };
 
-  const handleBulkDelete = (selectedApps: z.infer<typeof schema>[]) => {
+  const handleBulkDelete = (selectedApps: IApplication[]) => {
     selectedApps.forEach((app) => {
       deleteApp.mutate(app.id);
     });
@@ -413,8 +401,19 @@ export function DataTable() {
           handleClose={() => setIsModalCreateOpen(false)}
           isModalOpen={isModalCreateOpen}
         />
-        <Button onClick={() => setIsModalCreateOpen(true)}>
-          {" "}
+        <Button variant={"ghost"} className="
+        text-sm
+    text-[#090909]
+    px-[0.7em] py-[.7em]
+    rounded-[0.5em]
+    bg-[#e8e8e8]
+    cursor-pointer
+    border border-[#e8e8e8]
+    transition-all duration-300
+    shadow-[6px_6px_12px_#c5c5c5,-6px_-6px_12px_#ffffff]
+    hover:border-white
+    active:shadow-[4px_4px_12px_#c5c5c5,-4px_-4px_12px_#ffffff]
+  " onClick={() => setIsModalCreateOpen(true)}>
           Add new application{" "}
         </Button>
       </div>
@@ -448,7 +447,7 @@ export function DataTable() {
         </div>
       </div>
       <div className="px-4 lg:px-6">
-        <ReusableTable
+        <ReusableTable<IApplication>
           data={dataParsed}
           columns={columns}
           showColumnCustomization={true}
@@ -472,12 +471,16 @@ export function DataTable() {
             });
           }}
           application={{
-            id: parseInt(selectedApplication.id),
-            header: selectedApplication.header,
+            id: selectedApplication.id,
+            title_application: selectedApplication.title_application,
             company: selectedApplication.company,
             status: selectedApplication.status,
-            url: selectedApplication.url,
-            sentDate: selectedApplication.sentDate ? new Date(selectedApplication.sentDate).getTime() : Date.now(),
+            url_application: selectedApplication.url_application,
+            sent_date: selectedApplication.sent_date,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+            location: selectedApplication.location || '',
+            notes: selectedApplication.notes,
           }}
           handleClose={() => setIsModalRemoveOpen(false)}
           isModalOpen={true}
@@ -488,13 +491,13 @@ export function DataTable() {
           onSuccess={() => {
             const appData: IApplication = {
               id: selectedApplication.id,
-              title_application: selectedApplication.header,
+              title_application: selectedApplication.title_application,
               company: selectedApplication.company,
               location: selectedApplication.location || "",
-              sent_date: selectedApplication.sentDate,
+              sent_date: selectedApplication.sent_date,
               status: selectedApplication.status,
               notes: "",
-              url_application: selectedApplication.url,
+              url_application: selectedApplication.url_application,
               created_at: new Date().toISOString(),
               updated_at: new Date().toISOString(),
             };
@@ -506,12 +509,16 @@ export function DataTable() {
             });
           }}
           application={{
-            id: parseInt(selectedApplication.id),
-            header: selectedApplication.header,
+            id: selectedApplication.id,
+            title_application: selectedApplication.title_application,
             company: selectedApplication.company,
             status: selectedApplication.status,
-            url: selectedApplication.url,
-            sentDate: selectedApplication.sentDate ? new Date(selectedApplication.sentDate).getTime() : Date.now(),
+            url_application: selectedApplication.url_application,
+            sent_date: selectedApplication.sent_date,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+            location: selectedApplication.location || '',
+            notes: selectedApplication.notes,
           }}
           handleClose={() => setIsModalEditOpen(false)}
           isModalOpen={true}
@@ -533,19 +540,19 @@ export function DataTable() {
 }
 
 
-function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
+function TableCellViewer({ item }: { item: IApplication }) {
   const isMobile = useIsMobile();
 
   return (
     <Drawer direction={isMobile ? "bottom" : "right"}>
       <DrawerTrigger asChild>
         <Button variant="link" className=" text-foreground  px-2 text-left">
-          {item.header}
+          {item.title_application}
         </Button>
       </DrawerTrigger>
       <DrawerContent>
         <DrawerHeader className="gap-1">
-          <DrawerTitle>{item.header}</DrawerTitle>
+          <DrawerTitle>{item.title_application}</DrawerTitle>
           <DrawerDescription>
             Application Details
           </DrawerDescription>
@@ -554,7 +561,7 @@ function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
           <form className="flex flex-col gap-4">
             <div className="flex flex-col gap-3">
               <Label htmlFor="header">Application Title</Label>
-              <Input id="header" defaultValue={item.header} readOnly />
+              <Input id="header" defaultValue={item.title_application} readOnly />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="flex flex-col gap-3">
@@ -575,11 +582,11 @@ function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
             <div className="grid grid-cols-2 gap-4">
               <div className="flex flex-col gap-3">
                 <Label htmlFor="url">Application URL</Label>
-                <Input id="url" defaultValue={item.url} readOnly />
+                <Input id="url" defaultValue={item.url_application} readOnly />
               </div>
               <div className="flex flex-col gap-3">
-                <Label htmlFor="sentDate">Sent Date</Label>
-                <Input id="sentDate" defaultValue={formatDateToDDMMYYYY(item.sentDate)} readOnly />
+                <Label htmlFor="sent_date">Sent Date</Label>
+                <Input id="sent_date" defaultValue={formatDateToDDMMYYYY(item.sent_date)} readOnly />
               </div>
             </div>
           </form>

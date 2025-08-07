@@ -29,7 +29,7 @@ export function NavUser({ user }: NavUserProps) {
 	console.log("User nav bar", user);
 
 	return (
-		<SidebarMenu>
+		<SidebarMenu className="group-data-[collapsible=icon]:-mt-2">
 			<SidebarMenuItem>
 				<DropdownMenu>
 					<DropdownMenuTrigger asChild>
@@ -37,18 +37,25 @@ export function NavUser({ user }: NavUserProps) {
 							size="lg"
 							className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
 						>
-							<Avatar className="h-8 w-8 rounded-lg grayscale">
+							{/* Expanded state - full avatar */}
+							<Avatar className="h-8 w-8 rounded-lg grayscale group-data-[collapsible=icon]:hidden">
 								<AvatarFallback className="rounded-lg">
-									{user?.name.charAt(0)}
+									{user?.name?.charAt(0)?.toUpperCase()}
 								</AvatarFallback>
 							</Avatar>
-							<div className="grid flex-1 text-left text-sm leading-tight">
+							
+							{/* Collapsed state - simple letter circle */}
+							<div className="hidden group-data-[collapsible=icon]:flex h-7 w-7 items-center justify-center rounded-lg bg-muted text-sm font-normal text-foreground grayscale">
+								{user?.name?.charAt(0)?.toUpperCase()}
+							</div>
+							
+							<div className="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden">
 								<span className="truncate font-medium">{user?.name}</span>
 								<span className="text-muted-foreground truncate text-xs">
 									{user?.email}
 								</span>
 							</div>
-							<IconDotsVertical className="ml-auto size-4" />
+							<IconDotsVertical className="ml-auto size-4 group-data-[collapsible=icon]:hidden" />
 						</SidebarMenuButton>
 					</DropdownMenuTrigger>
 					<DropdownMenuContent

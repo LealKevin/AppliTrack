@@ -11,12 +11,16 @@ import {
 import { z } from "zod";
 
 export const schema = z.object({
-	id: z.number(),
-	header: z.string(),
+	id: z.string(),
+	title_application: z.string(),
 	company: z.string(),
+	location: z.string().optional(),
 	status: z.enum(["pending", "sent", "rejected"]),
-	url: z.string(),
-	sentDate: z.number(),
+	url_application: z.string(),
+	sent_date: z.string(),
+	created_at: z.string(),
+	updated_at: z.string(),
+	notes: z.string().nullable().optional(),
 });
 
 type ApplicationRemoveModalProps = {
@@ -47,10 +51,10 @@ function ApplicationRemoveModal({
 						Are you sure you want to delete this application?
 					</AlertDialogTitle>
 					<AlertDialogDescription className="text-center">
-						<p className="text-base font-semibold">{application?.header}</p>
+						<p className="text-base font-semibold">{application?.title_application}</p>
 						<p className="text-sm font-normal">From: {application?.company}</p>
 						<p className="text-sm font-normal">
-							Apply at: {application?.sentDate}
+							Apply at: {application?.sent_date}
 						</p>
 					</AlertDialogDescription>
 				</AlertDialogHeader>
