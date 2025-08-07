@@ -12,7 +12,9 @@ import (
 	"time"
 
 	db "ApplyTrack/internal/db/queries"
+	"ApplyTrack/internal/utils"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/labstack/echo/v4"
@@ -20,6 +22,74 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )
+
+func TestCreateApplication(t *testing.T) {
+	mockStore := new(MockStore)
+	service := NewService(mockStore)
+	handler := NewHandler(service, mockStore)
+
+	t.Run("CreateApplication_Success", func(t *testing.T) {
+		mockStore.On("CreateOne", mock.AnythingOfType("db.CreateOneApplicationParams")).Return(
+			createMockApplication("Software Engineer", "TechCorp"), nil)
+
+		e := echo.New()
+		e.Validator = &utils.CustomValidator{Validator: validator.New()}
+
+		body := `{
+	"title": "Software Engineer",
+	"company": "TechCorp",
+	"location": "Remote",
+	"sent_date": "2025-08-01T00:00:00Z",
+	"status": "pending",
+	"notes": "",
+	"url_application": "https://example.com/job"
+}`
+		req := httptest.NewRequest(http.MethodPost, "/application", strings.NewReader(body))
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+
+		userID := uuid.New()
+		c.Set("userID", userID)
+
+		err := handler.CreateApplication(c)
+		require.NoError(t, err)
+
+		assert.Equal(t, http.StatusCreated, rec.Code)
+		mockStore.AssertExpectations(t)
+	})
+	t.Run("CreateApplication_ValidationError", func(t *testing.T) {
+		e := echo.New()
+		e.Validator = &utils.CustomValidator{Validator: validator.New()}
+
+		body := `{
+	"title": "",
+	"company": "TechCorp",
+	"location": "Remote",
+	"sent_date": "2025-08-01T00:00:00Z",
+	"status": "pending",
+	"notes": "",
+	"url_application": "https://example.com/job"
+}`
+		req := httptest.NewRequest(http.MethodPost, "/application", strings.NewReader(body))
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+
+		userID := uuid.New()
+		c.Set("userID", userID)
+		err := handler.CreateApplication(c)
+
+		require.Error(t, err)
+		httpErr, ok := err.(*echo.HTTPError)
+		require.True(t, ok)
+
+		assert.Equal(t, http.StatusBadRequest, httpErr.Code)
+		assert.Contains(t, httpErr.Message.(string), "failed on the 'required' tag")
+	})
+}
 
 func TestHandler_ImportApplications(t *testing.T) {
 	tests := []struct {

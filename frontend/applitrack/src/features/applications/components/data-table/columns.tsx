@@ -67,7 +67,7 @@ export const createColumns = ({ onEdit, onDelete }: ColumnActions): ColumnDef<IA
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          className="h-auto p-0 font-medium"
+          className="h-auto p-0 font-medium w-full"
         >
           Company
           <ArrowUpDown className="ml-2 h-4 w-4" />
@@ -77,7 +77,7 @@ export const createColumns = ({ onEdit, onDelete }: ColumnActions): ColumnDef<IA
     cell: ({ row }) => {
       const company = row.getValue("company") as string
       return (
-        <Badge variant="secondary" className="font-normal">
+        <Badge variant="secondary" className="font-normal w-full text-center">
           {company}
         </Badge>
       )
@@ -118,10 +118,10 @@ export const createColumns = ({ onEdit, onDelete }: ColumnActions): ColumnDef<IA
     },
     cell: ({ row }) => {
       const status = row.getValue("status") as "pending" | "sent" | "rejected"
-      
+
       const statusClass = {
         pending: "status-pending",
-        sent: "status-sent", 
+        sent: "status-sent",
         rejected: "status-rejected",
       }
 
@@ -179,7 +179,7 @@ export const createColumns = ({ onEdit, onDelete }: ColumnActions): ColumnDef<IA
             <DropdownMenuItem onClick={() => onEdit(application)}>
               Edit application
             </DropdownMenuItem>
-            <DropdownMenuItem 
+            <DropdownMenuItem
               onClick={() => onDelete(application)}
               className="text-destructive"
             >

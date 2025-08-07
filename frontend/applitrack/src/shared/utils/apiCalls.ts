@@ -60,16 +60,17 @@ type bodyRequest = {
 };
 
 export async function updateApplication(application: IApplication) {
+  const sentDate = new Date(application.sent_date).toISOString();
+  
   const applicationRequest: bodyRequest = {
     title: application.title_application,
     company: application.company,
     location: application.location || "",
-    sent_date: application.sent_date,
+    sent_date: sentDate,
     status: application.status,
-    notes: application.notes,
+    notes: application.notes || "",
     url_application: application.url_application,
   };
-  console.log('🌐 API Call: PUT /api/applications/' + application.id, applicationRequest);
   const response = await axios.put<IApplication>(`/api/applications/${application.id}`, {
     ...applicationRequest,
   }, { withCredentials: true });

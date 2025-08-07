@@ -7,7 +7,6 @@ import {
 } from "@/shared/components/ui/dialog";
 import { Input } from "@/shared/components/ui/input";
 import { Button } from "@/shared/components/ui/button";
-// Using IApplication type instead of importing schema from RemoveModal
 import { useState } from "react";
 import useUpdateApp from "../hooks/useUpdateApp";
 import type { IApplication } from "../pages/ApplicationsPage";
@@ -54,56 +53,50 @@ function ApplicationEditModal({
 			return;
 		}
 
-		// Basic form validation
 		const title = formData.get("TitleApplication") as string;
 		const company = formData.get("Company") as string;
+		const location = formData.get("Location") as string;
 		
-		if (!title?.trim()) {
-			setError("Job title is required");
+		if (!title?.trim() || title.trim().length < 3) {
+			setError("Job title is required and must be at least 3 characters");
 			return;
 		}
 		
-		if (!company?.trim()) {
-			setError("Company name is required");
+		if (!company?.trim() || company.trim().length < 2) {
+			setError("Company name is required and must be at least 2 characters");
+			return;
+		}
+		
+		if (!location?.trim() || location.trim().length < 2) {
+			setError("Location is required and must be at least 2 characters");
+			return;
+		}
+		
+		if (!status) {
+			setError("Status is required");
 			return;
 		}
 
-		// Extract all form data
 		const updatedApplication: IApplication = {
 			id: application.id,
 			title_application: title.trim(),
 			company: company.trim(),
-			location: (formData.get("Location") as string)?.trim() || "",
+			location: location.trim(),
 			url_application: (formData.get("UrlApplication") as string)?.trim() || "",
 			sent_date: formData.get("SentDate") as string,
-			status: formData.get("Status") as "pending" | "sent" | "rejected",
+			status: status as "pending" | "sent" | "rejected",
 			notes: (formData.get("Notes") as string)?.trim() || "",
 			created_at: application.created_at,
 			updated_at: application.updated_at,
 		};
 
-		console.log('🔄 Attempting to update application:', updatedApplication);
-		console.log('📊 Form data extracted:', {
-			title: title.trim(),
-			company: company.trim(),
-			location: (formData.get("Location") as string)?.trim() || "",
-			url_application: (formData.get("UrlApplication") as string)?.trim() || "",
-			sent_date: formData.get("SentDate") as string,
-			status: formData.get("Status") as "pending" | "sent" | "rejected",
-			notes: (formData.get("Notes") as string)?.trim() || "",
-		});
 
 		updateApp.mutate(updatedApplication, {
-			onSuccess: (data) => {
-				console.log('✅ Update successful:', data);
+			onSuccess: () => {
 				onSuccess();
 				handleClose();
 			},
 			onError: (error: any) => {
-				console.error('❌ Update failed with error:', error);
-				console.error('❌ Error response:', error?.response?.data);
-				console.error('❌ Error status:', error?.response?.status);
-				console.error('❌ Error message:', error?.message);
 				setError(`Failed to update application: ${error?.response?.data?.message || error?.message || 'Unknown error'}`);
 			}
 		});
@@ -128,7 +121,6 @@ function ApplicationEditModal({
 				</DialogHeader>
 				<form onSubmit={handleEditApplication}>
 					<div className="grid gap-2 py-4">
-						{/* Hidden inputs for data that needs to be in FormData */}
 						<input type="hidden" name="SentDate" value={date.toISOString().split('T')[0]} />
 						<Input name="TitleApplication" placeholder="Title" defaultValue={application?.title_application} />
 						<Input name="Company" placeholder="Company" defaultValue={application?.company} />

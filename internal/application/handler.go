@@ -145,13 +145,13 @@ func (h *Handler) DeleteApplication(c echo.Context) error {
 }
 
 type CreateApplicationRequest struct {
-	TitleApplication string    `json:"title" validate:"required"`
-	Company          string    `json:"company"`
-	Location         string    `json:"location"`
-	SentDate         time.Time `json:"sent_date"`
-	Status           string    `json:"status"`
+	TitleApplication string    `json:"title" validate:"required,min=3"`
+	Company          string    `json:"company" validate:"required,min=2"`
+	Location         string    `json:"location" validate:"required,min=2"`
+	SentDate         time.Time `json:"sent_date" validate:"required"`
+	Status           string    `json:"status" validate:"required,oneof=sent pending rejected"`
 	Notes            string    `json:"notes"`
-	UrlApplication   string    `json:"url_application"`
+	UrlApplication   string    `json:"url_application" validate:"omitempty,url"`
 }
 
 func (h *Handler) CreateApplication(c echo.Context) error {
