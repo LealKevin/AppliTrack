@@ -95,7 +95,7 @@ export function ChartAreaInteractive() {
   const filteredData = chartData;
 
   return (
-    <Card className="@container/card m-10">
+    <Card className="@container/card mx-10 ">
       <CardHeader>
         <CardTitle>Total Applications</CardTitle>
         <CardDescription>
@@ -143,7 +143,7 @@ export function ChartAreaInteractive() {
           config={chartConfig}
           className="aspect-auto h-[250px] w-full rounded-lg"
         >
-          <AreaChart data={filteredData}>
+          <AreaChart className="mb-20" data={filteredData}>
             <defs>
               <linearGradient id="fillDesktop" x1="0" y1="0" x2="0" y2="1">
                 <stop

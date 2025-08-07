@@ -8,7 +8,8 @@
       "Bash(grep:*)",
       "Bash(cd:*)",
       "Bash(cd:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(git cherry-pick:*)"
     ],
     "deny": []
   }

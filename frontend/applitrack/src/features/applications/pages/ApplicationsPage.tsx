@@ -16,6 +16,10 @@ import ApplicationRemoveModal from "../components/ApplicationRemoveModal";
 import StatusBadge from "../components/StatusBadge";
 import useDeleteApp from "../hooks/useDeleteApp";
 import useApplications from "../hooks/useApplications";
+import { ApplicationsDataTable } from "../components/data-table/applications-data-table";
+import { createColumns } from "../components/data-table/columns";
+import ImportModal from "../../import-export/components/ImportModal";
+import useImportApplications from "../hooks/useImportApplications";
 
 export type IApplication = {
   company: string;
@@ -38,6 +42,7 @@ function ApplicationsPage() {
   const [isModalCreateOpen, setIsModalCreateOpen] = useState(false);
   const [isModalEditOpen, setIsModalEditOpen] = useState(false);
   const [isModalRemoveOpen, setIsModalRemoveOpen] = useState(false);
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [selectedApplication, setSelectedApplication] = useState<
     IApplication | undefined
   >(undefined);
@@ -48,6 +53,8 @@ function ApplicationsPage() {
 
   const { applications, refetch: refetchApps, appsCount } = useApplications(active);
   const deleteApp = useDeleteApp();
+  const importApps = useImportApplications();
+  const [viewMode, setViewMode] = useState<"grid" | "table">("grid");
 
   const getStatusCount = (status: "all" | "pending" | "sent" | "rejected") => {
     if (!appsCount) return 0;
@@ -77,22 +84,23 @@ function ApplicationsPage() {
             <div className="flex items-center gap-3">
               <button
                 className="px-4 py-2 text-sm rounded-[12px] border border-[var(--border)] bg-[var(--background)] hover:bg-[var(--muted)] transition-colors flex items-center gap-2"
-                title="Import CSV"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
-                </svg>
-                Import CSV
-              </button>
-
-              <button
-                className="px-4 py-2 text-sm rounded-[12px] border border-[var(--border)] bg-[var(--background)] hover:bg-[var(--muted)] transition-colors flex items-center gap-2"
                 title="Customize Columns"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4" />
                 </svg>
                 Customize
+              </button>
+
+              <button
+                className="px-4 py-2 text-sm rounded-[12px] border border-[var(--border)] bg-[var(--background)] hover:bg-[var(--muted)] transition-colors flex items-center gap-2"
+                title="Import CSV"
+                onClick={() => setIsImportModalOpen(true)}
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
+                </svg>
+                Import CSV
               </button>
 
               <AddButton onClick={() => setIsModalCreateOpen(true)} />
@@ -281,8 +289,22 @@ function ApplicationsPage() {
           isModalOpen={true}
         />
       )}
-    </div>
-    </Layout >
+
+      {/*Import CSV modal*/}
+      <ImportModal
+        isOpen={isImportModalOpen}
+        onClose={() => setIsImportModalOpen(false)}
+        onImport={(file) => {
+          importApps.mutate(file, {
+            onSuccess: () => {
+              refetchApps();
+            }
+          });
+        }}
+        isImporting={importApps.isPending}
+        result={importApps.data}
+      />
+    </Layout>
   );
 }
 
