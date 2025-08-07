@@ -85,14 +85,14 @@ export function ApplicationsDataTable<TData, TValue>({
   const handleDeleteClick = () => {
     const selectedRows = table.getFilteredSelectedRowModel().rows
     const selectedIds = selectedRows.map(row => (row.original as any).id as string)
-    
+
     setSelectedIdsToDelete(selectedIds)
     setIsBulkDeleteModalOpen(true)
   }
 
   const handleConfirmDelete = () => {
     if (!onDeleteSelected || selectedIdsToDelete.length === 0) return
-    
+
     onDeleteSelected(selectedIdsToDelete)
     setIsBulkDeleteModalOpen(false)
     setSelectedIdsToDelete([])
@@ -106,7 +106,7 @@ export function ApplicationsDataTable<TData, TValue>({
 
   return (
     <div className="w-full">
-      <div className="flex items-center py-4">
+      <div className="flex items-center py-4 mb-4">
         <Input
           placeholder="Search applications..."
           value={globalFilter ?? ""}
@@ -119,9 +119,9 @@ export function ApplicationsDataTable<TData, TValue>({
         />
         <div className="ml-auto flex items-center gap-2">
           {onDeleteSelected && table.getFilteredSelectedRowModel().rows.length > 0 && (
-            <Button 
+            <Button
               onClick={handleDeleteClick}
-              variant="ghost" 
+              variant="ghost"
               className="mx-2 rounded-xl neu-button-destructive"
               disabled={isDeleting}
             >
@@ -238,7 +238,7 @@ export function ApplicationsDataTable<TData, TValue>({
           </TableBody>
         </Table>
       </div>
-      <div className="flex items-center justify-end space-x-2 py-4">
+      <div className="flex items-center justify-end space-x-2 py-6">
         <div className="flex-1 text-sm text-muted-foreground">
           {table.getFilteredSelectedRowModel().rows.length} of{" "}
           {table.getFilteredRowModel().rows.length} row(s) selected.

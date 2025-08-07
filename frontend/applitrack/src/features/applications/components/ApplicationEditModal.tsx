@@ -6,11 +6,11 @@ import {
 	DialogTitle,
 } from "@/shared/components/ui/dialog";
 import { Input } from "@/shared/components/ui/input";
-import { Label } from "@/shared/components/ui/label";
 import { Button } from "@/shared/components/ui/button";
-import type { schema } from "./ApplicationRemoveModal";
-import type { z } from "zod";
+// Using IApplication type instead of importing schema from RemoveModal
 import { useState } from "react";
+import useUpdateApp from "../hooks/useUpdateApp";
+import type { IApplication } from "../pages/ApplicationsPage";
 import {
 	Popover,
 	PopoverContent,
@@ -23,7 +23,7 @@ import { format } from "date-fns";
 
 type ApplicationEditModalProps = {
 	onSuccess: () => void;
-	application?: z.infer<typeof schema>;
+	application?: IApplication;
 	isModalOpen: boolean;
 	handleClose: () => void;
 };
@@ -38,15 +38,75 @@ function ApplicationEditModal({
 		"pending" | "sent" | "rejected" | undefined
 	>(application?.status);
 	const [date, setDate] = useState<Date>(application?.sent_date ? new Date(application.sent_date) : new Date());
+	const [error, setError] = useState<string | null>(null);
+
+	const updateApp = useUpdateApp();
 
 	function handleEditApplication(event: React.FormEvent<HTMLFormElement>) {
 		event.preventDefault();
+		setError(null);
+		
 		const form = event.currentTarget as HTMLFormElement;
 		const formData = new FormData(form);
-		const sentData = formData.get("SentDate");
 
-		console.log({ sentData });
-		onSuccess();
+		if (!application?.id) {
+			setError("No application ID found");
+			return;
+		}
+
+		// Basic form validation
+		const title = formData.get("TitleApplication") as string;
+		const company = formData.get("Company") as string;
+		
+		if (!title?.trim()) {
+			setError("Job title is required");
+			return;
+		}
+		
+		if (!company?.trim()) {
+			setError("Company name is required");
+			return;
+		}
+
+		// Extract all form data
+		const updatedApplication: IApplication = {
+			id: application.id,
+			title_application: title.trim(),
+			company: company.trim(),
+			location: (formData.get("Location") as string)?.trim() || "",
+			url_application: (formData.get("UrlApplication") as string)?.trim() || "",
+			sent_date: formData.get("SentDate") as string,
+			status: formData.get("Status") as "pending" | "sent" | "rejected",
+			notes: (formData.get("Notes") as string)?.trim() || "",
+			created_at: application.created_at,
+			updated_at: application.updated_at,
+		};
+
+		console.log('🔄 Attempting to update application:', updatedApplication);
+		console.log('📊 Form data extracted:', {
+			title: title.trim(),
+			company: company.trim(),
+			location: (formData.get("Location") as string)?.trim() || "",
+			url_application: (formData.get("UrlApplication") as string)?.trim() || "",
+			sent_date: formData.get("SentDate") as string,
+			status: formData.get("Status") as "pending" | "sent" | "rejected",
+			notes: (formData.get("Notes") as string)?.trim() || "",
+		});
+
+		updateApp.mutate(updatedApplication, {
+			onSuccess: (data) => {
+				console.log('✅ Update successful:', data);
+				onSuccess();
+				handleClose();
+			},
+			onError: (error: any) => {
+				console.error('❌ Update failed with error:', error);
+				console.error('❌ Error response:', error?.response?.data);
+				console.error('❌ Error status:', error?.response?.status);
+				console.error('❌ Error message:', error?.message);
+				setError(`Failed to update application: ${error?.response?.data?.message || error?.message || 'Unknown error'}`);
+			}
+		});
 	}
 	return (
 		<Dialog
@@ -57,34 +117,30 @@ function ApplicationEditModal({
 				}
 			}}
 		>
-			<DialogContent className="sm:max-w-[425px]">
+			<DialogContent className="sm:max-w-[425px] rounded-xl">
 				<DialogHeader>
 					<DialogTitle className="text-center">Edit Application</DialogTitle>
+					{error && (
+						<div className="text-sm text-red-600 text-center p-2 bg-red-50 rounded-md border border-red-200">
+							{error}
+						</div>
+					)}
 				</DialogHeader>
 				<form onSubmit={handleEditApplication}>
 					<div className="grid gap-2 py-4">
-						<span>Title</span>
-						<Label>
-							<Input
-								name="TitleApplication"
-								placeholder={application?.title_application}
-							/>
-						</Label>
-						<span>Company Name</span>
-						<Label>
-							<Input name="Company" placeholder={application?.company} />
-						</Label>
-						<span>URL Website</span>
-						<Label>
-							<Input name="UrlApplication" placeholder={application?.url_application} />
-						</Label>
-						<span>Sent Date</span>
+						{/* Hidden inputs for data that needs to be in FormData */}
+						<input type="hidden" name="SentDate" value={date.toISOString().split('T')[0]} />
+						<Input name="TitleApplication" placeholder="Title" defaultValue={application?.title_application} />
+						<Input name="Company" placeholder="Company" defaultValue={application?.company} />
+						<Input name="Location" placeholder="Location" defaultValue={application?.location} />
+						<Input name="UrlApplication" placeholder="Application url" defaultValue={application?.url_application} />
 						<Popover>
 							<PopoverTrigger asChild>
 								<Button
-									variant={"outline"}
+									variant="ghost"
 									className={cn(
-										" justify-start text-left font-normal",
+										"rounded-xl",
+										"input justify-start text-left font-normal",
 										!date && "text-muted-foreground",
 									)}
 								>
@@ -101,11 +157,10 @@ function ApplicationEditModal({
 								/>
 							</PopoverContent>
 						</Popover>
-						<hr className="m-4" />
-						<span className="justify-center text-center">Status</span>
 						<div className="flex space-x-2  justify-center">
 							<Button
 								type="button"
+								className={`rounded-xl ${status === "pending" ? "status-pending" : ""}`}
 								variant={status === "pending" ? "default" : "secondary"}
 								onClick={() => setStatus("pending")}
 							>
@@ -113,6 +168,7 @@ function ApplicationEditModal({
 							</Button>
 							<Button
 								type="button"
+								className={`rounded-xl ${status === "sent" ? "status-sent" : ""}`}
 								variant={status === "sent" ? "default" : "secondary"}
 								onClick={() => setStatus("sent")}
 							>
@@ -120,6 +176,7 @@ function ApplicationEditModal({
 							</Button>
 							<Button
 								type="button"
+								className={`rounded-xl ${status === "rejected" ? "status-rejected" : ""}`}
 								variant={status === "rejected" ? "default" : "secondary"}
 								onClick={() => setStatus("rejected")}
 							>
@@ -127,17 +184,20 @@ function ApplicationEditModal({
 							</Button>
 							<input type="hidden" name="Status" value={status} />
 						</div>
-						<hr className="m-4" />
-						<span>Notes</span>
-						<Label>
-							<Input type="text" name="Notes" />
-						</Label>
+						<textarea className="input p-4" placeholder="Notes" name="Notes" defaultValue={application?.notes} />
 					</div>
 					<DialogFooter className="justify-between justify-center">
-						<Button variant="secondary" onClick={handleClose}>
+						<Button variant="ghost" className="neu-button-destructive rounded-xl" onClick={handleClose}>
 							Cancel
 						</Button>
-						<Button type="submit">Confirm changes</Button>
+						<Button 
+							variant={"ghost"} 
+							className="neu-button-primary rounded-xl" 
+							type="submit"
+							disabled={updateApp.isPending}
+						>
+							{updateApp.isPending ? "Saving..." : "Save changes"}
+						</Button>
 					</DialogFooter>
 				</form>
 			</DialogContent>

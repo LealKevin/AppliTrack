@@ -69,7 +69,8 @@ export async function updateApplication(application: IApplication) {
     notes: application.notes,
     url_application: application.url_application,
   };
-  const response = await axios.put<IApplication>(`/api/applications`, {
+  console.log('🌐 API Call: PUT /api/applications/' + application.id, applicationRequest);
+  const response = await axios.put<IApplication>(`/api/applications/${application.id}`, {
     ...applicationRequest,
   }, { withCredentials: true });
   return response.data;

@@ -8,7 +8,7 @@
 
 :root {
   --radius: 0.625rem;
-  --background: #e0e0e0;
+  --background: #ececec;
   --foreground: oklch(0.147 0.004 49.25);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.147 0.004 49.25);
@@ -335,5 +335,87 @@
     opacity: 0.6;
     cursor: not-allowed;
     transform: none;
+  }
+
+  /* From Uiverse.io by tranquoclong */
+  .inputGroup {
+    font-family: 'Segoe UI', sans-serif;
+    margin: 1em 0 1em 0;
+    max-width: 190px;
+    position: relative;
+  }
+
+  .inputGroup input {
+    font-size: 100%;
+    padding: 0.8em;
+    outline: none;
+    border: 2px solid rgb(200, 200, 200);
+    background-color: transparent;
+    border-radius: 20px;
+    width: 100%;
+  }
+
+  .inputGroup label {
+    font-size: 100%;
+    position: absolute;
+    left: 0;
+    padding: 0.8em;
+    margin-left: 0.5em;
+    pointer-events: none;
+    transition: all 0.3s ease;
+    color: rgb(100, 100, 100);
+  }
+
+  .inputGroup :is(input:focus, input:valid)~label {
+    transform: translateY(-50%) scale(.9);
+    margin: 0em;
+    margin-left: 1.3em;
+    padding: 0.4em;
+    background-color: #e8e8e8;
+  }
+
+  .inputGroup :is(input:focus, input:valid) {
+    border-color: rgb(150, 150, 200);
+  }
+
+  .input {
+    border: none;
+    padding: 0.2rem;
+    border-radius: 1rem;
+    background: #e8e8e8;
+    box-shadow: inset 2px 2px 8px #c5c5c5,
+      inset -2px -2px 8px #ffffff;
+    transition: 0.3s;
+  }
+
+  .input:focus {
+    outline-color: #e8e8e8;
+    background: #e8e8e8;
+    box-shadow: inset 10px 10px 30px #c5c5c5,
+      inset -10px -10px 30px #ffffff;
+    transition: 0.3s;
+  }
+
+  .input:hover {
+    background: var(--neu-bg);
+    box-shadow: inset 2px 2px 8px #c5c5c5,
+      inset -2px -2px 8px #ffffff;
+    transition: 0.3s;
+  }
+
+  /* Status button colors */
+  .status-pending {
+    background-color: #f59e0b !important;
+    color: white !important;
+  }
+
+  .status-sent {
+    background-color: #10b981 !important;
+    color: white !important;
+  }
+
+  .status-rejected {
+    background-color: #ef4444 !important;
+    color: white !important;
   }
 }

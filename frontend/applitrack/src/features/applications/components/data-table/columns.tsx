@@ -119,14 +119,14 @@ export const createColumns = ({ onEdit, onDelete }: ColumnActions): ColumnDef<IA
     cell: ({ row }) => {
       const status = row.getValue("status") as "pending" | "sent" | "rejected"
       
-      const statusVariant = {
-        pending: "default" as const,
-        sent: "secondary" as const, 
-        rejected: "destructive" as const,
+      const statusClass = {
+        pending: "status-pending",
+        sent: "status-sent", 
+        rejected: "status-rejected",
       }
 
       return (
-        <Badge variant={statusVariant[status]} className="capitalize">
+        <Badge variant="secondary" className={`capitalize w-full text-center ${statusClass[status]}`}>
           {status}
         </Badge>
       )

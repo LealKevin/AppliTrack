@@ -90,16 +90,16 @@ type companyStats struct {
 func (h *Handler) GetAllApplications(c echo.Context) error {
 	userID := c.Get("userID").(uuid.UUID)
 	status := c.QueryParam("status")
-	
+
 	var applications []db.Application
 	var err error
-	
+
 	if status != "" && status != "all" {
 		applications, err = h.Store.GetApplicationsByStatus(userID, status)
 	} else {
 		applications, err = h.Store.GetAll(userID)
 	}
-	
+
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "could not load applications")
 	}
@@ -145,7 +145,7 @@ func (h *Handler) DeleteApplication(c echo.Context) error {
 }
 
 type CreateApplicationRequest struct {
-	TitleApplication string    `json:"title"`
+	TitleApplication string    `json:"title" validate:"required"`
 	Company          string    `json:"company"`
 	Location         string    `json:"location"`
 	SentDate         time.Time `json:"sent_date"`
@@ -159,6 +159,10 @@ func (h *Handler) CreateApplication(c echo.Context) error {
 	var appRequest CreateApplicationRequest
 	if err := c.Bind(&appRequest); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "invalid input")
+	}
+
+	if err := c.Validate(appRequest); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "validation failed: "+err.Error())
 	}
 
 	app := db.CreateOneApplicationParams{

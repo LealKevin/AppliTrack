@@ -474,10 +474,12 @@ function SidebarMenuItem({ className, ...props }: React.ComponentProps<"li">) {
     <li
       data-slot="sidebar-menu-item"
       data-sidebar="menu-item"
-      className={cn("rounded-xl bg-neumorphic-100 m-1 group/menu-item relative group-data-[collapsible=icon]:mx-0", className)}
+      className={cn("rounded-xl m-1 group/menu-item relative group-data-[collapsible=icon]:mx-0", className)}
       style={{
+        border: '1px solid #e0e0e0',
         transition: 'all 0.3s',
-        boxShadow: 'inset 2px 2px 16px #c1c1c1, inset -2px -2px 16px #ffffff'
+        background: ' #f5f5f5',
+        boxShadow: ' 2px 2px 16px #e0e0e0,  -2px -2px 16px #ffffff'
       }}
       {...props}
     />

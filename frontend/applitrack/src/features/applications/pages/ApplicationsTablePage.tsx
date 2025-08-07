@@ -70,13 +70,6 @@ export default function ApplicationsTablePage() {
 
   return (
     <div className="flex h-full flex-col space-y-8 p-8">
-      {/* Header */}
-      <div>
-        <h2 className="text-2xl font-bold tracking-tight">Applications</h2>
-        <p className="text-muted-foreground">
-          Manage your job applications and track their status.
-        </p>
-      </div>
 
       {/* Status Tabs */}
       <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as typeof activeTab)}>
