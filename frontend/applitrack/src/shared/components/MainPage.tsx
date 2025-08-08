@@ -11,12 +11,7 @@ function CustomSidebarTrigger() {
   return (
     <button
       onClick={toggleSidebar}
-      className="m-5  fixed size-9 rounded-xl border-neumorphic-light flex items-center justify-center 
-      text-neumorphic-400 hover:shadow-lg transition-shadow duration-300"
-      style={{
-        background: 'var(--card-bg, #d4d4d8)',
-        boxShadow: 'var(--card-shadow, 10px 10px 30px #a1a1aa, -10px -10px 30px #ffffff)'
-      }}
+      className="m-5 fixed size-9 rounded-md border border-border bg-background hover:bg-accent hover:text-accent-foreground flex items-center justify-center transition-colors duration-200"
     >
       <PanelLeftIcon className="size-4" />
       <span className="sr-only">Toggle Sidebar</span>
@@ -27,7 +22,7 @@ function CustomSidebarTrigger() {
 export default function MainPage() {
   return (
     <SidebarProvider>
-      <AppSidebar className="boxShadow-neumorphic" />
+      <AppSidebar />
       <SidebarInset>
         <CustomSidebarTrigger />
         <div className="m-10">

@@ -5,6 +5,7 @@ import { ArrowUpDown, MoreHorizontal } from "lucide-react"
 import { Button } from "@/shared/components/ui/button"
 import { Checkbox } from "@/shared/components/ui/checkbox"
 import { Badge } from "@/shared/components/ui/badge"
+import StatusBadge from "@/features/applications/components/StatusBadge"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -118,17 +119,11 @@ export const createColumns = ({ onEdit, onDelete }: ColumnActions): ColumnDef<IA
     },
     cell: ({ row }) => {
       const status = row.getValue("status") as "pending" | "sent" | "rejected"
-
-      const statusClass = {
-        pending: "status-pending",
-        sent: "status-sent",
-        rejected: "status-rejected",
-      }
-
+      
       return (
-        <Badge variant="secondary" className={`capitalize w-full text-center ${statusClass[status]}`}>
-          {status}
-        </Badge>
+        <div className="flex justify-center">
+          <StatusBadge status={status} />
+        </div>
       )
     },
   },

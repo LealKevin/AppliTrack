@@ -176,15 +176,19 @@ function ApplicationEditModal({
 							</Button>
 							<input type="hidden" name="Status" value={status} />
 						</div>
-						<textarea className="input p-4" placeholder="Notes" name="Notes" defaultValue={application?.notes} />
+						<textarea 
+							className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" 
+							placeholder="Notes" 
+							name="Notes" 
+							defaultValue={application?.notes || ''} 
+						/>
 					</div>
 					<DialogFooter className="justify-between justify-center">
-						<Button variant="ghost" className="neu-button-destructive rounded-xl" onClick={handleClose}>
+						<Button variant="outline" onClick={handleClose}>
 							Cancel
 						</Button>
 						<Button 
-							variant={"ghost"} 
-							className="neu-button-primary rounded-xl" 
+							variant="default" 
 							type="submit"
 							disabled={updateApp.isPending}
 						>

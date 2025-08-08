@@ -1,6 +1,7 @@
 package user
 
 import (
+	"fmt"
 	"net/http"
 	"os"
 	"time"
@@ -28,6 +29,7 @@ func (h *Handler) RegisterRoutes(e *echo.Group) {
 	e.POST("/register", h.Register)
 	e.POST("/login", h.Login)
 	e.POST("/logout", h.Logout)
+	e.GET("/csrf", h.GetCSRFToken)
 }
 
 func (h *Handler) RegisterProtectedRoutes(e *echo.Group) {
@@ -169,6 +171,14 @@ func (h *Handler) GetCurrentUser(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, mapToUserResponse(user))
+}
+
+func (h *Handler) GetCSRFToken(c echo.Context) error {
+	fmt.Println("Generating CSRF token")
+	fmt.Println("CSRF token:", c.Get("csrf"))
+	return c.JSON(http.StatusOK, map[string]string{
+		"token": c.Get("csrf").(string),
+	})
 }
 
 func mapToUserResponse(user User) userResponse {

@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"net/http"
 	"os"
 	"os/signal"
 
@@ -40,6 +41,12 @@ func main() {
 		AllowHeaders:     []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept, echo.HeaderAuthorization},
 		AllowCredentials: true,
 	}))
+	e.Use(middleware.CSRFWithConfig(middleware.CSRFConfig{
+		TokenLookup:    "header:X-CSRF-Token",
+		CookiePath:     "/",
+		CookieHTTPOnly: true,
+		CookieSameSite: http.SameSiteStrictMode,
+	}))
 
 	api := e.Group("/api")
 
@@ -47,6 +54,7 @@ func main() {
 
 	protected := api.Group("")
 	protected.Use(utils.EchoAuthMiddleware())
+
 	appHandler.RegisterRoutes(protected)
 	userHandler.RegisterProtectedRoutes(protected)
 

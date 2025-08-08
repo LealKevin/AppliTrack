@@ -111,18 +111,14 @@ export function ApplicationsDataTable<TData, TValue>({
           placeholder="Search applications..."
           value={globalFilter ?? ""}
           onChange={(event) => setGlobalFilter(String(event.target.value))}
-          className="max-w-sm mr-4 rounded-[15px] border-0"
-          style={{
-            background: 'var(--app-card-bg)',
-            boxShadow: 'inset 2px 2px 4px rgba(0,0,0,0.1), inset -2px -2px 4px rgba(255,255,255,0.1)'
-          }}
+          className="max-w-sm mr-4"
         />
         <div className="ml-auto flex items-center gap-2">
           {onDeleteSelected && table.getFilteredSelectedRowModel().rows.length > 0 && (
             <Button
               onClick={handleDeleteClick}
-              variant="ghost"
-              className="mx-2 rounded-xl neu-button-destructive"
+              variant="destructive"
+              className="mx-2"
               disabled={isDeleting}
             >
               <Trash2 className="h-4 w-4" />
@@ -132,20 +128,20 @@ export function ApplicationsDataTable<TData, TValue>({
             </Button>
           )}
           {onImportCSV && (
-            <Button onClick={onImportCSV} variant={"ghost"} className="mx-2 rounded-xl neu-button-secondary">
+            <Button onClick={onImportCSV} variant={"secondary"} className="mx-2">
               <Upload className="h-4 w-4" />
               <span className="hidden sm:inline sm:ml-2">Import CSV</span>
             </Button>
           )}
-          <Button onClick={onAddApplication} variant={"ghost"} className=" mx-4 rounded-xl neu-button-primary">
+          <Button onClick={onAddApplication} variant={"default"} className="mx-4">
             <Plus className="h-4 w-4" />
             <span className="hidden sm:inline sm:ml-2">Add Application</span>
           </Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
-                variant="ghost"
-                className="rounded-[15px] border-0 neu-button-secondary cursor-pointer"
+                variant="outline"
+                className=""
               >
                 Columns <ChevronDown className="ml-2 h-4 w-4" />
               </Button>
@@ -164,7 +160,14 @@ export function ApplicationsDataTable<TData, TValue>({
                         column.toggleVisibility(!!value)
                       }
                     >
-                      {column.id}
+                      {
+                        column.id === "title_application"
+                          ? "Application"
+                          : column.id === "sent_date"
+                            ? "Date"
+                            : column.id
+                      }
+
                     </DropdownMenuCheckboxItem>
                   )
                 })}
@@ -172,13 +175,7 @@ export function ApplicationsDataTable<TData, TValue>({
           </DropdownMenu>
         </div>
       </div>
-      <div
-        className="rounded-[20px] border-0 overflow-hidden"
-        style={{
-          background: 'var(--app-card-bg)',
-          boxShadow: 'var(--app-card-shadow)'
-        }}
-      >
+      <div className="rounded-md border">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -245,20 +242,18 @@ export function ApplicationsDataTable<TData, TValue>({
         </div>
         <div className="space-x-2">
           <Button
-            variant="ghost"
+            variant="outline"
             size="sm"
             onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage()}
-            className="rounded-[12px] border-0 neu-button-secondary cursor-pointer"
           >
             Previous
           </Button>
           <Button
-            variant="ghost"
+            variant="outline"
             size="sm"
             onClick={() => table.nextPage()}
             disabled={!table.getCanNextPage()}
-            className="rounded-[12px] border-0 neu-button-secondary cursor-pointer"
           >
             Next
           </Button>

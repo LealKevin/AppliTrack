@@ -304,17 +304,16 @@ function ImportModal({ isOpen, onClose, onImport, isImporting = false, result }:
           <div className="flex justify-end gap-2">
             {showResults && (
               <Button 
-                variant="ghost" 
+                variant="outline" 
                 onClick={() => window.location.reload()}
-                className="mr-auto rounded-xl neu-button-secondary"
+                className="mr-auto"
               >
                 Import Another File
               </Button>
             )}
             <Button 
               onClick={onClose}
-              variant="ghost" 
-              className={showResults ? "rounded-xl neu-button-primary" : "rounded-xl neu-button-destructive"}
+              variant={showResults ? "default" : "outline"}
             >
               {showResults ? 'Close' : 'Cancel'}
             </Button>

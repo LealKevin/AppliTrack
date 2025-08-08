@@ -6,7 +6,6 @@ import {
   DialogTitle,
 } from "@/shared/components/ui/dialog";
 import { Input } from "@/shared/components/ui/input";
-import { Label } from "@/shared/components/ui/label";
 import { Button } from "@/shared/components/ui/button";
 import { useState } from "react";
 import type { IApplication } from "../pages/ApplicationsPage";
@@ -21,11 +20,13 @@ import { format } from "date-fns";
 type CreateModalProps = {
   isModalOpen: boolean;
   handleClose: () => void;
+  onSuccess: () => void;
 };
 
 function ApplicationCreateModal({
   handleClose,
   isModalOpen,
+  onSuccess,
 }: CreateModalProps) {
   const [status, setStatus] = useState<"pending" | "sent" | "rejected">(
     "pending",
@@ -54,6 +55,7 @@ function ApplicationCreateModal({
       updated_at: "",
     };
     await createApp.mutateAsync(newApplication);
+    onSuccess();
     handleClose();
   };
 
@@ -129,10 +131,10 @@ function ApplicationCreateModal({
             <textarea className="input p-4" placeholder="Notes" name="Notes" />
           </div>
           <DialogFooter className="justify-between justify-center">
-            <Button variant="ghost" className="neu-button-destructive rounded-xl" onClick={handleClose}>
+            <Button variant="outline" onClick={handleClose}>
               Cancel
             </Button>
-            <Button variant={"ghost"} className="neu-button-primary rounded-xl" type="submit">Create new application</Button>
+            <Button variant="default" type="submit">Create new application</Button>
           </DialogFooter>
         </form>
       </DialogContent>

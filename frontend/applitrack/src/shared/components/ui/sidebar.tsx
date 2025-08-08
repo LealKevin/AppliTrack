@@ -168,8 +168,7 @@ function Sidebar({
       <div
         data-slot="sidebar"
         className={cn(
-          "bg-sidebar-light dark:bg-sidebar-dark text-neumorphic-400 dark:text-neumorphic-dark-400 flex h-full w-(--sidebar-width) flex-col",
-
+          "bg-sidebar text-sidebar-foreground flex h-full w-(--sidebar-width) flex-col",
           className,
         )}
         {...props}
@@ -186,7 +185,7 @@ function Sidebar({
           data-sidebar="sidebar"
           data-slot="sidebar"
           data-mobile="true"
-          className="bg-sidebar-light dark:bg-sidebar-dark text-neumorphic-400 dark:text-neumorphic-dark-400 w-(--sidebar-width) p-0 [&>button]:hidden"
+          className="bg-sidebar text-sidebar-foreground w-(--sidebar-width) p-0 [&>button]:hidden"
           style={
             {
               "--sidebar-width": SIDEBAR_WIDTH_MOBILE,
@@ -225,33 +224,25 @@ function Sidebar({
             ? "group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)+(--spacing(4)))]"
             : "group-data-[collapsible=icon]:w-(--sidebar-width-icon)",
         )}
-        style={{
-          background: 'var(--card-bg, #d4d4d8)',
-          boxShadow: 'var(--card-shadow, 20px 20px 60px #a1a1aa, -20px -20px 60px #ffffff)'
-        }}
       />
       <div
         data-slot="sidebar-container"
         className={cn(
-          "rounded-[50px] fixed top-5 bottom-5 z-10 hidden w-(--sidebar-width) transition-[left,right,width] duration-200 ease-linear md:flex",
+          "fixed inset-y-0 z-10 hidden w-(--sidebar-width) transition-[left,right,width] duration-200 ease-linear md:flex",
           side === "left"
-            ? "left-5 group-data-[collapsible=offcanvas]:left-[calc(var(--sidebar-width)*-1.2)]"
-            : "right-5 group-data-[collapsible=offcanvas]:right-[calc(var(--sidebar-width)*-1)]",
+            ? "left-0 group-data-[collapsible=offcanvas]:left-[calc(var(--sidebar-width)*-1)]"
+            : "right-0 group-data-[collapsible=offcanvas]:right-[calc(var(--sidebar-width)*-1)]",
           variant === "floating" || variant === "inset"
             ? "p-2 group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)+(--spacing(4))+2px)]"
             : "group-data-[collapsible=icon]:w-(--sidebar-width-icon) group-data-[side=left]:border-r group-data-[side=right]:border-l",
           className,
         )}
-        style={{
-          background: 'var(--card-bg, #d4d4d8)',
-          boxShadow: 'var(--card-shadow, 20px 20px 60px #a1a1aa, -20px -20px 60px #ffffff)'
-        }}
         {...props}
       >
         <div
           data-sidebar="sidebar"
           data-slot="sidebar-inner"
-          className="boxShadow-neumorphic bg-sidebar-light dark:bg-sidebar-dark  dark:border-neumorphic-dark-200 flex h-full w-full flex-col group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:shadow-sm"
+          className="bg-sidebar text-sidebar-foreground flex h-full w-full flex-col group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:shadow-sm"
         >
           {children}
         </div>
@@ -474,13 +465,7 @@ function SidebarMenuItem({ className, ...props }: React.ComponentProps<"li">) {
     <li
       data-slot="sidebar-menu-item"
       data-sidebar="menu-item"
-      className={cn("rounded-xl m-1 group/menu-item relative group-data-[collapsible=icon]:mx-0", className)}
-      style={{
-        border: '1px solid #e0e0e0',
-        transition: 'all 0.3s',
-        background: ' #f5f5f5',
-        boxShadow: ' 2px 2px 16px #e0e0e0,  -2px -2px 16px #ffffff'
-      }}
+      className={cn("group/menu-item relative", className)}
       {...props}
     />
   );
@@ -491,7 +476,7 @@ const sidebarMenuButtonVariants = cva(
   {
     variants: {
       variant: {
-        default: "hover:bg-white/20 transition duration-200 rounded-xl hover:text-sidebar-accent-foreground",
+        default: "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
         outline:
           "bg-background shadow-[0_0_0_1px_hsl(var(--sidebar-border))] hover:bg-sidebar-accent hover:text-sidebar-accent-foreground hover:shadow-[0_0_0_1px_hsl(var(--sidebar-accent))]",
       },
