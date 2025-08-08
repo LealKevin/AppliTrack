@@ -5,6 +5,7 @@ import { ArrowUpDown, MoreHorizontal } from "lucide-react"
 import { Button } from "@/shared/components/ui/button"
 import { Checkbox } from "@/shared/components/ui/checkbox"
 import { Badge } from "@/shared/components/ui/badge"
+import StatusBadge from "@/features/applications/components/StatusBadge"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -67,7 +68,7 @@ export const createColumns = ({ onEdit, onDelete }: ColumnActions): ColumnDef<IA
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          className="h-auto p-0 font-medium"
+          className="h-auto p-0 font-medium w-full"
         >
           Company
           <ArrowUpDown className="ml-2 h-4 w-4" />
@@ -77,7 +78,7 @@ export const createColumns = ({ onEdit, onDelete }: ColumnActions): ColumnDef<IA
     cell: ({ row }) => {
       const company = row.getValue("company") as string
       return (
-        <Badge variant="secondary" className="font-normal">
+        <Badge variant="secondary" className="font-normal w-full text-center">
           {company}
         </Badge>
       )
@@ -119,16 +120,10 @@ export const createColumns = ({ onEdit, onDelete }: ColumnActions): ColumnDef<IA
     cell: ({ row }) => {
       const status = row.getValue("status") as "pending" | "sent" | "rejected"
       
-      const statusVariant = {
-        pending: "default" as const,
-        sent: "secondary" as const, 
-        rejected: "destructive" as const,
-      }
-
       return (
-        <Badge variant={statusVariant[status]} className="capitalize">
-          {status}
-        </Badge>
+        <div className="flex justify-center">
+          <StatusBadge status={status} />
+        </div>
       )
     },
   },
@@ -179,7 +174,7 @@ export const createColumns = ({ onEdit, onDelete }: ColumnActions): ColumnDef<IA
             <DropdownMenuItem onClick={() => onEdit(application)}>
               Edit application
             </DropdownMenuItem>
-            <DropdownMenuItem 
+            <DropdownMenuItem
               onClick={() => onDelete(application)}
               className="text-destructive"
             >

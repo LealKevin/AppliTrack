@@ -1,6 +1,45 @@
 import type { UserInput } from "@/features/authentication/hooks/useConnection";
 import type { IApplication } from "@/features/applications/pages/ApplicationsPage";
 import axios from "axios";
+
+let csrfToken: string | null = null;
+
+async function fetchCSRFToken(): Promise<string> {
+  if (!csrfToken) {
+    const response = await axios.get<{ token: string }>("/api/csrf", {
+      withCredentials: true
+    });
+    csrfToken = response.data.token;
+  }
+  console.log("CSRF Token fetched:", csrfToken);
+  return csrfToken;
+}
+
+const apiClient = axios.create({
+  withCredentials: true
+});
+
+apiClient.interceptors.request.use(async (config) => {
+  if (config.method !== 'get' && config.method !== 'GET') {
+    try {
+      const token = await fetchCSRFToken();
+      config.headers['X-CSRF-Token'] = token;
+    } catch (error) {
+      console.error('Failed to fetch CSRF token:', error);
+    }
+  }
+  return config;
+});
+
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 403 && error.response?.data?.message?.includes('CSRF')) {
+      csrfToken = null;
+    }
+    return Promise.reject(error);
+  }
+);
 type IUser = {
   id: number;
   name: string;
@@ -10,22 +49,20 @@ type IUser = {
 export async function fetchApplications(
   status: string,
 ): Promise<IApplication[]> {
-  const response = await axios.get<{ applications: IApplication[] }>(
-    `/api/applications?status=${status ?? ""}`,
-    { withCredentials: true }
+  const response = await apiClient.get<{ applications: IApplication[] }>(
+    `/api/applications?status=${status ?? ""}`
   );
   return response.data.applications;
 }
 
 export async function deleteApplication(id: string): Promise<IApplication[]> {
-  const response = await axios.delete<{ applications: IApplication[] }>(`/api/applications/${id}`, { withCredentials: true });
+  const response = await apiClient.delete<{ applications: IApplication[] }>(`/api/applications/${id}`);
   return response.data.applications;
 }
 
 export async function fetchApplicationsByStatus(status: string) {
-  const response = await axios.get<{ applications: IApplication[] }>(
-    `/api/applications/${status}`,
-    { withCredentials: true }
+  const response = await apiClient.get<{ applications: IApplication[] }>(
+    `/api/applications/${status}`
   );
   return response.data.applications;
 }
@@ -40,7 +77,7 @@ export async function createApplication(application: IApplication) {
     notes: application.notes || "",
     url_application: application.url_application,
   };
-  const response = await axios.post<IApplication>("/api/application", applicationRequest, { withCredentials: true });
+  const response = await apiClient.post<IApplication>("/api/application", applicationRequest);
   return response.data;
 }
 
@@ -60,18 +97,20 @@ type bodyRequest = {
 };
 
 export async function updateApplication(application: IApplication) {
+  const sentDate = new Date(application.sent_date).toISOString();
+
   const applicationRequest: bodyRequest = {
     title: application.title_application,
     company: application.company,
     location: application.location || "",
-    sent_date: application.sent_date,
+    sent_date: sentDate,
     status: application.status,
-    notes: application.notes,
+    notes: application.notes || "",
     url_application: application.url_application,
   };
-  const response = await axios.put<IApplication>(`/api/applications`, {
+  const response = await apiClient.put<IApplication>(`/api/applications/${application.id}`, {
     ...applicationRequest,
-  }, { withCredentials: true });
+  });
   return response.data;
 }
 
@@ -81,15 +120,14 @@ export async function createUser(
   newPassword: string,
   newPassWordRepeat: string,
 ): Promise<CreateUserResponse> {
-  const response = await axios.post<CreateUserResponse>(
+  const response = await apiClient.post<CreateUserResponse>(
     "/api/register",
     {
       name: newName,
       email: newEmail,
       password: newPassword,
       passwordRepeat: newPassWordRepeat,
-    },
-    { withCredentials: true },
+    }
   );
   return response.data;
 }
@@ -97,22 +135,19 @@ export async function createUser(
 export async function connectUser(
   input: UserInput,
 ): Promise<CreateUserResponse> {
-  const response = await axios.post<CreateUserResponse>(
+  const response = await apiClient.post<CreateUserResponse>(
     "/api/login",
     {
       email: input.email,
       password: input.password,
-    },
-    {
-      withCredentials: true,
-    },
+    }
   );
 
   return response.data;
 }
 
 export async function logoutUser(): Promise<void> {
-  await axios.post("/api/logout", {}, { withCredentials: true });
+  await apiClient.post("/api/logout", {});
 }
 
 export type UserType = {
@@ -124,9 +159,7 @@ export type UserType = {
 };
 
 export async function getUser(): Promise<UserType> {
-  const response = await axios.get<UserType>("/api/user/current", {
-    withCredentials: true,
-  });
+  const response = await apiClient.get<UserType>("/api/user/current");
   return response.data;
 }
 
@@ -137,9 +170,7 @@ export type AppsCount = {
   rejected_count: number;
 };
 export async function getAppsCount(): Promise<AppsCount> {
-  const response = await axios.get<AppsCount>("/api/applications/count", {
-    withCredentials: true,
-  });
+  const response = await apiClient.get<AppsCount>("/api/applications/count");
   return response.data;
 }
 
@@ -154,8 +185,7 @@ export async function importApplicationsFromCSV(file: File): Promise<ImportResul
   const formData = new FormData();
   formData.append('file', file);
 
-  const response = await axios.post<ImportResult>("/api/application/import", formData, {
-    withCredentials: true,
+  const response = await apiClient.post<ImportResult>("/api/application/import", formData, {
     headers: {
       'Content-Type': 'multipart/form-data',
     },

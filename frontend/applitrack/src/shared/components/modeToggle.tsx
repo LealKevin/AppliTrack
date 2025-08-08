@@ -3,9 +3,9 @@ import {
 	DropdownMenuTrigger,
 	DropdownMenuContent,
 	DropdownMenuItem,
-} from "@radix-ui/react-dropdown-menu";
+} from "@/shared/components/ui/dropdown-menu";
 import { Sun, Moon } from "lucide-react";
-import { useTheme } from "next-themes";
+import { useTheme } from "@/shared/contexts/themeProvider";
 
 import { Button } from "@/shared/components/ui/button";
 export function ModeToggle() {

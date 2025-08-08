@@ -18,6 +18,7 @@ interface ImportModalProps {
 function ImportModal({ isOpen, onClose, onImport, isImporting = false, result }: ImportModalProps) {
   const [isDragOver, setIsDragOver] = React.useState(false);
   const [dragCounter, setDragCounter] = React.useState(0);
+  const [showFormatRequirements, setShowFormatRequirements] = React.useState(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const handleDragEnter = (e: React.DragEvent) => {
@@ -80,9 +81,9 @@ function ImportModal({ isOpen, onClose, onImport, isImporting = false, result }:
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-gray-400 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb]:border-transparent dark:[&::-webkit-scrollbar-thumb]:bg-gray-600 hover:[&::-webkit-scrollbar-thumb]:bg-gray-500 dark:hover:[&::-webkit-scrollbar-thumb]:bg-gray-500">
+      <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto rounded-xl [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-gray-400 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb]:border-transparent dark:[&::-webkit-scrollbar-thumb]:bg-gray-600 hover:[&::-webkit-scrollbar-thumb]:bg-gray-500 dark:hover:[&::-webkit-scrollbar-thumb]:bg-gray-500">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
+          <DialogTitle className="text-center flex items-center justify-center gap-2">
             <IconFileImport className="h-5 w-5" />
             {showResults ? 'CSV Import Results' : 'Import Applications from CSV'}
           </DialogTitle>
@@ -95,7 +96,7 @@ function ImportModal({ isOpen, onClose, onImport, isImporting = false, result }:
               <div className="space-y-4">
                 <div
                   className={cn(
-                    "relative border-2 border-dashed rounded-lg p-8 text-center transition-colors",
+                    "relative border-2 border-dashed rounded-xl p-8 text-center transition-colors",
                     isDragOver 
                       ? "border-primary bg-primary/10" 
                       : "border-muted-foreground/25 hover:border-muted-foreground/50",
@@ -108,7 +109,7 @@ function ImportModal({ isOpen, onClose, onImport, isImporting = false, result }:
                 >
                   <div className="flex flex-col items-center gap-4">
                     <div className={cn(
-                      "rounded-full p-4 transition-colors",
+                      "rounded-xl p-4 transition-colors",
                       isDragOver ? "bg-primary text-primary-foreground" : "bg-muted"
                     )}>
                       <IconUpload className="h-8 w-8" />
@@ -126,7 +127,8 @@ function ImportModal({ isOpen, onClose, onImport, isImporting = false, result }:
                     <Button 
                       onClick={handleButtonClick}
                       disabled={isImporting}
-                      className="mt-2"
+                      className="mt-2 rounded-xl"
+                      variant="ghost"
                     >
                       {isImporting ? (
                         <>
@@ -160,18 +162,18 @@ function ImportModal({ isOpen, onClose, onImport, isImporting = false, result }:
             <>
               {/* Results Summary */}
               <div className="grid grid-cols-3 gap-4">
-                <div className="text-center p-4 rounded-lg bg-muted/50">
+                <div className="text-center p-4 rounded-xl bg-muted/50">
                   <div className="text-2xl font-bold text-muted-foreground">{result.total_records}</div>
                   <div className="text-sm text-muted-foreground">Total Records</div>
                 </div>
-                <div className="text-center p-4 rounded-lg bg-green-50 dark:bg-green-950/20">
+                <div className="text-center p-4 rounded-xl bg-green-50 dark:bg-green-950/20">
                   <div className="flex items-center justify-center gap-1 text-2xl font-bold text-green-600 dark:text-green-400">
                     <IconCheck className="h-5 w-5" />
                     {result.success_count}
                   </div>
                   <div className="text-sm text-green-600 dark:text-green-400">Successful</div>
                 </div>
-                <div className="text-center p-4 rounded-lg bg-red-50 dark:bg-red-950/20">
+                <div className="text-center p-4 rounded-xl bg-red-50 dark:bg-red-950/20">
                   <div className="flex items-center justify-center gap-1 text-2xl font-bold text-red-600 dark:text-red-400">
                     <IconX className="h-5 w-5" />
                     {result.failure_count}
@@ -182,7 +184,7 @@ function ImportModal({ isOpen, onClose, onImport, isImporting = false, result }:
 
               {/* Success Message */}
               {hasSuccess && !hasErrors && (
-                <div className="flex items-center gap-3 p-4 rounded-lg bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800">
+                <div className="flex items-center gap-3 p-4 rounded-xl bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800">
                   <IconCheck className="h-6 w-6 text-green-600 dark:text-green-400" />
                   <div>
                     <div className="font-medium text-green-800 dark:text-green-200">
@@ -197,7 +199,7 @@ function ImportModal({ isOpen, onClose, onImport, isImporting = false, result }:
 
               {/* Mixed Results */}
               {hasSuccess && hasErrors && (
-                <div className="flex items-center gap-3 p-4 rounded-lg bg-yellow-50 dark:bg-yellow-950/20 border border-yellow-200 dark:border-yellow-800">
+                <div className="flex items-center gap-3 p-4 rounded-xl bg-yellow-50 dark:bg-yellow-950/20 border border-yellow-200 dark:border-yellow-800">
                   <IconAlertCircle className="h-6 w-6 text-yellow-600 dark:text-yellow-400" />
                   <div>
                     <div className="font-medium text-yellow-800 dark:text-yellow-200">
@@ -222,7 +224,7 @@ function ImportModal({ isOpen, onClose, onImport, isImporting = false, result }:
                   </div>
                   
                   <div className="relative">
-                    <div className="max-h-40 w-full rounded-lg border bg-muted/30 overflow-y-auto [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-gray-400 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb]:border-transparent dark:[&::-webkit-scrollbar-thumb]:bg-gray-600 hover:[&::-webkit-scrollbar-thumb]:bg-gray-500 dark:hover:[&::-webkit-scrollbar-thumb]:bg-gray-500">
+                    <div className="max-h-40 w-full rounded-xl border bg-muted/30 overflow-y-auto [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-gray-400 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb]:border-transparent dark:[&::-webkit-scrollbar-thumb]:bg-gray-600 hover:[&::-webkit-scrollbar-thumb]:bg-gray-500 dark:hover:[&::-webkit-scrollbar-thumb]:bg-gray-500">
                       <div className="p-3 space-y-2">
                         {result.failures.map((error, index) => (
                           <div key={index} className="flex items-start gap-2 text-sm">
@@ -247,43 +249,55 @@ function ImportModal({ isOpen, onClose, onImport, isImporting = false, result }:
 
           {/* CSV Format Instructions */}
           <div className="space-y-4">
-            <div className="flex items-center gap-2">
-              <IconInfoCircle className="h-4 w-4 text-blue-500" />
-              <h3 className="font-medium">CSV Format Requirements</h3>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <IconInfoCircle className="h-4 w-4 text-blue-500" />
+                <h3 className="font-medium">CSV Format Requirements</h3>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowFormatRequirements(!showFormatRequirements)}
+                className="text-sm"
+              >
+                {showFormatRequirements ? 'Hide' : 'Show'} Requirements
+              </Button>
             </div>
             
-            <div className="rounded-lg bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 p-4 overflow-hidden">
-              <div className="space-y-4 text-sm">
-                <div>
-                  <div className="font-medium text-blue-800 dark:text-blue-200 mb-2">Required Columns (in order):</div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-blue-700 dark:text-blue-300">
-                    <div>1. <span className="font-mono bg-blue-100 dark:bg-blue-900/30 px-1 rounded">Title</span></div>
-                    <div>2. <span className="font-mono bg-blue-100 dark:bg-blue-900/30 px-1 rounded">Company</span></div>
-                    <div>3. <span className="font-mono bg-blue-100 dark:bg-blue-900/30 px-1 rounded">Date (YYYY-MM-DD)</span></div>
-                    <div>4. <span className="font-mono bg-blue-100 dark:bg-blue-900/30 px-1 rounded">Location</span></div>
-                    <div>5. <span className="font-mono bg-blue-100 dark:bg-blue-900/30 px-1 rounded">Status</span></div>
-                    <div>6. <span className="font-mono bg-blue-100 dark:bg-blue-900/30 px-1 rounded">Notes</span></div>
-                    <div className="sm:col-span-2">7. <span className="font-mono bg-blue-100 dark:bg-blue-900/30 px-1 rounded">Application URL</span></div>
+            {showFormatRequirements && (
+              <div className="rounded-xl bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 p-4 overflow-hidden">
+                <div className="space-y-4 text-sm">
+                  <div>
+                    <div className="font-medium text-blue-800 dark:text-blue-200 mb-2">Required Columns (in order):</div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-blue-700 dark:text-blue-300">
+                      <div>1. <span className="font-mono bg-blue-100 dark:bg-blue-900/30 px-1 rounded-lg">Title</span></div>
+                      <div>2. <span className="font-mono bg-blue-100 dark:bg-blue-900/30 px-1 rounded-lg">Company</span></div>
+                      <div>3. <span className="font-mono bg-blue-100 dark:bg-blue-900/30 px-1 rounded-lg">Date (YYYY-MM-DD)</span></div>
+                      <div>4. <span className="font-mono bg-blue-100 dark:bg-blue-900/30 px-1 rounded-lg">Location</span></div>
+                      <div>5. <span className="font-mono bg-blue-100 dark:bg-blue-900/30 px-1 rounded-lg">Status</span></div>
+                      <div>6. <span className="font-mono bg-blue-100 dark:bg-blue-900/30 px-1 rounded-lg">Notes</span></div>
+                      <div className="sm:col-span-2">7. <span className="font-mono bg-blue-100 dark:bg-blue-900/30 px-1 rounded-lg">Application URL</span></div>
+                    </div>
                   </div>
-                </div>
-                
-                <div>
-                  <div className="font-medium text-blue-800 dark:text-blue-200 mb-2">Example:</div>
-                  <div className="font-mono text-xs bg-blue-100 dark:bg-blue-900/30 p-3 rounded border overflow-x-auto">
-                    "Software Engineer","Tech Corp","2024-01-15","New York","pending","Great opportunity","https://example.com"
+                  
+                  <div>
+                    <div className="font-medium text-blue-800 dark:text-blue-200 mb-2">Example:</div>
+                    <div className="font-mono text-xs bg-blue-100 dark:bg-blue-900/30 p-3 rounded-xl border overflow-x-auto">
+                      "Software Engineer","Tech Corp","2024-01-15","New York","pending","Great opportunity","https://example.com"
+                    </div>
                   </div>
-                </div>
 
-                <div>
-                  <div className="font-medium text-blue-800 dark:text-blue-200 mb-2">Valid Status Values:</div>
-                  <div className="flex gap-2 flex-wrap">
-                    <Badge variant="outline" className="text-xs">pending</Badge>
-                    <Badge variant="outline" className="text-xs">sent</Badge>
-                    <Badge variant="outline" className="text-xs">rejected</Badge>
+                  <div>
+                    <div className="font-medium text-blue-800 dark:text-blue-200 mb-2">Valid Status Values:</div>
+                    <div className="flex gap-2 flex-wrap">
+                      <Badge variant="outline" className="text-xs">pending</Badge>
+                      <Badge variant="outline" className="text-xs">sent</Badge>
+                      <Badge variant="outline" className="text-xs">rejected</Badge>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            )}
           </div>
 
           {/* Actions */}
@@ -297,7 +311,10 @@ function ImportModal({ isOpen, onClose, onImport, isImporting = false, result }:
                 Import Another File
               </Button>
             )}
-            <Button onClick={onClose}>
+            <Button 
+              onClick={onClose}
+              variant={showResults ? "default" : "outline"}
+            >
               {showResults ? 'Close' : 'Cancel'}
             </Button>
           </div>

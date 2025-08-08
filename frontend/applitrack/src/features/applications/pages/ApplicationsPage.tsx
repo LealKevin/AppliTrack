@@ -1,10 +1,8 @@
 import Layout from "@/shared/components/Layout";
 import { useState } from "react";
-import StatusButton from "../components/StatusButton";
 import Application from "../components/Application";
 import ApplicationTitle from "../components/ApplicationTitle";
 import ApplicationCompany from "../components/ApplicationCompany";
-import ApplicationIcons from "../components/ApplicationIcons";
 import EditButton from "../components/EditButton";
 import TrashButton from "../components/TrashButton";
 import WebSiteButton from "../components/WebSiteButton";
@@ -16,8 +14,6 @@ import ApplicationRemoveModal from "../components/ApplicationRemoveModal";
 import StatusBadge from "../components/StatusBadge";
 import useDeleteApp from "../hooks/useDeleteApp";
 import useApplications from "../hooks/useApplications";
-import { ApplicationsDataTable } from "../components/data-table/applications-data-table";
-import { createColumns } from "../components/data-table/columns";
 import ImportModal from "../../import-export/components/ImportModal";
 import useImportApplications from "../hooks/useImportApplications";
 
@@ -34,9 +30,6 @@ export type IApplication = {
   updated_at: string;
 };
 
-function toCamelCase(str: string) {
-  return str.charAt(0).toUpperCase() + str.slice(1);
-}
 
 function ApplicationsPage() {
   const [isModalCreateOpen, setIsModalCreateOpen] = useState(false);
@@ -54,7 +47,6 @@ function ApplicationsPage() {
   const { applications, refetch: refetchApps, appsCount } = useApplications(active);
   const deleteApp = useDeleteApp();
   const importApps = useImportApplications();
-  const [viewMode, setViewMode] = useState<"grid" | "table">("grid");
 
   const getStatusCount = (status: "all" | "pending" | "sent" | "rejected") => {
     if (!appsCount) return 0;
@@ -244,6 +236,7 @@ function ApplicationsPage() {
       <ApplicationCreateModal
         handleClose={() => setIsModalCreateOpen(false)}
         isModalOpen={isModalCreateOpen}
+        onSuccess={() => refetchApps()}
       />
 
       {/*Edit application modal*/}

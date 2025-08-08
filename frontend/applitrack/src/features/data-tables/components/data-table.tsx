@@ -318,7 +318,7 @@ export function DataTable() {
     setIsModalRemoveOpen,
     setIsModalEditOpen,
   });
-  const { applications, appsCount } = useApplications(status);
+  const { applications, appsCount, refetch: refetchApps } = useApplications(status);
   const deleteApp = useDeleteApp();
   const updateApp = useUpdateApp();
   const importMutation = useImportApplications();
@@ -400,6 +400,7 @@ export function DataTable() {
         <ApplicationCreateModal
           handleClose={() => setIsModalCreateOpen(false)}
           isModalOpen={isModalCreateOpen}
+          onSuccess={() => refetchApps()}
         />
         <Button variant={"ghost"} className="
         text-sm

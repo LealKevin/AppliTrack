@@ -14,14 +14,8 @@ function StatusButton({
 	return (
 		<Button
 			onClick={onClick}
-			className="flex-1 rounded-[15px] border-none transition-all duration-300 hover:translate-y-[-1px]"
-			style={{
-				background: 'var(--app-card-bg)',
-				boxShadow: isActive 
-					? 'var(--app-status-active-shadow)' 
-					: 'var(--app-status-inactive-shadow)',
-				color: 'var(--foreground)'
-			}}
+			variant={isActive ? "default" : "outline"}
+			className="flex-1"
 		>
 			{children}
 		</Button>

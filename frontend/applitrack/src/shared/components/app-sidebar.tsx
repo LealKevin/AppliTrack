@@ -20,7 +20,7 @@ import {
 } from "@/shared/components/ui/sidebar";
 import { useAuth } from "@/features/authentication/contexts/AuthContext";
 import { BriefcaseBusiness } from "lucide-react";
-// import { ModeToggle } from "@/components/modeToggle";
+import { ModeToggle } from "@/shared/components/modeToggle";
 
 const data = {
   navMain: [
@@ -103,7 +103,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   };
 
   return (
-    <Sidebar className="bg-red rounded-xl border boxShadow-neumorphic flex " collapsible="icon" {...props}>
+    <Sidebar className="border-r" collapsible="icon" {...props}>
       <SidebarHeader>
         <div className="flex items-center justify-center py-4">
           {/* Expanded state - centered icon and text */}
@@ -124,7 +124,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter className="py-4">
-        {/* <ModeToggle /> */}
+        <ModeToggle />
         <NavUser user={user} />
       </SidebarFooter>
     </Sidebar>
