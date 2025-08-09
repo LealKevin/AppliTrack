@@ -23,6 +23,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+
 func matchCreateOneParams(title, company string) interface{} {
 	return mock.MatchedBy(func(params db.CreateOneApplicationParams) bool {
 		return params.TitleApplication == title && params.Company == company
@@ -44,6 +45,7 @@ func createMockApplication(title, company string) db.Application {
 		UpdatedAt:        pgtype.Timestamptz{Time: time.Now(), Valid: true},
 	}
 }
+
 
 func TestCreateApplication(t *testing.T) {
 	mockStore := new(MockStore)
