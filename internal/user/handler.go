@@ -38,7 +38,6 @@ func (h *Handler) RegisterProtectedRoutes(e *echo.Group) {
 }
 
 type registerRequest struct {
-	Name           string `json:"name"`
 	Email          string `json:"email"`
 	Password       string `json:"password"`
 	PasswordRepeat string `json:"passwordRepeat"`
@@ -69,7 +68,6 @@ func (h *Handler) Register(c echo.Context) error {
 	}
 
 	serviceReq := RegisterRequest{
-		Name:           req.Name,
 		Email:          req.Email,
 		Password:       req.Password,
 		PasswordRepeat: req.PasswordRepeat,
@@ -184,7 +182,6 @@ func (h *Handler) GetCSRFToken(c echo.Context) error {
 func mapToUserResponse(user User) userResponse {
 	return userResponse{
 		ID:        user.ID,
-		Name:      user.Name,
 		Email:     user.Email,
 		CreatedAt: user.CreatedAt,
 		UpdatedAt: user.UpdatedAt,

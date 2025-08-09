@@ -8,7 +8,6 @@ import (
 )
 
 type RegisterRequest struct {
-	Name           string
 	Email          string
 	Password       string
 	PasswordRepeat string
@@ -49,7 +48,6 @@ func (s *UserService) Register(req RegisterRequest) (AuthResponse, error) {
 	}
 
 	params := CreateUserParams{
-		Name:     req.Name,
 		Email:    req.Email,
 		Password: hashedPassword,
 	}

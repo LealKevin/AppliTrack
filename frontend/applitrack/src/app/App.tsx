@@ -8,6 +8,7 @@ import { Temp } from "../features/applications/pages/Temp";
 import LoginPage from "../features/authentication/pages/LoginPage";
 import { ProtectedRoute } from "../features/authentication/pages/ProtectedRoutes";
 import { CheckUser } from "../features/authentication/pages/CheckUser";
+import RoundsPage from "../features/applications/pages/RoundsPage";
 
 function App() {
 	return (
@@ -24,6 +25,7 @@ function App() {
 							<Route path="/" element={<HomePage />} />
 							<Route path="/applications" element={<Temp />} />
 							<Route path="/stats" element={<StatsPage />} />
+							<Route path="/rounds" element={<RoundsPage />} />
 						</Route>
 					</Route>
 				</Routes>
