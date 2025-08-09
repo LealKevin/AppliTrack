@@ -23,6 +23,30 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+
+func matchCreateOneParams(title, company string) interface{} {
+	return mock.MatchedBy(func(params db.CreateOneApplicationParams) bool {
+		return params.TitleApplication == title && params.Company == company
+	})
+}
+
+func createMockApplication(title, company string) db.Application {
+	return db.Application{
+		ID:               uuid.New(),
+		TitleApplication: title,
+		Company:          company,
+		SentDate:         time.Date(2024, 1, 15, 0, 0, 0, 0, time.UTC),
+		Location:         "Test Location",
+		Status:           "sent",
+		Notes:            "Test notes",
+		UrlApplication:   "https://example.com",
+		UserID:           uuid.New(),
+		CreatedAt:        pgtype.Timestamptz{Time: time.Now(), Valid: true},
+		UpdatedAt:        pgtype.Timestamptz{Time: time.Now(), Valid: true},
+	}
+}
+
+
 func TestCreateApplication(t *testing.T) {
 	mockStore := new(MockStore)
 	service := NewService(mockStore)
@@ -375,26 +399,4 @@ func createMultipartRequest(csvContent string) (*http.Request, error) {
 	req.Header.Set("Content-Type", writer.FormDataContentType())
 
 	return req, nil
-}
-
-func matchCreateOneParams(title, company string) interface{} {
-	return mock.MatchedBy(func(params db.CreateOneApplicationParams) bool {
-		return params.TitleApplication == title && params.Company == company
-	})
-}
-
-func createMockApplication(title, company string) db.Application {
-	return db.Application{
-		ID:               uuid.New(),
-		TitleApplication: title,
-		Company:          company,
-		SentDate:         time.Date(2024, 1, 15, 0, 0, 0, 0, time.UTC),
-		Location:         "Test Location",
-		Status:           "sent",
-		Notes:            "Test notes",
-		UrlApplication:   "https://example.com",
-		UserID:           uuid.New(),
-		CreatedAt:        pgtype.Timestamptz{Time: time.Now(), Valid: true},
-		UpdatedAt:        pgtype.Timestamptz{Time: time.Now(), Valid: true},
-	}
 }
