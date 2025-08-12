@@ -59,21 +59,19 @@ func (q *Queries) CreateOneApplication(ctx context.Context, arg CreateOneApplica
 }
 
 const createUser = `-- name: CreateUser :one
-INSERT INTO users ( name, email, password ) VALUES ($1, $2, $3) RETURNING id, name, email, password, created_at, updated_at
+INSERT INTO users ( email, password ) VALUES ($1, $2) RETURNING id, email, password, created_at, updated_at
 `
 
 type CreateUserParams struct {
-	Name     string
 	Email    string
 	Password string
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
-	row := q.db.QueryRow(ctx, createUser, arg.Name, arg.Email, arg.Password)
+	row := q.db.QueryRow(ctx, createUser, arg.Email, arg.Password)
 	var i User
 	err := row.Scan(
 		&i.ID,
-		&i.Name,
 		&i.Email,
 		&i.Password,
 		&i.CreatedAt,
@@ -133,7 +131,7 @@ func (q *Queries) GetAllApplications(ctx context.Context, userID uuid.UUID) ([]A
 }
 
 const getAllUsers = `-- name: GetAllUsers :many
-SELECT id, name, email, password, created_at, updated_at FROM users
+SELECT id, email, password, created_at, updated_at FROM users
 `
 
 func (q *Queries) GetAllUsers(ctx context.Context) ([]User, error) {
@@ -147,7 +145,6 @@ func (q *Queries) GetAllUsers(ctx context.Context) ([]User, error) {
 		var i User
 		if err := rows.Scan(
 			&i.ID,
-			&i.Name,
 			&i.Email,
 			&i.Password,
 			&i.CreatedAt,
@@ -398,7 +395,7 @@ func (q *Queries) GetOneApplicationByID(ctx context.Context, arg GetOneApplicati
 }
 
 const getOneUserByEmail = `-- name: GetOneUserByEmail :one
-SELECT id, name, email, password, created_at, updated_at FROM users WHERE email = $1
+SELECT id, email, password, created_at, updated_at FROM users WHERE email = $1
 `
 
 func (q *Queries) GetOneUserByEmail(ctx context.Context, email string) (User, error) {
@@ -406,7 +403,6 @@ func (q *Queries) GetOneUserByEmail(ctx context.Context, email string) (User, er
 	var i User
 	err := row.Scan(
 		&i.ID,
-		&i.Name,
 		&i.Email,
 		&i.Password,
 		&i.CreatedAt,
@@ -416,7 +412,7 @@ func (q *Queries) GetOneUserByEmail(ctx context.Context, email string) (User, er
 }
 
 const getOneUserByID = `-- name: GetOneUserByID :one
-SELECT id, name, email, password, created_at, updated_at FROM users WHERE id = $1
+SELECT id, email, password, created_at, updated_at FROM users WHERE id = $1
 `
 
 func (q *Queries) GetOneUserByID(ctx context.Context, id uuid.UUID) (User, error) {
@@ -424,7 +420,6 @@ func (q *Queries) GetOneUserByID(ctx context.Context, id uuid.UUID) (User, error
 	var i User
 	err := row.Scan(
 		&i.ID,
-		&i.Name,
 		&i.Email,
 		&i.Password,
 		&i.CreatedAt,

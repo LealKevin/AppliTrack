@@ -36,7 +36,6 @@ type Reminder struct {
 
 type User struct {
 	ID        uuid.UUID
-	Name      string
 	Email     string
 	Password  string
 	CreatedAt pgtype.Timestamptz

@@ -2,16 +2,12 @@ package user
 
 import (
 	"errors"
+	"fmt"
 
 	hash "ApplyTrack/internal/utils"
+
 	"github.com/google/uuid"
 )
-
-type RegisterRequest struct {
-	Email          string
-	Password       string
-	PasswordRepeat string
-}
 
 type LoginRequest struct {
 	Email    string
@@ -54,7 +50,7 @@ func (s *UserService) Register(req RegisterRequest) (AuthResponse, error) {
 
 	user, err := s.Store.CreateOne(params)
 	if err != nil {
-		return AuthResponse{}, errors.New("failed to create user")
+		return AuthResponse{}, fmt.Errorf("failed to create user: %w", err)
 	}
 
 	token, err := hash.CreateToken(user.ID.String())
