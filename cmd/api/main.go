@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"net/http"
 	"os"
 	"os/signal"
 
@@ -11,20 +12,21 @@ import (
 	"ApplyTrack/internal/user"
 	"ApplyTrack/internal/utils"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
 
 func main() {
 	fmt.Println("Starting server...")
-	
+
 	db.InitDB()
 	defer db.CloseDB()
 
 	queries := dbQueries.New(db.Conn)
 
 	appStore := application.NewApplicationStorage(queries)
-	appService := application.NewService()
+	appService := application.NewService(appStore)
 	appHandler := application.NewHandler(appService, appStore)
 
 	userStore := user.NewUserStorage(queries)
@@ -34,13 +36,27 @@ func main() {
 	e := echo.New()
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
+	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins:     []string{"http://localhost:5173"},
+		AllowMethods:     []string{echo.GET, echo.POST, echo.PUT, echo.DELETE, echo.PATCH, echo.OPTIONS},
+		AllowHeaders:     []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept, echo.HeaderAuthorization},
+		AllowCredentials: true,
+	}))
+	e.Use(middleware.CSRFWithConfig(middleware.CSRFConfig{
+		TokenLookup:    "header:X-CSRF-Token",
+		CookiePath:     "/",
+		CookieHTTPOnly: true,
+		CookieSameSite: http.SameSiteStrictMode,
+	}))
+	e.Validator = &utils.CustomValidator{Validator: validator.New()}
 
 	api := e.Group("/api")
-	
+
 	userHandler.RegisterRoutes(api)
-	
+
 	protected := api.Group("")
 	protected.Use(utils.EchoAuthMiddleware())
+
 	appHandler.RegisterRoutes(protected)
 	userHandler.RegisterProtectedRoutes(protected)
 

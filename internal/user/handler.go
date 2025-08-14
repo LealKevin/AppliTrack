@@ -1,7 +1,9 @@
 package user
 
 import (
+	"fmt"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/google/uuid"
@@ -18,10 +20,16 @@ func NewHandler(service *UserService) *Handler {
 	}
 }
 
+func isDevelopment() bool {
+	env := os.Getenv("GO_ENV")
+	return env == "" || env == "development"
+}
+
 func (h *Handler) RegisterRoutes(e *echo.Group) {
 	e.POST("/register", h.Register)
 	e.POST("/login", h.Login)
 	e.POST("/logout", h.Logout)
+	e.GET("/csrf", h.GetCSRFToken)
 }
 
 func (h *Handler) RegisterProtectedRoutes(e *echo.Group) {
@@ -29,8 +37,7 @@ func (h *Handler) RegisterProtectedRoutes(e *echo.Group) {
 	e.GET("/user/current", h.GetCurrentUser)
 }
 
-type registerRequest struct {
-	Name           string `json:"name"`
+type RegisterRequest struct {
 	Email          string `json:"email"`
 	Password       string `json:"password"`
 	PasswordRepeat string `json:"passwordRepeat"`
@@ -55,13 +62,12 @@ type authResponse struct {
 }
 
 func (h *Handler) Register(c echo.Context) error {
-	var req registerRequest
+	var req RegisterRequest
 	if err := c.Bind(&req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "invalid request body")
 	}
 
 	serviceReq := RegisterRequest{
-		Name:           req.Name,
 		Email:          req.Email,
 		Password:       req.Password,
 		PasswordRepeat: req.PasswordRepeat,
@@ -77,7 +83,7 @@ func (h *Handler) Register(c echo.Context) error {
 		Value:    authResp.Token,
 		Path:     "/",
 		HttpOnly: true,
-		Secure:   true,
+		Secure:   !isDevelopment(),
 		SameSite: http.SameSiteLaxMode,
 		MaxAge:   60 * 60 * 24,
 	})
@@ -109,7 +115,7 @@ func (h *Handler) Login(c echo.Context) error {
 		Value:    authResp.Token,
 		Path:     "/",
 		HttpOnly: true,
-		Secure:   true,
+		Secure:   !isDevelopment(),
 		SameSite: http.SameSiteLaxMode,
 		MaxAge:   60 * 60 * 24,
 	})
@@ -126,7 +132,7 @@ func (h *Handler) Logout(c echo.Context) error {
 		Value:    "",
 		Path:     "/",
 		HttpOnly: true,
-		Secure:   true,
+		Secure:   !isDevelopment(),
 		SameSite: http.SameSiteLaxMode,
 		Expires:  time.Unix(0, 0),
 		MaxAge:   -1,
@@ -165,10 +171,17 @@ func (h *Handler) GetCurrentUser(c echo.Context) error {
 	return c.JSON(http.StatusOK, mapToUserResponse(user))
 }
 
+func (h *Handler) GetCSRFToken(c echo.Context) error {
+	fmt.Println("Generating CSRF token")
+	fmt.Println("CSRF token:", c.Get("csrf"))
+	return c.JSON(http.StatusOK, map[string]string{
+		"token": c.Get("csrf").(string),
+	})
+}
+
 func mapToUserResponse(user User) userResponse {
 	return userResponse{
 		ID:        user.ID,
-		Name:      user.Name,
 		Email:     user.Email,
 		CreatedAt: user.CreatedAt,
 		UpdatedAt: user.UpdatedAt,

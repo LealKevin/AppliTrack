@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"fmt"
+	"log"
 	"os"
 	"time"
 
@@ -13,24 +14,20 @@ import (
 var Conn *pgxpool.Pool
 
 func InitDB() {
-
 	var err error
-	if err := godotenv.Load(".env"); err != nil {
-		fmt.Print("Unable to find .env")
-		return
+	if err := godotenv.Load("./../../.env"); err != nil {
+		log.Fatal("Unable to find .env")
 	}
 
 	dsn := os.Getenv("DATABASE_URL")
 
 	if dsn == "" {
-		fmt.Print("Unable to find dsn")
-		return
+		log.Fatal("Unable to find dsn")
 	}
 
 	config, err := pgxpool.ParseConfig(dsn)
 	if err != nil {
-		fmt.Printf("Unable to parse DATABASE_URL")
-		return
+		log.Fatal("Unable to parse DATABASE_URL")
 	}
 
 	config.MaxConns = 10
@@ -40,12 +37,11 @@ func InitDB() {
 
 	Conn, err = pgxpool.NewWithConfig(context.Background(), config)
 	if err != nil {
-		fmt.Printf("Unable to connect to DB, error: %v", err)
-		return
+		log.Fatalf("Unable to connect to DB, error: %v", err)
 	}
 
 	if err = Conn.Ping(context.Background()); err != nil {
-		fmt.Printf("Unable to Ping, error: %v", err)
+		log.Fatalf("Unable to Ping, error: %v", err)
 	}
 
 	fmt.Println("Sucessfull connection to database")
@@ -56,5 +52,4 @@ func CloseDB() {
 		Conn.Close()
 		fmt.Println("Closed connection to database")
 	}
-
 }
