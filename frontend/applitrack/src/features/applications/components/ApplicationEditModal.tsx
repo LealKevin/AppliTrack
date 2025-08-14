@@ -34,7 +34,7 @@ function ApplicationEditModal({
 	handleClose,
 }: ApplicationEditModalProps) {
 	const [status, setStatus] = useState<
-		"pending" | "sent" | "rejected" | undefined
+		"pending" | "sent" | "interview_scheduled" | "interviewing" | "rejected" | "offer" | undefined
 	>(application?.status);
 	const [date, setDate] = useState<Date>(application?.sent_date ? new Date(application.sent_date) : new Date());
 	const [error, setError] = useState<string | null>(null);
@@ -149,7 +149,7 @@ function ApplicationEditModal({
 								/>
 							</PopoverContent>
 						</Popover>
-						<div className="flex space-x-2  justify-center">
+						<div className="grid grid-cols-2 gap-2">
 							<Button
 								type="button"
 								className={`rounded-xl ${status === "pending" ? "status-pending" : ""}`}
@@ -168,11 +168,35 @@ function ApplicationEditModal({
 							</Button>
 							<Button
 								type="button"
+								className={`rounded-xl ${status === "interview_scheduled" ? "status-interview" : ""}`}
+								variant={status === "interview_scheduled" ? "default" : "secondary"}
+								onClick={() => setStatus("interview_scheduled")}
+							>
+								Interview Scheduled
+							</Button>
+							<Button
+								type="button"
+								className={`rounded-xl ${status === "interviewing" ? "status-interviewing" : ""}`}
+								variant={status === "interviewing" ? "default" : "secondary"}
+								onClick={() => setStatus("interviewing")}
+							>
+								Interviewing
+							</Button>
+							<Button
+								type="button"
 								className={`rounded-xl ${status === "rejected" ? "status-rejected" : ""}`}
 								variant={status === "rejected" ? "default" : "secondary"}
 								onClick={() => setStatus("rejected")}
 							>
 								Rejected
+							</Button>
+							<Button
+								type="button"
+								className={`rounded-xl ${status === "offer" ? "status-offer" : ""}`}
+								variant={status === "offer" ? "default" : "secondary"}
+								onClick={() => setStatus("offer")}
+							>
+								Offer
 							</Button>
 							<input type="hidden" name="Status" value={status} />
 						</div>

@@ -1,5 +1,5 @@
 import type { UserInput } from "@/features/authentication/hooks/useConnection";
-import type { IApplication } from "@/features/applications/pages/ApplicationsPage";
+import type { IApplication, ApplicationCounts, Round, CreateRoundRequest, UpdateRoundRequest, InterviewApplication } from "@/shared/types/api";
 import axios from "axios";
 
 let csrfToken: string | null = null;
@@ -48,11 +48,11 @@ type IUser = {
 
 export async function fetchApplications(
   status: string,
-): Promise<IApplication[]> {
-  const response = await apiClient.get<{ applications: IApplication[] }>(
+): Promise<InterviewApplication[]> {
+  const response = await apiClient.get<InterviewApplication[]>(
     `/api/applications?status=${status ?? ""}`
   );
-  return response.data.applications;
+  return response.data;
 }
 
 export async function deleteApplication(id: string): Promise<IApplication[]> {
@@ -163,14 +163,8 @@ export async function getUser(): Promise<UserType> {
   return response.data;
 }
 
-export type AppsCount = {
-  all_count: number;
-  sent_count: number;
-  pending_count: number;
-  rejected_count: number;
-};
-export async function getAppsCount(): Promise<AppsCount> {
-  const response = await apiClient.get<AppsCount>("/api/applications/count");
+export async function getAppsCount(): Promise<ApplicationCounts> {
+  const response = await apiClient.get<ApplicationCounts>("/api/applications/count");
   return response.data;
 }
 
@@ -191,5 +185,30 @@ export async function importApplicationsFromCSV(file: File): Promise<ImportResul
     },
   });
 
+  return response.data;
+}
+
+// Rounds API functions
+export async function fetchRounds(applicationId: string): Promise<Round[]> {
+  const response = await apiClient.get<{ Application: any; Rounds: Round[] | null }>(`/api/applications/${applicationId}/rounds`);
+  return response.data.Rounds || [];
+}
+
+export async function createRound(applicationId: string, roundData: CreateRoundRequest): Promise<Round> {
+  const response = await apiClient.post<Round>(`/api/application/${applicationId}/rounds`, roundData);
+  return response.data;
+}
+
+export async function updateRound(roundId: string, roundData: UpdateRoundRequest): Promise<Round> {
+  const response = await apiClient.put<Round>(`/api/rounds/${roundId}`, roundData);
+  return response.data;
+}
+
+export async function deleteRound(roundId: string): Promise<void> {
+  await apiClient.delete(`/api/rounds/${roundId}`);
+}
+
+export async function fetchInterviewApplications(): Promise<InterviewApplication[]> {
+  const response = await apiClient.get<InterviewApplication[]>("/api/interviews");
   return response.data;
 }

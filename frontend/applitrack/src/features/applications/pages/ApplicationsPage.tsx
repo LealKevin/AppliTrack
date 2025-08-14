@@ -17,18 +17,8 @@ import useApplications from "../hooks/useApplications";
 import ImportModal from "../../import-export/components/ImportModal";
 import useImportApplications from "../hooks/useImportApplications";
 
-export type IApplication = {
-  company: string;
-  location: string;
-  created_at: string;
-  id: string;
-  notes?: string | null;
-  url_application: string;
-  sent_date: string;
-  status: "pending" | "sent" | "rejected";
-  title_application: string;
-  updated_at: string;
-};
+// Import from centralized types
+export type { IApplication, ApplicationStatus } from "@/shared/types/api";
 
 
 function ApplicationsPage() {

@@ -37,7 +37,7 @@ func (h *Handler) RegisterProtectedRoutes(e *echo.Group) {
 	e.GET("/user/current", h.GetCurrentUser)
 }
 
-type registerRequest struct {
+type RegisterRequest struct {
 	Email          string `json:"email"`
 	Password       string `json:"password"`
 	PasswordRepeat string `json:"passwordRepeat"`
@@ -62,7 +62,7 @@ type authResponse struct {
 }
 
 func (h *Handler) Register(c echo.Context) error {
-	var req registerRequest
+	var req RegisterRequest
 	if err := c.Bind(&req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "invalid request body")
 	}

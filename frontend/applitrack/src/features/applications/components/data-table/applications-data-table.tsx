@@ -41,6 +41,7 @@ interface DataTableProps<TData, TValue> {
   onDeleteSelected?: (ids: string[]) => void
   isDeleting?: boolean
   onImportCSV?: () => void
+  onRowDoubleClick?: (data: TData) => void
 }
 
 export function ApplicationsDataTable<TData, TValue>({
@@ -51,6 +52,7 @@ export function ApplicationsDataTable<TData, TValue>({
   onDeleteSelected,
   isDeleting = false,
   onImportCSV,
+  onRowDoubleClick,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
@@ -211,6 +213,8 @@ export function ApplicationsDataTable<TData, TValue>({
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
+                  onDoubleClick={() => onRowDoubleClick?.(row.original)}
+                  className={onRowDoubleClick ? "cursor-pointer" : ""}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>

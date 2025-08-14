@@ -7,12 +7,9 @@ export default function useDeleteApp() {
   const mutation = useMutation({
     mutationFn: (id: string) => deleteApplication(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["applications"],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["appsCount"],
-      });
+      queryClient.invalidateQueries({ queryKey: ["applications"], });
+      queryClient.invalidateQueries({ queryKey: ["interviewApplications"] });
+      queryClient.invalidateQueries({ queryKey: ["appsCount"], });
     },
     onError: (error) => {
       console.error("Failed to delete application:", error);

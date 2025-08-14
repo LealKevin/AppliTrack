@@ -17,28 +17,42 @@ type Application struct {
 	Company          string
 	Location         string
 	SentDate         time.Time
-	Status           string
-	Notes            string
-	UrlApplication   string
+	Status           pgtype.Text
+	Notes            pgtype.Text
+	UrlApplication   pgtype.Text
 	UserID           uuid.UUID
-	CreatedAt        pgtype.Timestamptz
-	UpdatedAt        pgtype.Timestamptz
+	CreatedAt        time.Time
+	UpdatedAt        time.Time
 }
 
 type Reminder struct {
 	ID            uuid.UUID
 	ReminderDate  time.Time
-	Status        string
+	Status        pgtype.Text
 	ApplicationID uuid.UUID
-	CreatedAt     pgtype.Timestamptz
-	UpdatedAt     pgtype.Timestamptz
+	CreatedAt     time.Time
+	UpdatedAt     time.Time
+}
+
+type Round struct {
+	ID            uuid.UUID
+	ApplicationID uuid.UUID
+	Title         string
+	Type          string
+	Status        string
+	Date          time.Time
+	Notes         pgtype.Text
+	Interviewer   pgtype.Text
+	Duration      pgtype.Text
+	Outcome       pgtype.Text
+	CreatedAt     time.Time
+	UpdatedAt     time.Time
 }
 
 type User struct {
 	ID        uuid.UUID
-	Name      string
 	Email     string
 	Password  string
-	CreatedAt pgtype.Timestamptz
-	UpdatedAt pgtype.Timestamptz
+	CreatedAt time.Time
+	UpdatedAt time.Time
 }

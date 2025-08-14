@@ -96,7 +96,7 @@ func mapFromDBUser(dbUser db.User) User {
 		ID:        dbUser.ID,
 		Email:     dbUser.Email,
 		Password:  dbUser.Password,
-		CreatedAt: dbUser.CreatedAt.Time,
-		UpdatedAt: dbUser.UpdatedAt.Time,
+		CreatedAt: dbUser.CreatedAt,
+		UpdatedAt: dbUser.UpdatedAt,
 	}
 }

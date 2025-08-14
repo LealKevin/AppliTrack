@@ -16,13 +16,11 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )
-
 
 func matchCreateOneParams(title, company string) interface{} {
 	return mock.MatchedBy(func(params db.CreateOneApplicationParams) bool {
@@ -41,11 +39,10 @@ func createMockApplication(title, company string) db.Application {
 		Notes:            "Test notes",
 		UrlApplication:   "https://example.com",
 		UserID:           uuid.New(),
-		CreatedAt:        pgtype.Timestamptz{Time: time.Now(), Valid: true},
-		UpdatedAt:        pgtype.Timestamptz{Time: time.Now(), Valid: true},
+		CreatedAt:        time.Now(),
+		UpdatedAt:        time.Now(),
 	}
 }
-
 
 func TestCreateApplication(t *testing.T) {
 	mockStore := new(MockStore)

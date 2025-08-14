@@ -15,7 +15,7 @@ export const schema = z.object({
 	title_application: z.string(),
 	company: z.string(),
 	location: z.string().optional(),
-	status: z.enum(["pending", "sent", "rejected"]),
+	status: z.enum(["pending", "sent", "interview_scheduled", "interviewing", "rejected", "offer"]),
 	url_application: z.string(),
 	sent_date: z.string(),
 	created_at: z.string(),

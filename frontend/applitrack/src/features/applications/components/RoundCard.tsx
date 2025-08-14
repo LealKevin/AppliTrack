@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Calendar, Clock, User, MessageSquare, Edit, Trash2, CheckCircle, AlertCircle, Clock as ClockIcon, XCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardAction } from "@/shared/components/ui/card";
 import { Badge } from "@/shared/components/ui/badge";
@@ -6,12 +6,11 @@ import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/components/ui/select";
 import { Label } from "@/shared/components/ui/label";
-import type { Round } from "../pages/RoundsPage";
+import type { Round } from "@/shared/types/api";
+import { useUpdateRound, useDeleteRound } from "../hooks/useRounds";
 
 interface RoundCardProps {
   round: Round;
-  onDelete: (id: string) => void;
-  onUpdate: (id: string, updatedRound: Partial<Round>) => void;
 }
 
 const roundTypeLabels = {
@@ -45,13 +44,30 @@ const statusConfig = {
   }
 };
 
-export default function RoundCard({ round, onDelete, onUpdate }: RoundCardProps) {
+export default function RoundCard({ round }: RoundCardProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editedRound, setEditedRound] = useState(round);
 
+  const updateRoundMutation = useUpdateRound();
+  const deleteRoundMutation = useDeleteRound();
+
+  // Sync editedRound state when round prop changes
+  useEffect(() => {
+    setEditedRound(round);
+  }, [round]);
+
   const handleSave = () => {
-    onUpdate(round.id, editedRound);
-    setIsEditing(false);
+    updateRoundMutation.mutate(
+      { roundId: round.id, roundData: editedRound },
+      {
+        onSuccess: () => {
+          setIsEditing(false);
+        },
+        onError: (error) => {
+          console.error("Failed to update round:", error);
+        }
+      }
+    );
   };
 
   const handleCancel = () => {
@@ -179,7 +195,13 @@ export default function RoundCard({ round, onDelete, onUpdate }: RoundCardProps)
           </div>
           
           <div className="flex gap-2 pt-4">
-            <Button onClick={handleSave} size="sm">Save</Button>
+            <Button 
+              onClick={handleSave} 
+              size="sm" 
+              disabled={updateRoundMutation.isPending}
+            >
+              {updateRoundMutation.isPending ? "Saving..." : "Save"}
+            </Button>
             <Button onClick={handleCancel} variant="outline" size="sm">Cancel</Button>
           </div>
         </CardHeader>
@@ -220,8 +242,9 @@ export default function RoundCard({ round, onDelete, onUpdate }: RoundCardProps)
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => onDelete(round.id)}
+                onClick={() => deleteRoundMutation.mutate(round.id)}
                 className="h-8 w-8 text-red-500 hover:text-red-700"
+                disabled={deleteRoundMutation.isPending}
               >
                 <Trash2 className="h-4 w-4" />
               </Button>

@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createOneApplication = `-- name: CreateOneApplication :one
@@ -24,9 +25,9 @@ type CreateOneApplicationParams struct {
 	Company          string
 	Location         string
 	SentDate         time.Time
-	Status           string
-	Notes            string
-	UrlApplication   string
+	Status           pgtype.Text
+	Notes            pgtype.Text
+	UrlApplication   pgtype.Text
 	UserID           uuid.UUID
 }
 
@@ -58,22 +59,68 @@ func (q *Queries) CreateOneApplication(ctx context.Context, arg CreateOneApplica
 	return i, err
 }
 
+const createRound = `-- name: CreateRound :one
+INSERT INTO rounds (application_id, title, type, status, date, notes, interviewer, duration, outcome) 
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+RETURNING id, application_id, title, type, status, date, notes, interviewer, duration, outcome, created_at, updated_at
+`
+
+type CreateRoundParams struct {
+	ApplicationID uuid.UUID
+	Title         string
+	Type          string
+	Status        string
+	Date          time.Time
+	Notes         pgtype.Text
+	Interviewer   pgtype.Text
+	Duration      pgtype.Text
+	Outcome       pgtype.Text
+}
+
+func (q *Queries) CreateRound(ctx context.Context, arg CreateRoundParams) (Round, error) {
+	row := q.db.QueryRow(ctx, createRound,
+		arg.ApplicationID,
+		arg.Title,
+		arg.Type,
+		arg.Status,
+		arg.Date,
+		arg.Notes,
+		arg.Interviewer,
+		arg.Duration,
+		arg.Outcome,
+	)
+	var i Round
+	err := row.Scan(
+		&i.ID,
+		&i.ApplicationID,
+		&i.Title,
+		&i.Type,
+		&i.Status,
+		&i.Date,
+		&i.Notes,
+		&i.Interviewer,
+		&i.Duration,
+		&i.Outcome,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const createUser = `-- name: CreateUser :one
-INSERT INTO users ( name, email, password ) VALUES ($1, $2, $3) RETURNING id, name, email, password, created_at, updated_at
+INSERT INTO users ( email, password ) VALUES ($1, $2) RETURNING id, email, password, created_at, updated_at
 `
 
 type CreateUserParams struct {
-	Name     string
 	Email    string
 	Password string
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
-	row := q.db.QueryRow(ctx, createUser, arg.Name, arg.Email, arg.Password)
+	row := q.db.QueryRow(ctx, createUser, arg.Email, arg.Password)
 	var i User
 	err := row.Scan(
 		&i.ID,
-		&i.Name,
 		&i.Email,
 		&i.Password,
 		&i.CreatedAt,
@@ -93,6 +140,15 @@ type DeleteOneApplicationByIDParams struct {
 
 func (q *Queries) DeleteOneApplicationByID(ctx context.Context, arg DeleteOneApplicationByIDParams) error {
 	_, err := q.db.Exec(ctx, deleteOneApplicationByID, arg.ID, arg.UserID)
+	return err
+}
+
+const deleteRound = `-- name: DeleteRound :exec
+DELETE FROM rounds WHERE id = $1
+`
+
+func (q *Queries) DeleteRound(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.Exec(ctx, deleteRound, id)
 	return err
 }
 
@@ -133,7 +189,7 @@ func (q *Queries) GetAllApplications(ctx context.Context, userID uuid.UUID) ([]A
 }
 
 const getAllUsers = `-- name: GetAllUsers :many
-SELECT id, name, email, password, created_at, updated_at FROM users
+SELECT id, email, password, created_at, updated_at FROM users
 `
 
 func (q *Queries) GetAllUsers(ctx context.Context) ([]User, error) {
@@ -147,7 +203,6 @@ func (q *Queries) GetAllUsers(ctx context.Context) ([]User, error) {
 		var i User
 		if err := rows.Scan(
 			&i.ID,
-			&i.Name,
 			&i.Email,
 			&i.Password,
 			&i.CreatedAt,
@@ -277,16 +332,22 @@ SELECT
     COUNT(*) as total_count,
     COUNT(*) FILTER (WHERE status = 'sent') as sent_count,
     COUNT(*) FILTER (WHERE status = 'pending') as pending_count,
-    COUNT(*) FILTER (WHERE status = 'rejected') as rejected_count
+    COUNT(*) FILTER (WHERE status = 'rejected') as rejected_count,
+    COUNT(*) FILTER (WHERE status = 'interview_scheduled') as interview_scheduled,
+    COUNT(*) FILTER (WHERE status = 'interviewing') as interviewing,
+    COUNT(*) FILTER (WHERE status = 'offer') as offer_count
 FROM applications 
 WHERE user_id = $1
 `
 
 type GetApplicationCountsByUserRow struct {
-	TotalCount    int64
-	SentCount     int64
-	PendingCount  int64
-	RejectedCount int64
+	TotalCount         int64
+	SentCount          int64
+	PendingCount       int64
+	RejectedCount      int64
+	InterviewScheduled int64
+	Interviewing       int64
+	OfferCount         int64
 }
 
 func (q *Queries) GetApplicationCountsByUser(ctx context.Context, userID uuid.UUID) (GetApplicationCountsByUserRow, error) {
@@ -297,6 +358,9 @@ func (q *Queries) GetApplicationCountsByUser(ctx context.Context, userID uuid.UU
 		&i.SentCount,
 		&i.PendingCount,
 		&i.RejectedCount,
+		&i.InterviewScheduled,
+		&i.Interviewing,
+		&i.OfferCount,
 	)
 	return i, err
 }
@@ -306,7 +370,7 @@ SELECT id, title_application, company, location, sent_date, status, notes, url_a
 `
 
 type GetApplicationsByStatusParams struct {
-	Status string
+	Status pgtype.Text
 	UserID uuid.UUID
 }
 
@@ -359,7 +423,7 @@ SELECT COUNT(*) FROM applications WHERE user_id = $1 AND status = $2
 
 type GetApplicationsCountByStatusParams struct {
 	UserID uuid.UUID
-	Status string
+	Status pgtype.Text
 }
 
 func (q *Queries) GetApplicationsCountByStatus(ctx context.Context, arg GetApplicationsCountByStatusParams) (int64, error) {
@@ -367,6 +431,44 @@ func (q *Queries) GetApplicationsCountByStatus(ctx context.Context, arg GetAppli
 	var count int64
 	err := row.Scan(&count)
 	return count, err
+}
+
+const getInterviewsByUser = `-- name: GetInterviewsByUser :many
+SELECT id, title_application, company, location, sent_date, status, notes, url_application, user_id, created_at, updated_at FROM applications
+WHERE user_id = $1 AND status IN ('interview_scheduled', 'interviewing')
+ORDER BY company ASC
+`
+
+func (q *Queries) GetInterviewsByUser(ctx context.Context, userID uuid.UUID) ([]Application, error) {
+	rows, err := q.db.Query(ctx, getInterviewsByUser, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Application
+	for rows.Next() {
+		var i Application
+		if err := rows.Scan(
+			&i.ID,
+			&i.TitleApplication,
+			&i.Company,
+			&i.Location,
+			&i.SentDate,
+			&i.Status,
+			&i.Notes,
+			&i.UrlApplication,
+			&i.UserID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const getOneApplicationByID = `-- name: GetOneApplicationByID :one
@@ -398,7 +500,7 @@ func (q *Queries) GetOneApplicationByID(ctx context.Context, arg GetOneApplicati
 }
 
 const getOneUserByEmail = `-- name: GetOneUserByEmail :one
-SELECT id, name, email, password, created_at, updated_at FROM users WHERE email = $1
+SELECT id, email, password, created_at, updated_at FROM users WHERE email = $1
 `
 
 func (q *Queries) GetOneUserByEmail(ctx context.Context, email string) (User, error) {
@@ -406,7 +508,6 @@ func (q *Queries) GetOneUserByEmail(ctx context.Context, email string) (User, er
 	var i User
 	err := row.Scan(
 		&i.ID,
-		&i.Name,
 		&i.Email,
 		&i.Password,
 		&i.CreatedAt,
@@ -416,7 +517,7 @@ func (q *Queries) GetOneUserByEmail(ctx context.Context, email string) (User, er
 }
 
 const getOneUserByID = `-- name: GetOneUserByID :one
-SELECT id, name, email, password, created_at, updated_at FROM users WHERE id = $1
+SELECT id, email, password, created_at, updated_at FROM users WHERE id = $1
 `
 
 func (q *Queries) GetOneUserByID(ctx context.Context, id uuid.UUID) (User, error) {
@@ -424,13 +525,73 @@ func (q *Queries) GetOneUserByID(ctx context.Context, id uuid.UUID) (User, error
 	var i User
 	err := row.Scan(
 		&i.ID,
-		&i.Name,
 		&i.Email,
 		&i.Password,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
 	return i, err
+}
+
+const getRoundByID = `-- name: GetRoundByID :one
+SELECT id, application_id, title, type, status, date, notes, interviewer, duration, outcome, created_at, updated_at FROM rounds WHERE id = $1
+`
+
+func (q *Queries) GetRoundByID(ctx context.Context, id uuid.UUID) (Round, error) {
+	row := q.db.QueryRow(ctx, getRoundByID, id)
+	var i Round
+	err := row.Scan(
+		&i.ID,
+		&i.ApplicationID,
+		&i.Title,
+		&i.Type,
+		&i.Status,
+		&i.Date,
+		&i.Notes,
+		&i.Interviewer,
+		&i.Duration,
+		&i.Outcome,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const getRoundsByApplicationID = `-- name: GetRoundsByApplicationID :many
+SELECT id, application_id, title, type, status, date, notes, interviewer, duration, outcome, created_at, updated_at FROM rounds WHERE application_id = $1 ORDER BY date ASC, created_at ASC
+`
+
+func (q *Queries) GetRoundsByApplicationID(ctx context.Context, applicationID uuid.UUID) ([]Round, error) {
+	rows, err := q.db.Query(ctx, getRoundsByApplicationID, applicationID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Round
+	for rows.Next() {
+		var i Round
+		if err := rows.Scan(
+			&i.ID,
+			&i.ApplicationID,
+			&i.Title,
+			&i.Type,
+			&i.Status,
+			&i.Date,
+			&i.Notes,
+			&i.Interviewer,
+			&i.Duration,
+			&i.Outcome,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const getTopCompanyByUser = `-- name: GetTopCompanyByUser :one
@@ -458,9 +619,9 @@ type UpdateOneApplicationByIDParams struct {
 	Company          string
 	Location         string
 	SentDate         time.Time
-	Status           string
-	Notes            string
-	UrlApplication   string
+	Status           pgtype.Text
+	Notes            pgtype.Text
+	UrlApplication   pgtype.Text
 	ID               uuid.UUID
 	UserID           uuid.UUID
 }
@@ -488,6 +649,55 @@ func (q *Queries) UpdateOneApplicationByID(ctx context.Context, arg UpdateOneApp
 		&i.Notes,
 		&i.UrlApplication,
 		&i.UserID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const updateRound = `-- name: UpdateRound :one
+UPDATE rounds
+SET title = $1, type = $2, status = $3, date = $4, notes = $5, interviewer = $6, duration = $7, outcome = $8
+WHERE id = $9
+RETURNING id, application_id, title, type, status, date, notes, interviewer, duration, outcome, created_at, updated_at
+`
+
+type UpdateRoundParams struct {
+	Title       string
+	Type        string
+	Status      string
+	Date        time.Time
+	Notes       pgtype.Text
+	Interviewer pgtype.Text
+	Duration    pgtype.Text
+	Outcome     pgtype.Text
+	ID          uuid.UUID
+}
+
+func (q *Queries) UpdateRound(ctx context.Context, arg UpdateRoundParams) (Round, error) {
+	row := q.db.QueryRow(ctx, updateRound,
+		arg.Title,
+		arg.Type,
+		arg.Status,
+		arg.Date,
+		arg.Notes,
+		arg.Interviewer,
+		arg.Duration,
+		arg.Outcome,
+		arg.ID,
+	)
+	var i Round
+	err := row.Scan(
+		&i.ID,
+		&i.ApplicationID,
+		&i.Title,
+		&i.Type,
+		&i.Status,
+		&i.Date,
+		&i.Notes,
+		&i.Interviewer,
+		&i.Duration,
+		&i.Outcome,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)

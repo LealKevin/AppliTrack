@@ -31,7 +31,10 @@ SELECT
     COUNT(*) as total_count,
     COUNT(*) FILTER (WHERE status = 'sent') as sent_count,
     COUNT(*) FILTER (WHERE status = 'pending') as pending_count,
-    COUNT(*) FILTER (WHERE status = 'rejected') as rejected_count
+    COUNT(*) FILTER (WHERE status = 'rejected') as rejected_count,
+    COUNT(*) FILTER (WHERE status = 'interview_scheduled') as interview_scheduled,
+    COUNT(*) FILTER (WHERE status = 'interviewing') as interviewing,
+    COUNT(*) FILTER (WHERE status = 'offer') as offer_count
 FROM applications 
 WHERE user_id = $1;
 
@@ -92,4 +95,27 @@ ORDER BY COUNT(*) DESC
 LIMIT 1;
 
 
+-- name: GetRoundsByApplicationID :many
+SELECT * FROM rounds WHERE application_id = $1 ORDER BY date ASC, created_at ASC;
 
+-- name: CreateRound :one
+INSERT INTO rounds (application_id, title, type, status, date, notes, interviewer, duration, outcome) 
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+RETURNING *;
+
+-- name: UpdateRound :one
+UPDATE rounds
+SET title = $1, type = $2, status = $3, date = $4, notes = $5, interviewer = $6, duration = $7, outcome = $8
+WHERE id = $9
+RETURNING *;
+
+-- name: DeleteRound :exec
+DELETE FROM rounds WHERE id = $1;
+
+-- name: GetRoundByID :one
+SELECT * FROM rounds WHERE id = $1;
+
+-- name: GetInterviewsByUser :many
+SELECT * FROM applications
+WHERE user_id = $1 AND status IN ('interview_scheduled', 'interviewing')
+ORDER BY company ASC;
