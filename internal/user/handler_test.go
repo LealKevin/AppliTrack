@@ -70,8 +70,6 @@ func Test_Register(t *testing.T) {
 		t.Fatalf("Failed to apply migrations: %v", err)
 	}
 
-	time.Sleep(2 * time.Second) // Wait for migrations to complete
-
 	dbPool, err := pgxpool.New(ctx, connStr)
 	assert.NoError(t, err)
 	defer dbPool.Close()

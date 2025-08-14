@@ -1,108 +1,173 @@
-import { useState } from "react";
-import { Plus } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Plus, ArrowLeft, Building } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
+import { Badge } from "@/shared/components/ui/badge";
 import RoundCard from "../components/RoundCard";
-
-// Mock data for demonstration
-export interface Round {
-  id: string;
-  title: string;
-  type: "phone_screen" | "technical" | "behavioral" | "final" | "onsite";
-  status: "scheduled" | "completed" | "passed" | "failed";
-  date: string;
-  notes: string;
-  interviewer?: string;
-  duration?: string;
-  outcome?: string;
-}
-
-const mockRounds: Round[] = [
-  {
-    id: "1",
-    title: "Initial Phone Screen",
-    type: "phone_screen",
-    status: "completed",
-    date: "2024-01-15",
-    notes: "General questions about background and experience. Went well overall.",
-    interviewer: "Sarah Johnson (HR)",
-    duration: "30 min",
-    outcome: "Positive - moving to next round"
-  },
-  {
-    id: "2", 
-    title: "Technical Interview",
-    type: "technical",
-    status: "scheduled",
-    date: "2024-01-22",
-    notes: "Coding challenge and system design questions. Need to review algorithms.",
-    interviewer: "Mike Chen (Senior Engineer)",
-    duration: "90 min",
-  },
-  {
-    id: "3",
-    title: "Final Interview",
-    type: "final", 
-    status: "scheduled",
-    date: "2024-01-25",
-    notes: "Meeting with team lead and product manager.",
-    interviewer: "Alex Rivera (Team Lead)",
-    duration: "60 min",
-  }
-];
+import RoundCreateModal from "../components/RoundCreateModal";
+import { useRounds } from "../hooks/useRounds";
 
 export default function RoundsPage() {
-  const [rounds, setRounds] = useState<Round[]>(mockRounds);
+  const [applicationContext, setApplicationContext] = useState<{
+    id: string;
+    company: string;
+  } | null>(null);
+  const [sourceContext, setSourceContext] = useState<{
+    from: string;
+    label: string;
+    url: string;
+  }>({
+    from: 'applications',
+    label: 'Applications',
+    url: '/applications'
+  });
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
-  const handleAddRound = () => {
-    const newRound: Round = {
-      id: Date.now().toString(),
-      title: "New Interview Round",
-      type: "phone_screen",
-      status: "scheduled", 
-      date: "",
-      notes: "",
-    };
-    setRounds([...rounds, newRound]);
+  // API hooks
+  const { data: rounds = [], isLoading, error } = useRounds(applicationContext?.id || "");
+
+  useEffect(() => {
+    // Check for query parameters to determine if we're managing rounds for a specific application
+    const urlParams = new URLSearchParams(window.location.search);
+    const applicationId = urlParams.get('application');
+    const company = urlParams.get('company');
+    const from = urlParams.get('from');
+    
+    if (applicationId && company) {
+      setApplicationContext({
+        id: applicationId,
+        company: decodeURIComponent(company)
+      });
+    }
+
+    // Set source context based on 'from' parameter
+    if (from === 'interviews') {
+      setSourceContext({
+        from: 'interviews',
+        label: 'Interviews',
+        url: '/interviews'
+      });
+    } else {
+      setSourceContext({
+        from: 'applications',
+        label: 'Applications',
+        url: '/applications'
+      });
+    }
+  }, []);
+
+  const handleOpenCreateModal = () => {
+    setIsCreateModalOpen(true);
   };
 
-  const handleDeleteRound = (id: string) => {
-    setRounds(rounds.filter(round => round.id !== id));
+  const handleCloseCreateModal = () => {
+    setIsCreateModalOpen(false);
   };
 
-  const handleUpdateRound = (id: string, updatedRound: Partial<Round>) => {
-    setRounds(rounds.map(round => 
-      round.id === id ? { ...round, ...updatedRound } : round
-    ));
+  const handleBackToSource = () => {
+    window.location.href = sourceContext.url;
   };
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight mb-2">Rounds</h1>
-        <p className="text-muted-foreground">
-          Keep track of your application rounds
-        </p>
+        {applicationContext ? (
+          <>
+            {/* Breadcrumb Navigation */}
+            <div className="flex items-center space-x-2 text-sm text-muted-foreground mb-4">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleBackToSource}
+                className="h-auto p-1 text-muted-foreground hover:text-foreground"
+              >
+                <ArrowLeft className="h-4 w-4 mr-1" />
+                {sourceContext.label}
+              </Button>
+              <span>/</span>
+              <span>Manage Rounds</span>
+            </div>
+
+            {/* Application Context Header */}
+            <div className="flex items-center space-x-3 mb-4">
+              <Building className="h-8 w-8 text-primary" />
+              <div>
+                <h1 className="text-3xl font-bold tracking-tight">{applicationContext.company}</h1>
+                <div className="flex items-center space-x-2 mt-1">
+                  <Badge variant="outline" className="text-xs">
+                    Application ID: {applicationContext.id}
+                  </Badge>
+                </div>
+              </div>
+            </div>
+            <p className="text-muted-foreground">
+              Manage interview rounds for this application
+            </p>
+          </>
+        ) : (
+          <>
+            <h1 className="text-3xl font-bold tracking-tight mb-2">Rounds</h1>
+            <p className="text-muted-foreground">
+              Keep track of your application rounds
+            </p>
+          </>
+        )}
       </div>
 
-      <div className="grid gap-4 mb-6">
-        {rounds.map((round) => (
-          <RoundCard
-            key={round.id}
-            round={round}
-            onDelete={handleDeleteRound}
-            onUpdate={handleUpdateRound}
-          />
-        ))}
-      </div>
+      {/* Loading State */}
+      {isLoading && (
+        <div className="grid gap-4 mb-6">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="h-32 bg-muted animate-pulse rounded-lg" />
+          ))}
+        </div>
+      )}
 
-      <Button
-        onClick={handleAddRound}
-        variant="outline"
-        className="w-full border-dashed border-2 h-20 text-muted-foreground hover:text-foreground"
-      >
-        <Plus className="h-6 w-6 mr-2" />
-        Add New Round
-      </Button>
+      {/* Error State */}
+      {error && (
+        <div className="text-center py-8">
+          <p className="text-red-500">Failed to load rounds. Please try again.</p>
+        </div>
+      )}
+
+      {/* Rounds List */}
+      {!isLoading && !error && (
+        <>
+          <div className="grid gap-4 mb-6">
+            {rounds.length > 0 ? (
+              rounds.map((round) => (
+                <RoundCard
+                  key={round.id}
+                  round={round}
+                />
+              ))
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                <p>No interview rounds yet.</p>
+                <p className="text-sm">Add your first round below to get started.</p>
+              </div>
+            )}
+          </div>
+
+          <Button
+            onClick={handleOpenCreateModal}
+            variant="outline"
+            className="w-full border-dashed border-2 h-20 text-muted-foreground hover:text-foreground"
+            disabled={!applicationContext?.id}
+          >
+            <Plus className="h-6 w-6 mr-2" />
+            Add New Round
+          </Button>
+        </>
+      )}
+
+      {/* Create Round Modal */}
+      {applicationContext && (
+        <RoundCreateModal
+          applicationId={applicationContext.id}
+          isModalOpen={isCreateModalOpen}
+          handleClose={handleCloseCreateModal}
+        />
+      )}
     </div>
   );
 }

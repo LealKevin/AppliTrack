@@ -6,6 +6,7 @@ import {
   IconFileAi,
   IconFileDescription,
   IconUsers,
+  IconCalendar,
 } from "@tabler/icons-react";
 
 import { NavMain } from "@/shared/components/nav-main";
@@ -38,6 +39,11 @@ const data = {
       title: "Applications",
       url: "/applications",
       icon: IconUsers,
+    },
+    {
+      title: "Interviews",
+      url: "/interviews",
+      icon: IconCalendar,
     },
   ],
   navClouds: [

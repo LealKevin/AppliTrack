@@ -1,7 +1,7 @@
 "use client"
 
 import { ColumnDef } from "@tanstack/react-table"
-import { ArrowUpDown, MoreHorizontal } from "lucide-react"
+import { ArrowUpDown, MoreHorizontal, Calendar } from "lucide-react"
 import { Button } from "@/shared/components/ui/button"
 import { Checkbox } from "@/shared/components/ui/checkbox"
 import { Badge } from "@/shared/components/ui/badge"
@@ -12,14 +12,15 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/shared/components/ui/dropdown-menu"
-import type { IApplication } from "@/features/applications/pages/ApplicationsPage"
+import type { IApplication } from "@/shared/types/api"
 
 interface ColumnActions {
   onEdit: (application: IApplication) => void
   onDelete: (application: IApplication) => void
+  onManageRounds?: (application: IApplication) => void
 }
 
-export const createColumns = ({ onEdit, onDelete }: ColumnActions): ColumnDef<IApplication>[] => [
+export const createColumns = ({ onEdit, onDelete, onManageRounds }: ColumnActions): ColumnDef<IApplication>[] => [
   {
     id: "select",
     header: ({ table }) => (
@@ -118,13 +119,65 @@ export const createColumns = ({ onEdit, onDelete }: ColumnActions): ColumnDef<IA
       )
     },
     cell: ({ row }) => {
-      const status = row.getValue("status") as "pending" | "sent" | "rejected"
+      const status = row.getValue("status") as "pending" | "sent" | "interview_scheduled" | "interviewing" | "rejected" | "offer"
       
       return (
         <div className="flex justify-center">
           <StatusBadge status={status} />
         </div>
       )
+    },
+  },
+  {
+    id: "current_round",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="h-auto p-0 font-medium"
+        >
+          <Calendar className="mr-2 h-4 w-4" />
+          Current Round
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      )
+    },
+    cell: ({ row }) => {
+      const application = row.original
+      
+      // Show current round status for interview-stage applications
+      if (application.status === "interview_scheduled") {
+        return (
+          <div className="flex flex-col space-y-1">
+            <div className="text-xs font-medium">Interview Process</div>
+            <Badge 
+              variant="outline" 
+              className="bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-400 border-none text-xs w-fit"
+            >
+              Scheduled
+            </Badge>
+          </div>
+        )
+      } else if (application.status === "interviewing") {
+        return (
+          <div className="flex flex-col space-y-1">
+            <div className="text-xs font-medium">Interview Process</div>
+            <Badge 
+              variant="outline" 
+              className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400 border-none text-xs w-fit"
+            >
+              In Progress
+            </Badge>
+          </div>
+        )
+      } else {
+        return (
+          <div className="text-xs text-muted-foreground">
+            No active interviews
+          </div>
+        )
+      }
     },
   },
   {
@@ -174,6 +227,11 @@ export const createColumns = ({ onEdit, onDelete }: ColumnActions): ColumnDef<IA
             <DropdownMenuItem onClick={() => onEdit(application)}>
               Edit application
             </DropdownMenuItem>
+            {onManageRounds && (application.status === "interview_scheduled" || application.status === "interviewing") && (
+              <DropdownMenuItem onClick={() => onManageRounds(application)}>
+                Manage rounds
+              </DropdownMenuItem>
+            )}
             <DropdownMenuItem
               onClick={() => onDelete(application)}
               className="text-destructive"

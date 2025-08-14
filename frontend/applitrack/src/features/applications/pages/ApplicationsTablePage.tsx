@@ -17,7 +17,7 @@ import ApplicationRemoveModal from "@/features/applications/components/Applicati
 import ImportModal from "@/features/import-export/components/ImportModal"
 import useImportApplications from "@/features/applications/hooks/useImportApplications"
 
-import type { IApplication } from "@/features/applications/pages/ApplicationsPage"
+import type { IApplication } from "@/shared/types/api"
 
 export default function ApplicationsTablePage() {
   const [activeTab, setActiveTab] = useState<"all" | "pending" | "sent" | "rejected">("all")
@@ -41,9 +41,17 @@ export default function ApplicationsTablePage() {
     setIsRemoveModalOpen(true)
   }
 
+  const handleManageRounds = (application: IApplication) => {
+    // For now, navigate to the rounds page - later we can make this a modal
+    // In a real implementation, this would open a rounds management modal
+    // scoped to the specific application
+    window.location.href = `/rounds?application=${application.id}&company=${encodeURIComponent(application.company)}`
+  }
+
   const columns = createColumns({
     onEdit: handleEdit,
     onDelete: handleDelete,
+    onManageRounds: handleManageRounds,
   })
 
   const handleDeleteConfirm = () => {
@@ -82,6 +90,7 @@ export default function ApplicationsTablePage() {
             onDeleteSelected={handleDeleteSelected}
             isDeleting={deleteApp.isPending}
             onImportCSV={() => setIsImportModalOpen(true)}
+            onRowDoubleClick={handleEdit}
           />
         </TabsContent>
       </Tabs>

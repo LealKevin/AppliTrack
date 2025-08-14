@@ -12,6 +12,7 @@ import (
 	"ApplyTrack/internal/user"
 	"ApplyTrack/internal/utils"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
@@ -47,6 +48,7 @@ func main() {
 		CookieHTTPOnly: true,
 		CookieSameSite: http.SameSiteStrictMode,
 	}))
+	e.Validator = &utils.CustomValidator{Validator: validator.New()}
 
 	api := e.Group("/api")
 
