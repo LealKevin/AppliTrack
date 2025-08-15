@@ -3,7 +3,6 @@ package db
 import (
 	"context"
 	"fmt"
-	"log"
 	"os"
 	"time"
 
@@ -13,43 +12,56 @@ import (
 
 var Conn *pgxpool.Pool
 
-func InitDB() {
+type Database struct {
+	Conn *pgxpool.Pool
+}
+
+func NewDatabase() (*Database, error) {
 	var err error
-	if err := godotenv.Load("./../../.env"); err != nil {
-		log.Fatal("Unable to find .env")
+	if err := godotenv.Load(".env"); err != nil {
+		return &Database{}, fmt.Errorf("unable to load .env file: %w", err)
 	}
 
 	dsn := os.Getenv("DATABASE_URL")
 
 	if dsn == "" {
-		log.Fatal("Unable to find dsn")
+		return &Database{}, fmt.Errorf("DATABASE_URL is not set")
 	}
 
 	config, err := pgxpool.ParseConfig(dsn)
 	if err != nil {
-		log.Fatal("Unable to parse DATABASE_URL")
+		return &Database{}, fmt.Errorf("unable to parse DATABASE_URL: %w", err)
 	}
 
 	config.MaxConns = 10
 	config.MinConns = 2
 	config.MaxConnIdleTime = time.Hour
-	config.MaxConnLifetime.Minutes()
+	config.MaxConnLifetime = time.Hour * 2
 
 	Conn, err = pgxpool.NewWithConfig(context.Background(), config)
 	if err != nil {
-		log.Fatalf("Unable to connect to DB, error: %v", err)
+		return &Database{}, fmt.Errorf("unable to connect to database: %w", err)
 	}
 
 	if err = Conn.Ping(context.Background()); err != nil {
-		log.Fatalf("Unable to Ping, error: %v", err)
+		return &Database{}, fmt.Errorf("unable to ping database: %w", err)
 	}
 
 	fmt.Println("Sucessfull connection to database")
+	return &Database{Conn: Conn}, nil
 }
 
-func CloseDB() {
-	if Conn != nil {
-		Conn.Close()
+func (db *Database) GetConnection() *pgxpool.Pool {
+	if db.Conn == nil {
+		fmt.Println("Database connection is not initialized")
+		return nil
+	}
+	return db.Conn
+}
+
+func (db *Database) Close() {
+	if db.Conn != nil {
+		db.Conn.Close()
 		fmt.Println("Closed connection to database")
 	}
 }

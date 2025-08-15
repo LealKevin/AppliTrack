@@ -2,66 +2,25 @@ package main
 
 import (
 	"fmt"
-	"net/http"
 	"os"
 	"os/signal"
 
-	"ApplyTrack/internal/application"
 	"ApplyTrack/internal/db"
-	dbQueries "ApplyTrack/internal/db/queries"
-	"ApplyTrack/internal/user"
-	"ApplyTrack/internal/utils"
-
-	"github.com/go-playground/validator/v10"
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
+	"ApplyTrack/internal/server"
 )
 
 func main() {
 	fmt.Println("Starting server...")
 
-	db.InitDB()
-	defer db.CloseDB()
-
-	queries := dbQueries.New(db.Conn)
-
-	appStore := application.NewApplicationStorage(queries)
-	appService := application.NewService(appStore)
-	appHandler := application.NewHandler(appService, appStore)
-
-	userStore := user.NewUserStorage(queries)
-	userService := user.NewService(userStore)
-	userHandler := user.NewHandler(userService)
-
-	e := echo.New()
-	e.Use(middleware.Logger())
-	e.Use(middleware.Recover())
-	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins:     []string{"http://localhost:5173"},
-		AllowMethods:     []string{echo.GET, echo.POST, echo.PUT, echo.DELETE, echo.PATCH, echo.OPTIONS},
-		AllowHeaders:     []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept, echo.HeaderAuthorization},
-		AllowCredentials: true,
-	}))
-	e.Use(middleware.CSRFWithConfig(middleware.CSRFConfig{
-		TokenLookup:    "header:X-CSRF-Token",
-		CookiePath:     "/",
-		CookieHTTPOnly: true,
-		CookieSameSite: http.SameSiteStrictMode,
-	}))
-	e.Validator = &utils.CustomValidator{Validator: validator.New()}
-
-	api := e.Group("/api")
-
-	userHandler.RegisterRoutes(api)
-
-	protected := api.Group("")
-	protected.Use(utils.EchoAuthMiddleware())
-
-	appHandler.RegisterRoutes(protected)
-	userHandler.RegisterProtectedRoutes(protected)
+	db, err := db.NewDatabase()
+	if err != nil {
+		fmt.Printf("Error initializing database: %v\n", err)
+		os.Exit(1)
+	}
+	srv := server.New(db)
 
 	go func() {
-		if err := e.Start(":8080"); err != nil {
+		if err := srv.Start(":8080"); err != nil {
 			fmt.Printf("Error starting server: %v\n", err)
 		}
 	}()
@@ -73,7 +32,7 @@ func main() {
 	<-stop
 
 	fmt.Println("Shutting down server...")
-	if err := e.Shutdown(nil); err != nil {
+	if err := srv.Stop(); err != nil {
 		fmt.Printf("Error shutting down server: %v\n", err)
 	}
 

@@ -1,24 +1,31 @@
 import Layout from "@/shared/components/Layout";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Application from "../components/Application";
 import ApplicationTitle from "../components/ApplicationTitle";
 import ApplicationCompany from "../components/ApplicationCompany";
 import EditButton from "../components/EditButton";
 import TrashButton from "../components/TrashButton";
 import WebSiteButton from "../components/WebSiteButton";
+import ReminderButton from "../components/ReminderButton";
 import ApplicationEditModal from "../components/ApplicationEditModal";
 import AddButton from "../components/AddButton";
 import ApplicationCreateModal from "../components/ApplicationCreateModal";
 import ApplicationDate from "../components/ApplicationDate";
 import ApplicationRemoveModal from "../components/ApplicationRemoveModal";
+import ReminderModal from "../components/ReminderModal";
 import StatusBadge from "../components/StatusBadge";
 import useDeleteApp from "../hooks/useDeleteApp";
 import useApplications from "../hooks/useApplications";
+import useReminders from "../hooks/useReminders";
+import useReminderNotifications from "../hooks/useReminderNotifications";
 import ImportModal from "../../import-export/components/ImportModal";
 import useImportApplications from "../hooks/useImportApplications";
 
 // Import from centralized types
-export type { IApplication, ApplicationStatus } from "@/shared/types/api";
+import type { IApplication, ApplicationStatus } from "@/shared/types/api";
+
+// Re-export for backward compatibility
+export type { IApplication, ApplicationStatus };
 
 
 function ApplicationsPage() {
@@ -26,15 +33,22 @@ function ApplicationsPage() {
   const [isModalEditOpen, setIsModalEditOpen] = useState(false);
   const [isModalRemoveOpen, setIsModalRemoveOpen] = useState(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+  const [isReminderModalOpen, setIsReminderModalOpen] = useState(false);
   const [selectedApplication, setSelectedApplication] = useState<
     IApplication | undefined
   >(undefined);
+  const [selectedReminder, setSelectedReminder] = useState<{
+    id: string;
+    date: string;
+  } | undefined>(undefined);
 
   const [active, setActive] = useState<"all" | "pending" | "sent" | "rejected">(
     "all",
   );
 
   const { applications, refetch: refetchApps, appsCount } = useApplications(active);
+  const { reminders } = useReminders();
+  useReminderNotifications(); // Initialize notification system
   const deleteApp = useDeleteApp();
   const importApps = useImportApplications();
 
@@ -48,6 +62,52 @@ function ApplicationsPage() {
       default: return 0;
     }
   };
+
+  // Check if application has an active reminder
+  const getApplicationReminder = (applicationId: string) => {
+    return reminders?.find(reminder => 
+      reminder.application_id === applicationId && reminder.status === 'pending'
+    );
+  };
+
+  // Handle reminder button click
+  const handleReminderClick = (application: IApplication) => {
+    const existingReminder = getApplicationReminder(application.id);
+    
+    setSelectedApplication(application);
+    if (existingReminder) {
+      setSelectedReminder({
+        id: existingReminder.id,
+        date: existingReminder.reminder_date
+      });
+    } else {
+      setSelectedReminder(undefined);
+    }
+    setIsReminderModalOpen(true);
+  };
+
+  // Listen for reminder notification events
+  useEffect(() => {
+    const handleReminderDue = (event: CustomEvent) => {
+      // For now, just show a toast - could implement action buttons here
+      console.log('Reminder due:', event.detail.reminder);
+    };
+
+    const handleReminderReApply = (event: CustomEvent) => {
+      const reminder = event.detail.reminder;
+      // Pre-fill create modal with application data
+      setSelectedApplication(reminder.Application);
+      setIsModalCreateOpen(true);
+    };
+
+    window.addEventListener('reminder-due', handleReminderDue as EventListener);
+    window.addEventListener('reminder-reapply', handleReminderReApply as EventListener);
+
+    return () => {
+      window.removeEventListener('reminder-due', handleReminderDue as EventListener);
+      window.removeEventListener('reminder-reapply', handleReminderReApply as EventListener);
+    };
+  }, []);
 
   return (
     <Layout>
@@ -193,6 +253,10 @@ function ApplicationsPage() {
                   <div className="flex items-center justify-between mb-4">
                     <StatusBadge status={application.status} />
                     <div className="flex gap-1">
+                      <ReminderButton
+                        onClick={() => handleReminderClick(application)}
+                        hasActiveReminder={!!getApplicationReminder(application.id)}
+                      />
                       <EditButton
                         onClick={() => {
                           setIsModalEditOpen(true);
@@ -287,6 +351,21 @@ function ApplicationsPage() {
         isImporting={importApps.isPending}
         result={importApps.data}
       />
+
+      {/*Reminder modal*/}
+      {isReminderModalOpen && selectedApplication && (
+        <ReminderModal
+          isModalOpen={isReminderModalOpen}
+          handleClose={() => {
+            setIsReminderModalOpen(false);
+            setSelectedApplication(undefined);
+            setSelectedReminder(undefined);
+          }}
+          application={selectedApplication}
+          existingReminderId={selectedReminder?.id}
+          existingReminderDate={selectedReminder?.date}
+        />
+      )}
     </Layout>
   );
 }

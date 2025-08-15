@@ -10,6 +10,7 @@ import { ProtectedRoute } from "../features/authentication/pages/ProtectedRoutes
 import { CheckUser } from "../features/authentication/pages/CheckUser";
 import RoundsPage from "../features/applications/pages/RoundsPage";
 import InterviewsPage from "../features/applications/pages/InterviewsPage";
+import RemindersPage from "../features/reminders/pages/RemindersPage";
 
 function App() {
 	return (
@@ -28,6 +29,7 @@ function App() {
 							<Route path="/stats" element={<StatsPage />} />
 							<Route path="/rounds" element={<RoundsPage />} />
 							<Route path="/interviews" element={<InterviewsPage />} />
+							<Route path="/reminders" element={<RemindersPage />} />
 						</Route>
 					</Route>
 				</Routes>

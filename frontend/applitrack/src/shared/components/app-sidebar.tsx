@@ -7,6 +7,7 @@ import {
   IconFileDescription,
   IconUsers,
   IconCalendar,
+  IconBell,
 } from "@tabler/icons-react";
 
 import { NavMain } from "@/shared/components/nav-main";
@@ -44,6 +45,11 @@ const data = {
       title: "Interviews",
       url: "/interviews",
       icon: IconCalendar,
+    },
+    {
+      title: "Reminders",
+      url: "/reminders",
+      icon: IconBell,
     },
   ],
   navClouds: [

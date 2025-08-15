@@ -60,12 +60,12 @@ func (s *ApplicationService) GetAllApplications(userID uuid.UUID, status string)
 	return resp, nil
 }
 
-func (s *ApplicationService) GetApplicationByID(userID, appID uuid.UUID) (applicationResp, error) {
+func (s *ApplicationService) GetApplicationByID(userID, appID uuid.UUID) (ApplicationResp, error) {
 	application, err := s.Store.GetOne(userID, appID)
 	if err != nil {
-		return applicationResp{}, err
+		return ApplicationResp{}, err
 	}
-	return applicationResp{
+	return ApplicationResp{
 		ID:               application.ID,
 		TitleApplication: application.TitleApplication,
 		Company:          application.Company,
@@ -234,10 +234,10 @@ func (s *ApplicationService) GetInterviewApplications(userID uuid.UUID) ([]Inter
 		if err != nil {
 			return nil, fmt.Errorf("could not get rounds for application %s: %w", app.ID, err)
 		}
-		
+
 		applicationResp := mapperToApplicationResp(app)
 		roundsResp := mapperToRoundsResp(rounds)
-		
+
 		resp = append(resp, InterviewApplicationResp{
 			Application: applicationResp,
 			Rounds:      roundsResp,
@@ -246,8 +246,8 @@ func (s *ApplicationService) GetInterviewApplications(userID uuid.UUID) ([]Inter
 	return resp, nil
 }
 
-func mapperToApplicationResp(app db.Application) applicationResp {
-	return applicationResp{
+func mapperToApplicationResp(app db.Application) ApplicationResp {
+	return ApplicationResp{
 		ID:               app.ID,
 		TitleApplication: app.TitleApplication,
 		Company:          app.Company,

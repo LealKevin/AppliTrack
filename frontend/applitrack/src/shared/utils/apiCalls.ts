@@ -1,5 +1,5 @@
 import type { UserInput } from "@/features/authentication/hooks/useConnection";
-import type { IApplication, ApplicationCounts, Round, CreateRoundRequest, UpdateRoundRequest, InterviewApplication } from "@/shared/types/api";
+import type { IApplication, ApplicationCounts, Round, CreateRoundRequest, UpdateRoundRequest, InterviewApplication, Reminder, CreateReminderRequest, UpdateReminderRequest, ReminderWithApplication } from "@/shared/types/api";
 import axios from "axios";
 
 let csrfToken: string | null = null;
@@ -210,5 +210,53 @@ export async function deleteRound(roundId: string): Promise<void> {
 
 export async function fetchInterviewApplications(): Promise<InterviewApplication[]> {
   const response = await apiClient.get<InterviewApplication[]>("/api/interviews");
+  return response.data;
+}
+
+// Reminder API functions
+export async function createReminder(reminderData: CreateReminderRequest): Promise<Reminder> {
+  console.log("Creating reminder with data:", reminderData);
+  
+  // Transform data to match backend ReminderReq struct
+  const backendRequest = {
+    status: "pending",  // Default status as expected by backend
+    reminder_date: new Date(reminderData.reminder_date).toISOString(),
+    application_id: reminderData.application_id
+  };
+  
+  console.log("Transformed request for backend:", backendRequest);
+  const response = await apiClient.post<Reminder>("/api/reminders", backendRequest);
+  return response.data;
+}
+
+export async function fetchUserReminders(): Promise<Reminder[]> {
+  const response = await apiClient.get<Reminder[]>("/api/reminders");
+  return response.data;
+}
+
+export async function updateReminder(reminderId: string, reminderData: UpdateReminderRequest): Promise<Reminder> {
+  // Transform data to match backend ReminderReq struct
+  const backendRequest = {
+    status: reminderData.status || "pending",
+    reminder_date: new Date(reminderData.reminder_date).toISOString(),
+    // Backend expects application_id but doesn't use it for updates, so provide dummy if missing
+    application_id: reminderData.application_id || "00000000-0000-0000-0000-000000000000"
+  };
+  
+  console.log("Updating reminder with data:", backendRequest);
+  const response = await apiClient.put<Reminder>(`/api/reminders/${reminderId}`, backendRequest);
+  return response.data;
+}
+
+export async function completeReminder(reminderId: string): Promise<void> {
+  await apiClient.put(`/api/reminders/${reminderId}/complete`);
+}
+
+export async function deleteReminder(reminderId: string): Promise<void> {
+  await apiClient.delete(`/api/reminders/${reminderId}`);
+}
+
+export async function fetchDueReminders(): Promise<ReminderWithApplication[]> {
+  const response = await apiClient.get<ReminderWithApplication[]>("/api/reminders/due");
   return response.data;
 }

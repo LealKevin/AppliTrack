@@ -47,7 +47,7 @@ func (h *Handler) RegisterRoutes(e *echo.Group) {
 	e.GET("/interviews", h.GetInterviewApplications)
 }
 
-type applicationResp struct {
+type ApplicationResp struct {
 	ID               uuid.UUID `json:"id"`
 	TitleApplication string    `json:"title_application"`
 	Company          string    `json:"company"`
@@ -61,7 +61,7 @@ type applicationResp struct {
 }
 
 type applicationsResp struct {
-	Applications []applicationResp `json:"applications"`
+	Applications []ApplicationResp `json:"applications"`
 }
 
 type applicationCountsResp struct {
@@ -373,7 +373,7 @@ type RoundResp struct {
 }
 
 type InterviewApplicationResp struct {
-	Application applicationResp `json:"Application"`
+	Application ApplicationResp `json:"Application"`
 	Rounds      []RoundResp     `json:"Rounds"`
 }
 

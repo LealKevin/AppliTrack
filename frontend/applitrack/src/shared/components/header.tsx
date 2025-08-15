@@ -2,6 +2,7 @@ import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/shared/components/ui/button";
 import { useUserConnectionModal } from "@/features/authentication/contexts/userConnectionModalProvider";
 import useDisconnection from "@/features/authentication/hooks/useDisconnection";
+import NotificationBell from "../../features/reminders/components/NotificationBell";
 
 const iconHome = (
 	<svg
@@ -78,6 +79,11 @@ function Header() {
 				>
 					<Link to="/stats">Stats</Link>
 				</Button>
+				{/* Notification Bell */}
+				<div className="self-end m-4">
+					<NotificationBell />
+				</div>
+
 				<Button className="self-end  m-4 w-10 h-10" asChild>
 					<Link
 						onClick={() => {

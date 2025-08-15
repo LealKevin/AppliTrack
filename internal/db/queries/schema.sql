@@ -25,7 +25,7 @@ CREATE TABLE applications (
 CREATE TABLE reminders (
     id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
     reminder_date DATE NOT NULL,
-    status TEXT CHECK (status IN ('pending', 'sent')),
+    status TEXT CHECK (status IN ('pending', 'completed ' )),
     application_id UUID NOT NULL REFERENCES applications(id) ON DELETE CASCADE,
     created_at TIMESTAMPTZ DEFAULT now() NOT NULL,
     updated_at TIMESTAMPTZ DEFAULT now() NOT NULL,
