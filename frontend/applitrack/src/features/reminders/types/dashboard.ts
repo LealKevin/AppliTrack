@@ -18,7 +18,7 @@ export interface ReminderUrgency {
 export const REMINDER_URGENCIES: Record<string, ReminderUrgency> = {
   overdue: {
     level: 'overdue',
-    color: 'red', 
+    color: 'red',
     icon: '🔴',
     label: 'Overdue',
     priority: 1
@@ -26,22 +26,22 @@ export const REMINDER_URGENCIES: Record<string, ReminderUrgency> = {
   today: {
     level: 'today',
     color: 'orange',
-    icon: '🟡', 
+    icon: '🟡',
     label: 'Due Today',
     priority: 2
   },
   week: {
     level: 'week',
     color: 'blue',
-    icon: '📅',
-    label: 'This Week', 
+    icon: '',
+    label: 'This Week',
     priority: 3
   },
   future: {
     level: 'future',
     color: 'gray',
-    icon: '📋',
-    label: 'Future', 
+    icon: '',
+    label: 'Future',
     priority: 4
   }
 };

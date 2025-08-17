@@ -27,6 +27,7 @@ export default function ApplicationsTablePage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const routerNavigate = useRouterNavigate();
   const highlightAppId = searchParams.get('highlight');
+  const createParam = searchParams.get('create');
   const [highlightedAppId, setHighlightedAppId] = useState<string | null>(null);
   
   const [activeTab, setActiveTab] = useState<"all" | "pending" | "sent" | "rejected">("all")
@@ -68,6 +69,18 @@ export default function ApplicationsTablePage() {
       setSearchParams(newParams, { replace: true });
     }
   }, [highlightAppId, applications, activeTab, searchParams, setSearchParams]);
+
+  // Handle create modal from URL parameter
+  useEffect(() => {
+    if (createParam === 'true') {
+      setIsCreateModalOpen(true);
+      
+      // Clear URL parameter after opening modal
+      const newParams = new URLSearchParams(searchParams);
+      newParams.delete('create');
+      setSearchParams(newParams, { replace: true });
+    }
+  }, [createParam, searchParams, setSearchParams]);
   
   // Clear highlighting after a timeout and on any interaction
   useEffect(() => {

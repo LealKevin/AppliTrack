@@ -1,10 +1,9 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import HomePage from "../shared/components/HomePage";
-import StatsPage from "../features/analytics/pages/StatsPage";
 import { ThemeProvider } from "../shared/contexts/themeProvider";
 import SigninPage from "../features/authentication/pages/SigninPage";
 import MainPage from "../shared/components/MainPage";
-import { Temp } from "../features/applications/pages/Temp";
+import ApplicationsPage from "../features/applications/pages/ApplicationsPage";
 import LoginPage from "../features/authentication/pages/LoginPage";
 import { ProtectedRoute } from "../features/authentication/pages/ProtectedRoutes";
 import { CheckUser } from "../features/authentication/pages/CheckUser";
@@ -25,8 +24,7 @@ function App() {
 					<Route element={<ProtectedRoute />}>
 						<Route element={<MainPage />}>
 							<Route path="/" element={<HomePage />} />
-							<Route path="/applications" element={<Temp />} />
-							<Route path="/stats" element={<StatsPage />} />
+							<Route path="/applications" element={<ApplicationsPage />} />
 							<Route path="/rounds" element={<RoundsPage />} />
 							<Route path="/interviews" element={<InterviewsPage />} />
 							<Route path="/reminders" element={<RemindersPage />} />

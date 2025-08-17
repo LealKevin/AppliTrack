@@ -1,7 +1,6 @@
 import type * as React from "react";
 import {
   IconCamera,
-  IconChartBar,
   IconDashboard,
   IconFileAi,
   IconFileDescription,
@@ -28,13 +27,8 @@ const data = {
   navMain: [
     {
       title: "Dashboard",
-      url: "#",
+      url: "/",
       icon: IconDashboard,
-    },
-    {
-      title: "Stats",
-      url: "/stats",
-      icon: IconChartBar,
     },
     {
       title: "Applications",

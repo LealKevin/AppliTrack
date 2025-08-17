@@ -42,7 +42,7 @@ db-reset: migrate-down migrate sqlc
 	@echo "Database reset and code regenerated"
 
 # Development
-dev: db-up
+dev:
 	@echo "Starting development server..."
 	go run cmd/api/main.go
 
@@ -56,6 +56,20 @@ build:
 test:
 	@echo "Running tests..."
 	go test -v ./...
+
+
+docker-up:
+	@echo "Starting Docker containers..."
+	docker-compose up -d
+	@echo "Docker containers are running"
+
+docker-down:
+	@echo "Stopping Docker containers..."
+	docker-compose down
+	@echo "Docker containers stopped"
+
+dev-docker: docker-down docker-up dev
+	@echo "Development environment started with Docker"
 
 # Cleanup
 clean:

@@ -8,14 +8,15 @@ import { Badge } from '@/shared/components/ui/badge';
 import { Input } from '@/shared/components/ui/input';
 import { Calendar, Clock, AlertCircle, Search, X, Filter } from 'lucide-react';
 import { REMINDER_URGENCIES } from '../types/dashboard';
+import { startOfDay, endOfDay, endOfWeek, endOfMonth, isWithinInterval } from 'date-fns';
 
-type TimeFilter = 'all' | 'urgent' | 'soon' | 'month' | 'later';
+type TimeFilter = 'today' | 'this_week' | 'this_month' | 'all';
 
 const RemindersPage: React.FC = () => {
   const { data, isLoading, error } = useDashboardReminders();
   const { reminders, isLoading: allRemindersLoading } = useRemindersWithApplications();
   const [searchQuery, setSearchQuery] = useState('');
-  const [timeFilter, setTimeFilter] = useState<TimeFilter>('urgent');
+  const [timeFilter, setTimeFilter] = useState<TimeFilter>('today');
   
   // Apply search and time filters
   const filteredReminders = useMemo(() => {
@@ -37,24 +38,25 @@ const RemindersPage: React.FC = () => {
     
     // Apply time filter
     if (timeFilter !== 'all') {
-      const today = new Date();
-      const nextWeek = new Date(today);
-      nextWeek.setDate(today.getDate() + 7);
-      const nextMonth = new Date(today);
-      nextMonth.setDate(today.getDate() + 30);
+      const now = new Date();
+      const today = startOfDay(now);
+      const todayEnd = endOfDay(now);
+      const weekEnd = endOfWeek(now, { weekStartsOn: 0 });
+      const monthEnd = endOfMonth(now);
       
       filtered = filtered.filter(reminder => {
         const reminderDate = new Date(reminder.reminder_date);
         
         switch (timeFilter) {
-          case 'urgent':
-            return reminderDate <= nextWeek; // Next 7 days
-          case 'soon':
-            return reminderDate <= nextMonth; // Next 30 days
-          case 'month':
-            return reminderDate <= new Date(today.getFullYear(), today.getMonth() + 1, 0); // This month
-          case 'later':
-            return reminderDate > nextMonth; // Beyond 30 days
+          case 'today':
+            // Show overdue + today's reminders
+            return reminderDate <= todayEnd && reminder.status === 'pending';
+          case 'this_week':
+            // Show from today through end of current week
+            return isWithinInterval(reminderDate, { start: today, end: weekEnd }) && reminder.status === 'pending';
+          case 'this_month':
+            // Show from today through end of current month
+            return isWithinInterval(reminderDate, { start: today, end: monthEnd }) && reminder.status === 'pending';
           default:
             return true;
         }
@@ -144,15 +146,56 @@ const RemindersPage: React.FC = () => {
     return reminderDate > thisMonthEnd && reminder.status === 'pending';
   });
 
-  const totalReminders = searchQuery 
-    ? filteredReminders.length
-    : (data?.overdue?.length || 0) + 
-      (data?.due_today?.length || 0) + 
-      tomorrowReminders.length +
-      thisWeekReminders.length +
-      nextWeekReminders.length +
-      thisMonthReminders.length +
-      laterReminders.length;
+  // Calculate visible reminders based on current filter
+  const getVisibleRemindersCount = () => {
+    if (searchQuery) {
+      return filteredReminders.length;
+    }
+    
+    let count = 0;
+    
+    // Count based on what sections are visible for each filter
+    switch (timeFilter) {
+      case 'today':
+        count += (data?.overdue?.length || 0);
+        count += (data?.due_today?.length || 0);
+        break;
+        
+      case 'this_week':
+        count += (data?.overdue?.length || 0);
+        count += (data?.due_today?.length || 0); 
+        count += (data?.due_this_week?.length || 0);
+        count += tomorrowReminders.length;
+        count += thisWeekReminders.length;
+        break;
+        
+      case 'this_month':
+        count += (data?.overdue?.length || 0);
+        count += (data?.due_today?.length || 0); 
+        count += (data?.due_this_week?.length || 0);
+        count += tomorrowReminders.length;
+        count += thisWeekReminders.length;
+        count += nextWeekReminders.length;
+        count += thisMonthReminders.length;
+        break;
+        
+      case 'all':
+      default:
+        count += (data?.overdue?.length || 0);
+        count += (data?.due_today?.length || 0); 
+        count += (data?.due_this_week?.length || 0);
+        count += tomorrowReminders.length;
+        count += thisWeekReminders.length;
+        count += nextWeekReminders.length;
+        count += thisMonthReminders.length;
+        count += laterReminders.length;
+        break;
+    }
+    
+    return count;
+  };
+  
+  const totalReminders = getVisibleRemindersCount();
                           
   console.log('RemindersPage - totalReminders:', totalReminders);
   console.log('RemindersPage - overdue count:', data?.overdue?.length || 0);
@@ -183,10 +226,9 @@ const RemindersPage: React.FC = () => {
         </div>
         
         {[
-          { key: 'urgent', label: 'Urgent (7 days)' },
-          { key: 'soon', label: 'Soon (30 days)' },
-          { key: 'month', label: 'This Month' },
-          { key: 'later', label: 'Later' },
+          { key: 'today', label: 'Today' },
+          { key: 'this_week', label: 'This Week' },
+          { key: 'this_month', label: 'This Month' },
           { key: 'all', label: 'All' }
         ].map(filter => (
           <Button
@@ -223,26 +265,9 @@ const RemindersPage: React.FC = () => {
         )}
       </div>
 
-      {/* Filter Results Info */}
-      {(searchQuery || timeFilter !== 'urgent') && (
-        <div className="text-sm text-muted-foreground">
-          {filteredReminders.length === 0 ? (
-            <>No reminders found{searchQuery ? ` for "${searchQuery}"` : ''}</>
-          ) : (
-            <>
-              Showing {filteredReminders.length} reminder{filteredReminders.length !== 1 ? 's' : ''}
-              {searchQuery && ` for "${searchQuery}"`}
-              {timeFilter !== 'urgent' && ` in ${timeFilter === 'all' ? 'all time periods' : 
-                timeFilter === 'soon' ? 'next 30 days' :
-                timeFilter === 'month' ? 'this month' : 
-                timeFilter === 'later' ? 'later periods' : timeFilter}`}
-            </>
-          )}
-        </div>
-      )}
 
       {/* No reminders state */}
-      {totalReminders === 0 && !searchQuery && (
+      {totalReminders === 0 && !searchQuery && timeFilter === 'today' && (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
             <Calendar className="h-12 w-12 text-muted-foreground mb-4" />
@@ -255,7 +280,7 @@ const RemindersPage: React.FC = () => {
       )}
 
       {/* No search/filter results state */}
-      {totalReminders === 0 && (searchQuery || timeFilter !== 'urgent') && (
+      {totalReminders === 0 && (searchQuery || timeFilter !== 'today') && (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
             <Search className="h-12 w-12 text-muted-foreground mb-4" />
@@ -272,10 +297,10 @@ const RemindersPage: React.FC = () => {
                   Clear Search
                 </Button>
               )}
-              {timeFilter !== 'urgent' && (
+              {timeFilter !== 'today' && (
                 <Button 
                   variant="outline" 
-                  onClick={() => setTimeFilter('urgent')}
+                  onClick={() => setTimeFilter('today')}
                 >
                   Reset Filter
                 </Button>
@@ -286,7 +311,7 @@ const RemindersPage: React.FC = () => {
       )}
 
       {/* Overdue reminders */}
-      {data?.overdue && data.overdue.length > 0 && (
+      {data?.overdue && data.overdue.length > 0 && (timeFilter === 'all' || timeFilter === 'today' || timeFilter === 'this_week' || timeFilter === 'this_month') && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-red-600">
@@ -307,7 +332,7 @@ const RemindersPage: React.FC = () => {
       )}
 
       {/* Due today */}
-      {data?.due_today && data.due_today.length > 0 && (
+      {data?.due_today && data.due_today.length > 0 && (timeFilter === 'all' || timeFilter === 'today' || timeFilter === 'this_week' || timeFilter === 'this_month') && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-orange-600">
@@ -328,7 +353,7 @@ const RemindersPage: React.FC = () => {
       )}
 
       {/* Due this week */}
-      {data?.due_this_week && data.due_this_week.length > 0 && (
+      {data?.due_this_week && data.due_this_week.length > 0 && (timeFilter === 'all' || timeFilter === 'this_week' || timeFilter === 'this_month') && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-blue-600">
@@ -349,7 +374,7 @@ const RemindersPage: React.FC = () => {
       )}
 
       {/* Tomorrow */}
-      {tomorrowReminders && tomorrowReminders.length > 0 && (
+      {tomorrowReminders && tomorrowReminders.length > 0 && (timeFilter === 'all' || timeFilter === 'this_week' || timeFilter === 'this_month') && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-yellow-600">
@@ -370,7 +395,7 @@ const RemindersPage: React.FC = () => {
       )}
 
       {/* Rest of This Week */}
-      {thisWeekReminders && thisWeekReminders.length > 0 && (
+      {thisWeekReminders && thisWeekReminders.length > 0 && (timeFilter === 'all' || timeFilter === 'this_week' || timeFilter === 'this_month') && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-blue-600">
@@ -391,7 +416,7 @@ const RemindersPage: React.FC = () => {
       )}
 
       {/* Next Week */}
-      {nextWeekReminders && nextWeekReminders.length > 0 && (
+      {nextWeekReminders && nextWeekReminders.length > 0 && (timeFilter === 'all' || timeFilter === 'this_month') && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-purple-600">
@@ -412,7 +437,7 @@ const RemindersPage: React.FC = () => {
       )}
 
       {/* This Month */}
-      {thisMonthReminders && thisMonthReminders.length > 0 && (
+      {thisMonthReminders && thisMonthReminders.length > 0 && (timeFilter === 'all' || timeFilter === 'this_month') && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-green-600">
@@ -433,7 +458,7 @@ const RemindersPage: React.FC = () => {
       )}
 
       {/* Later */}
-      {laterReminders && laterReminders.length > 0 && (
+      {laterReminders && laterReminders.length > 0 && (timeFilter === 'all') && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-gray-600">

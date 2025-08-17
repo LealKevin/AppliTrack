@@ -72,11 +72,12 @@ export async function createApplication(application: IApplication) {
     title: application.title_application,
     company: application.company,
     location: application.location || "",
-    sent_date: application.sent_date,
+    sent_date: new Date(application.sent_date).toISOString(),
     status: application.status,
     notes: application.notes || "",
     url_application: application.url_application,
   };
+  
   const response = await apiClient.post<IApplication>("/api/application", applicationRequest);
   return response.data;
 }
