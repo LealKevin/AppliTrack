@@ -119,3 +119,54 @@ SELECT * FROM rounds WHERE id = $1;
 SELECT * FROM applications
 WHERE user_id = $1 AND status IN ('interview_scheduled', 'interviewing')
 ORDER BY company ASC;
+
+-- name: GetRemindersByUser :many
+SELECT * FROM reminders WHERE application_id IN (SELECT id FROM applications WHERE user_id = $1);
+
+-- name: CreateReminder :one
+INSERT INTO reminders (reminder_date, status, application_id) 
+VALUES ($1, $2, $3)
+RETURNING *;
+
+-- name: UpdateReminder :one
+UPDATE reminders
+SET reminder_date = $1, status = $2
+WHERE reminders.id = $3 AND application_id IN (SELECT id FROM applications WHERE user_id = $4)
+RETURNING *;
+
+-- name: DeleteReminder :exec
+DELETE FROM reminders WHERE application_id IN (SELECT id FROM applications WHERE user_id = $1) AND reminders.id = $2;
+
+-- name: GetReminderDue :many
+SELECT r.*, a.* FROM reminders r
+LEFT JOIN applications a ON r.application_id = a.id
+WHERE r.reminder_date <= CURRENT_DATE AND r.status = 'pending' AND r.application_id IN (SELECT id FROM applications WHERE applications.user_id = $1);
+
+
+-- name: GetRemindersDueToday :many
+SELECT r.*, a.* FROM reminders r
+LEFT JOIN applications a ON r.application_id = a.id
+WHERE r.reminder_date = CURRENT_DATE AND r.status = 'pending'
+AND r.application_id IN (SELECT id FROM applications WHERE applications.user_id = $1);
+
+-- name: GetRemindersDueThisWeek :many
+SELECT r.*, a.* FROM reminders r
+LEFT JOIN applications a ON r.application_id = a.id
+WHERE r.reminder_date >= CURRENT_DATE AND r.reminder_date < CURRENT_DATE + INTERVAL '7 days'
+AND r.status = 'pending'
+AND r.application_id IN (SELECT id FROM applications WHERE applications.user_id = $1);
+
+-- name: GetRemindersOverdue :many
+SELECT r.*, a.* FROM reminders r
+LEFT JOIN applications a ON r.application_id = a.id
+WHERE r.reminder_date < CURRENT_DATE AND r.status = 'pending'
+AND r.application_id IN (SELECT id FROM applications WHERE applications.user_id = $1);
+
+-- name: GetTotalRemindersByUser :one
+SELECT COUNT(*) FROM reminders WHERE application_id IN (SELECT id FROM applications WHERE user_id = $1);
+
+-- name: ReminderCompleted :exec
+UPDATE reminders
+SET status = 'completed'
+WHERE application_id IN (SELECT id FROM applications WHERE user_id = $1) AND reminders.id = $2;
+

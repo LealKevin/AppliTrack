@@ -1,6 +1,9 @@
 package utils
 
-import "github.com/jackc/pgx/v5/pgtype"
+import (
+	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/google/uuid"
+)
 
 func PgtypeTextFromPointer(s *string) pgtype.Text {
 	if s == nil {
@@ -17,4 +20,11 @@ func PgtypeTextToPointer(t pgtype.Text) *string {
 		return nil
 	}
 	return &t.String
+}
+
+func PgtypeUUIDToUUID(p pgtype.UUID) uuid.UUID {
+	if !p.Valid {
+		return uuid.Nil
+	}
+	return p.Bytes
 }

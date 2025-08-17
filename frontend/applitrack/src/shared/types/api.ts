@@ -21,6 +21,10 @@ export type RoundStatus =
   | "passed" 
   | "failed";
 
+export type ReminderStatus = 
+  | "pending" 
+  | "completed";
+
 export interface IApplication {
   id: string;
   title_application: string;
@@ -94,6 +98,38 @@ export interface CreateApplicationRequest {
 
 export interface UpdateApplicationRequest extends CreateApplicationRequest {
   id: string;
+}
+
+// Reminder types
+export interface Reminder {
+  id: string;
+  reminder_date: string;         // ISO date string
+  status: ReminderStatus;
+  application_id: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CreateReminderRequest {
+  reminder_date: string;         // ISO date string
+  status: ReminderStatus;        // Always 'pending' from frontend
+  application_id: string;
+}
+
+export interface UpdateReminderRequest {
+  reminder_date: string;
+  status: ReminderStatus;
+  application_id?: string;
+}
+
+export interface ReminderWithApplication {
+  id: string;
+  reminder_date: string;
+  status: ReminderStatus;
+  application_id: string;
+  created_at: string;
+  updated_at: string;
+  Application: IApplication;     // Joined application data for rich notifications
 }
 
 // API Response wrappers

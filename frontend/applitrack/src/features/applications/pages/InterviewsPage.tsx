@@ -127,7 +127,11 @@ export default function InterviewsPage() {
           </TableHeader>
           <TableBody>
             {filteredApplications.map((application) => (
-              <TableRow key={application.Application.id}>
+              <TableRow 
+                key={application.Application.id}
+                onDoubleClick={() => handleManageRounds(application.Application.id, application.Application.company)}
+                className="cursor-pointer"
+              >
                 <TableCell>
                   <div className="flex items-center text-sm">
                     <Calendar className="mr-1 h-3 w-3 text-muted-foreground" />

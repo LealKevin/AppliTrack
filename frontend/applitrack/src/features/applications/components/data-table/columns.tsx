@@ -1,7 +1,8 @@
 "use client"
 
 import { ColumnDef } from "@tanstack/react-table"
-import { ArrowUpDown, MoreHorizontal, Calendar } from "lucide-react"
+import { ArrowUpDown, MoreHorizontal, Calendar, Bell } from "lucide-react"
+import EnhancedReminderIndicator from "../../../reminders/components/EnhancedReminderIndicator"
 import { Button } from "@/shared/components/ui/button"
 import { Checkbox } from "@/shared/components/ui/checkbox"
 import { Badge } from "@/shared/components/ui/badge"
@@ -18,9 +19,11 @@ interface ColumnActions {
   onEdit: (application: IApplication) => void
   onDelete: (application: IApplication) => void
   onManageRounds?: (application: IApplication) => void
+  onSetReminder?: (application: IApplication) => void
+  getApplicationReminder?: (applicationId: string) => any
 }
 
-export const createColumns = ({ onEdit, onDelete, onManageRounds }: ColumnActions): ColumnDef<IApplication>[] => [
+export const createColumns = ({ onEdit, onDelete, onManageRounds, onSetReminder, getApplicationReminder }: ColumnActions): ColumnDef<IApplication>[] => [
   {
     id: "select",
     header: ({ table }) => (
@@ -42,6 +45,26 @@ export const createColumns = ({ onEdit, onDelete, onManageRounds }: ColumnAction
     ),
     enableSorting: false,
     enableHiding: false,
+  },
+  {
+    id: "reminder",
+    header: () => (
+      <div className="flex justify-center" title="Reminders">
+        <Bell className="h-4 w-4" />
+      </div>
+    ),
+    cell: ({ row }) => {
+      const application = row.original
+      const reminder = getApplicationReminder ? getApplicationReminder(application.id) : null
+      
+      return (
+        <EnhancedReminderIndicator 
+          reminder={reminder}
+          onClick={() => onSetReminder && onSetReminder(application)}
+        />
+      )
+    },
+    enableSorting: false,
   },
   {
     accessorKey: "title_application",
@@ -227,6 +250,17 @@ export const createColumns = ({ onEdit, onDelete, onManageRounds }: ColumnAction
             <DropdownMenuItem onClick={() => onEdit(application)}>
               Edit application
             </DropdownMenuItem>
+            {onSetReminder && (
+              <DropdownMenuItem onClick={() => onSetReminder(application)}>
+                {(() => {
+                  const reminder = getApplicationReminder ? getApplicationReminder(application.id) : null
+                  if (!reminder) return "Set reminder"
+                  if (reminder.status === 'pending') return "Edit reminder"
+                  if (reminder.status === 'completed') return "View reminder"
+                  return "Set reminder"
+                })()}
+              </DropdownMenuItem>
+            )}
             {onManageRounds && (application.status === "interview_scheduled" || application.status === "interviewing") && (
               <DropdownMenuItem onClick={() => onManageRounds(application)}>
                 Manage rounds

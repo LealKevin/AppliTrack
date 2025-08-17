@@ -1,4 +1,4 @@
-import type { IApplication, ApplicationCounts, InterviewApplication } from "@/shared/types/api";
+import type { ApplicationCounts, InterviewApplication } from "@/shared/types/api";
 import { fetchApplications, getAppsCount } from "@/shared/utils/apiCalls";
 import { useQuery } from "@tanstack/react-query";
 

@@ -42,6 +42,7 @@ interface DataTableProps<TData, TValue> {
   isDeleting?: boolean
   onImportCSV?: () => void
   onRowDoubleClick?: (data: TData) => void
+  highlightedRowId?: string | null
 }
 
 export function ApplicationsDataTable<TData, TValue>({
@@ -53,6 +54,7 @@ export function ApplicationsDataTable<TData, TValue>({
   isDeleting = false,
   onImportCSV,
   onRowDoubleClick,
+  highlightedRowId,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
@@ -209,12 +211,14 @@ export function ApplicationsDataTable<TData, TValue>({
                 </TableRow>
               ))
             ) : table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
+              table.getRowModel().rows.map((row) => {
+                const isHighlighted = highlightedRowId && (row.original as any)?.id === highlightedRowId;
+                return (
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
                   onDoubleClick={() => onRowDoubleClick?.(row.original)}
-                  className={onRowDoubleClick ? "cursor-pointer" : ""}
+                  className={`${onRowDoubleClick ? "cursor-pointer" : ""} ${isHighlighted ? "bg-blue-50 dark:bg-blue-950/30" : ""}`}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
@@ -225,7 +229,8 @@ export function ApplicationsDataTable<TData, TValue>({
                     </TableCell>
                   ))}
                 </TableRow>
-              ))
+                )
+              })
             ) : (
               <TableRow>
                 <TableCell

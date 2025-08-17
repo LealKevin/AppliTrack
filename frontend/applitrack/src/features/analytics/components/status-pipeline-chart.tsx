@@ -20,13 +20,17 @@ const COLORS = {
   pending: "#f59e0b", // yellow
   rejected: "#ef4444", // red
   interview_scheduled: "#8b5cf6", // purple
+  interviewing: "#06b6d4", // cyan
+  offer: "#059669", // emerald
 };
 
 const chartConfig = {
   sent: { label: "Sent", color: COLORS.sent },
   pending: { label: "Pending", color: COLORS.pending },
   rejected: { label: "Rejected", color: COLORS.rejected },
-  interview_scheduled: { label: "Interview", color: COLORS.interview_scheduled },
+  interview_scheduled: { label: "Interview Scheduled", color: COLORS.interview_scheduled },
+  interviewing: { label: "Interviewing", color: COLORS.interviewing },
+  offer: { label: "Offer Received", color: COLORS.offer },
 };
 
 export function StatusPipelineChart() {
@@ -52,7 +56,10 @@ export function StatusPipelineChart() {
   const chartData = [
     { name: "Sent", value: appsCount.sent_count, color: COLORS.sent },
     { name: "Pending", value: appsCount.pending_count, color: COLORS.pending },
+    { name: "Interview Scheduled", value: appsCount.interview_scheduled_count, color: COLORS.interview_scheduled },
+    { name: "Interviewing", value: appsCount.interviewing_count, color: COLORS.interviewing },
     { name: "Rejected", value: appsCount.rejected_count, color: COLORS.rejected },
+    { name: "Offer Received", value: appsCount.offer_count, color: COLORS.offer },
   ].filter(item => item.value > 0);
 
   const total = chartData.reduce((sum, item) => sum + item.value, 0);

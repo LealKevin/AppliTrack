@@ -1,12 +1,12 @@
 import type * as React from "react";
 import {
   IconCamera,
-  IconChartBar,
   IconDashboard,
   IconFileAi,
   IconFileDescription,
   IconUsers,
   IconCalendar,
+  IconBell,
 } from "@tabler/icons-react";
 
 import { NavMain } from "@/shared/components/nav-main";
@@ -27,13 +27,8 @@ const data = {
   navMain: [
     {
       title: "Dashboard",
-      url: "#",
+      url: "/",
       icon: IconDashboard,
-    },
-    {
-      title: "Stats",
-      url: "/stats",
-      icon: IconChartBar,
     },
     {
       title: "Applications",
@@ -44,6 +39,11 @@ const data = {
       title: "Interviews",
       url: "/interviews",
       icon: IconCalendar,
+    },
+    {
+      title: "Reminders",
+      url: "/reminders",
+      icon: IconBell,
     },
   ],
   navClouds: [
