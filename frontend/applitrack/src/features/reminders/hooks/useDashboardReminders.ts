@@ -4,7 +4,6 @@ import { fetchDueReminders } from "@/shared/utils/apiCalls";
 import type { ReminderWithApplication } from "@/shared/types/api";
 import type { ReminderDashboardData } from "../types/dashboard";
 
-// Transform existing due reminders into urgency groups until backend endpoint is ready
 const transformDueRemindersToGroups = (dueReminders?: ReminderWithApplication[]): ReminderDashboardData => {
   if (!dueReminders || dueReminders.length === 0) {
     return {
@@ -44,7 +43,6 @@ const transformDueRemindersToGroups = (dueReminders?: ReminderWithApplication[])
   };
 };
 
-// Future endpoint call (will be implemented tomorrow)
 const fetchDashboardReminders = async (): Promise<ReminderDashboardData> => {
   const response = await fetch('/api/reminders/dashboard', {
     credentials: 'include'
@@ -58,31 +56,28 @@ const fetchDashboardReminders = async (): Promise<ReminderDashboardData> => {
 };
 
 export function useDashboardReminders() {
-  // Try new endpoint first
   const dashboardQuery = useQuery<ReminderDashboardData>({
     queryKey: ['reminders', 'dashboard'],
     queryFn: fetchDashboardReminders,
-    retry: false, // Don't retry if endpoint doesn't exist yet
-    staleTime: 2 * 60 * 1000, // 2 minutes
-    gcTime: 5 * 60 * 1000,    // 5 minutes
-  });
-
-  // Fallback to existing endpoint
-  const fallbackQuery = useQuery<ReminderWithApplication[]>({
-    queryKey: ['reminders', 'due'],
-    queryFn: fetchDueReminders,
-    enabled: !dashboardQuery.data && !dashboardQuery.isFetching, // Only run if dashboard query failed
+    retry: false,
     staleTime: 2 * 60 * 1000,
     gcTime: 5 * 60 * 1000,
   });
 
-  // Transform data and provide unified interface
+  const fallbackQuery = useQuery<ReminderWithApplication[]>({
+    queryKey: ['reminders', 'due'],
+    queryFn: fetchDueReminders,
+    enabled: !dashboardQuery.data && !dashboardQuery.isFetching,
+    staleTime: 2 * 60 * 1000,
+    gcTime: 5 * 60 * 1000,
+  });
+
   const data = useMemo(() => {
     if (dashboardQuery.data) {
-      return dashboardQuery.data; // Use new endpoint data
+      return dashboardQuery.data;
     }
     if (fallbackQuery.data) {
-      return transformDueRemindersToGroups(fallbackQuery.data); // Transform existing data
+      return transformDueRemindersToGroups(fallbackQuery.data);
     }
     return null;
   }, [dashboardQuery.data, fallbackQuery.data]);
@@ -102,7 +97,6 @@ export function useDashboardReminders() {
         fallbackQuery.refetch();
       }
     },
-    // Helper computed values
     hasOverdue: data ? data.overdue.length > 0 : false,
     hasDueToday: data ? data.due_today.length > 0 : false,
     totalDue: data ? data.total_pending : 0,

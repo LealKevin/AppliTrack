@@ -1,4 +1,3 @@
-// Core API response types matching backend exactly
 
 export type ApplicationStatus = 
   | "pending" 
@@ -63,23 +62,21 @@ export interface ApplicationCounts {
   offer_count: number;
 }
 
-// Interview application with rounds data included
 export interface InterviewApplication {
   Application: IApplication;
   Rounds: Round[];
 }
 
-// API Request types - matches backend RoundRequest struct exactly
 export interface CreateRoundRequest {
   title: string;
   type: RoundType;
   status: RoundStatus;
-  date: string;            // Required: full ISO timestamp string
-  notes?: string;          // Optional: will be sent as pointer in backend
-  interviewer?: string;    // Optional: will be sent as pointer in backend
-  duration?: string;       // Optional: will be sent as pointer in backend
-  outcome?: string;        // Optional: will be sent as pointer in backend
-  application_id: string;  // Required: UUID string
+  date: string;
+  notes?: string;
+  interviewer?: string;
+  duration?: string;
+  outcome?: string;
+  application_id: string;
 }
 
 export interface UpdateRoundRequest extends CreateRoundRequest {
@@ -100,10 +97,9 @@ export interface UpdateApplicationRequest extends CreateApplicationRequest {
   id: string;
 }
 
-// Reminder types
 export interface Reminder {
   id: string;
-  reminder_date: string;         // ISO date string
+  reminder_date: string;
   status: ReminderStatus;
   application_id: string;
   created_at: string;
@@ -111,8 +107,8 @@ export interface Reminder {
 }
 
 export interface CreateReminderRequest {
-  reminder_date: string;         // ISO date string
-  status: ReminderStatus;        // Always 'pending' from frontend
+  reminder_date: string;
+  status: ReminderStatus;
   application_id: string;
 }
 
@@ -129,10 +125,9 @@ export interface ReminderWithApplication {
   application_id: string;
   created_at: string;
   updated_at: string;
-  Application: IApplication;     // Joined application data for rich notifications
+  Application: IApplication;
 }
 
-// API Response wrappers
 export interface ApplicationsResponse {
   applications: IApplication[];
 }

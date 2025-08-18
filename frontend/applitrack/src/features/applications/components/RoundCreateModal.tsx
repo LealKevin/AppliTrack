@@ -9,7 +9,7 @@ import { Input } from "@/shared/components/ui/input";
 import { Button } from "@/shared/components/ui/button";
 import { useState } from "react";
 import { useCreateRound } from "../hooks/useRounds";
-import type { RoundType, RoundStatus } from "@/shared/types/api";
+import type { CreateRoundRequest, RoundType, RoundStatus } from "@/shared/types/api";
 import {
 	Popover,
 	PopoverContent,
@@ -19,7 +19,6 @@ import { cn } from "@/shared/lib/utils";
 import { Calendar as CalendarIcon } from "lucide-react";
 import { Calendar } from "@/shared/components/ui/calendar";
 import { format } from "date-fns";
-import { createRoundSchema, parseRoundFormData, useFormValidation } from "@/shared/validation";
 
 type RoundCreateModalProps = {
 	applicationId: string;
@@ -55,29 +54,41 @@ function RoundCreateModal({
 	const [error, setError] = useState<string | null>(null);
 
 	const createRoundMutation = useCreateRound();
-	const { validate, getFieldError, clearErrors } = useFormValidation(createRoundSchema);
 
 	function handleCreateRound(event: React.FormEvent<HTMLFormElement>) {
 		event.preventDefault();
 		setError(null);
-		clearErrors();
 		
 		const form = event.currentTarget as HTMLFormElement;
 		const formData = new FormData(form);
 
-		// Parse FormData and prepare for validation
-		const selectedDate = date ? date.toISOString() : new Date().toISOString();
-		const roundData = parseRoundFormData(formData, applicationId, type, status, selectedDate);
+		const title = formData.get("title") as string;
+		const notes = formData.get("notes") as string;
+		const interviewer = formData.get("interviewer") as string;
+		const duration = formData.get("duration") as string;
+		const outcome = formData.get("outcome") as string;
 		
-		const validation = validate(roundData);
-		
-		if (!validation.success) {
-			return; // Validation errors will be displayed via getFieldError
+		if (!title?.trim() || title.trim().length < 2) {
+			setError("Round title is required and must be at least 2 characters");
+			return;
 		}
+
+		const roundData: CreateRoundRequest = {
+			title: title.trim(),
+			type,
+			status,
+			date: date ? date.toISOString() : new Date().toISOString(),
+			notes: notes?.trim() || undefined,
+			interviewer: interviewer?.trim() || undefined,
+			duration: duration?.trim() || undefined,
+			outcome: outcome?.trim() || undefined,
+			application_id: applicationId,
+		};
+
 
 		createRoundMutation.mutate({
 			applicationId,
-			roundData: validation.data!
+			roundData
 		}, {
 			onSuccess: () => {
 				onSuccess?.();
@@ -121,20 +132,13 @@ function RoundCreateModal({
 				</DialogHeader>
 				<form onSubmit={handleCreateRound}>
 					<div className="grid gap-4 py-4">
-						{/* Title */}
-						<div>
 							<Input 
-								name="title" 
-								placeholder="Round title (e.g., Technical Interview)" 
-								className={getFieldError("title") ? "border-red-500" : ""}
-							/>
-							{getFieldError("title") && (
-								<span className="text-sm text-red-600 mt-1 block">{getFieldError("title")}</span>
-							)}
-						</div>
+							name="title" 
+							placeholder="Round title (e.g., Technical Interview)" 
+							required
+						/>
 
-						{/* Type Selection */}
-						<div>
+							<div>
 							<label className="text-sm font-medium text-gray-700 mb-2 block">
 								Round Type
 							</label>
@@ -153,8 +157,7 @@ function RoundCreateModal({
 							</div>
 						</div>
 
-						{/* Status Selection */}
-						<div>
+							<div>
 							<label className="text-sm font-medium text-gray-700 mb-2 block">
 								Status
 							</label>
@@ -173,8 +176,7 @@ function RoundCreateModal({
 							</div>
 						</div>
 
-						{/* Date */}
-						<div>
+							<div>
 							<label className="text-sm font-medium text-gray-700 mb-2 block">
 								Date (Optional)
 							</label>
@@ -203,8 +205,7 @@ function RoundCreateModal({
 							</Popover>
 						</div>
 
-						{/* Optional Fields */}
-						<Input 
+							<Input 
 							name="interviewer" 
 							placeholder="Interviewer name (optional)" 
 						/>
@@ -219,8 +220,7 @@ function RoundCreateModal({
 							placeholder="Outcome (optional)" 
 						/>
 
-						{/* Notes */}
-						<textarea 
+							<textarea 
 							className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" 
 							placeholder="Notes (optional)" 
 							name="notes" 

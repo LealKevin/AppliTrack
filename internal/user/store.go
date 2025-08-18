@@ -27,6 +27,7 @@ type Store interface {
 	GetOneByID(userID uuid.UUID) (User, error)
 	GetOneByEmail(email string) (User, error)
 	CreateOne(params CreateUserParams) (User, error)
+	DeleteByID(userID uuid.UUID) error
 }
 
 type PostgresUserStore struct {
@@ -89,6 +90,11 @@ func (s *PostgresUserStore) CreateOne(params CreateUserParams) (User, error) {
 	}
 
 	return mapFromDBUser(dbUser), nil
+}
+
+func (s *PostgresUserStore) DeleteByID(userID uuid.UUID) error {
+	ctx := context.Background()
+	return s.db.DeleteUserByID(ctx, userID)
 }
 
 func mapFromDBUser(dbUser db.User) User {

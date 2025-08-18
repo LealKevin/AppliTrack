@@ -9,7 +9,7 @@ import { Input } from "@/shared/components/ui/input";
 import { Button } from "@/shared/components/ui/button";
 import { useState } from "react";
 import useUpdateApp from "../hooks/useUpdateApp";
-import type { IApplication } from "../pages/ApplicationsPage";
+import type { IApplication } from "@/shared/types/api";
 import {
 	Popover,
 	PopoverContent,

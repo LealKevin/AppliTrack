@@ -16,7 +16,7 @@ const iconWebsite = (
 	</svg>
 );
 
-import type { IApplication } from "../pages/ApplicationsPage";
+import type { IApplication } from "@/shared/types/api";
 
 type ApplicationRowProps = {
 	application: IApplication;

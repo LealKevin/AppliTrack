@@ -11,7 +11,7 @@ import { Label } from "@/shared/components/ui/label";
 import { Button } from "@/shared/components/ui/button";
 import axios from "axios";
 import { useState } from "react";
-import type { IApplication } from "@/features/applications/pages/ApplicationsPage";
+import type { IApplication } from "@/shared/types/api";
 
 const iconPlus = (
   <svg

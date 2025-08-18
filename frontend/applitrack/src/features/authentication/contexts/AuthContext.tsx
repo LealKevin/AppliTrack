@@ -6,7 +6,7 @@ import {
   type UserType,
 } from "@/shared/utils/apiCalls";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { createContext, useContext, useMemo, type ReactNode } from "react";
+import { createContext, useContext, useMemo, useCallback, type ReactNode } from "react";
 
 interface AuthContexType {
   user: UserType | null;
@@ -27,10 +27,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const {
     data: user,
     isLoading: isLoadingUser,
-    // isFetching: isFetchingUser,
     isError,
     isSuccess,
-    // error,
   } = useQuery<UserType>({
     queryKey: ["currentUser"],
     queryFn: getUser,
@@ -41,23 +39,27 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const isAuthenticated = Boolean(isSuccess && user);
 
-  const login = async (input: UserInput) => {
+  const login = useCallback(async (input: UserInput) => {
     try {
       await connectUser(input);
       await queryClient.invalidateQueries({ queryKey: ["currentUser"] });
+      // Invalidate all application-related queries to ensure fresh data after login
+      await queryClient.invalidateQueries({ queryKey: ["applications"] });
+      await queryClient.invalidateQueries({ queryKey: ["appsCount"] });
+      await queryClient.invalidateQueries({ queryKey: ["reminders"] });
     } catch (error) {
       console.error("Login failed: ", error);
     }
-  };
+  }, [queryClient]);
 
-  const logout = async () => {
+  const logout = useCallback(async () => {
     try {
       await logoutUser();
       await queryClient.invalidateQueries({ queryKey: ["currentUser"] });
     } catch (error) {
       console.error("Logout failed: ", error);
     }
-  };
+  }, [queryClient]);
 
   const value = useMemo(
     () => ({

@@ -36,6 +36,7 @@ func (h *Handler) RegisterRoutes(e *echo.Group) {
 func (h *Handler) RegisterProtectedRoutes(e *echo.Group) {
 	e.GET("/users", h.GetAllUsers)
 	e.GET("/user/current", h.GetCurrentUser)
+	e.DELETE("/user/current", h.DeleteCurrentUser)
 }
 
 type RegisterRequest struct {
@@ -192,6 +193,33 @@ func (h *Handler) GetCSRFToken(c echo.Context) error {
 	return c.JSON(http.StatusOK, map[string]string{
 		"token": c.Get("csrf").(string),
 	})
+}
+
+func (h *Handler) DeleteCurrentUser(c echo.Context) error {
+	userIDValue := c.Get("userID")
+	if userIDValue == nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, "invalid user")
+	}
+
+	userID := userIDValue.(uuid.UUID)
+
+	err := h.Service.DeleteUser(userID)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "failed to delete user")
+	}
+
+	c.SetCookie(&http.Cookie{
+		Name:     "jwt",
+		Value:    "",
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   !isDevelopment(),
+		SameSite: http.SameSiteLaxMode,
+		Expires:  time.Unix(0, 0),
+		MaxAge:   -1,
+	})
+
+	return c.JSON(http.StatusOK, map[string]string{"message": "user deleted successfully"})
 }
 
 func mapToUserResponse(user User) userResponse {

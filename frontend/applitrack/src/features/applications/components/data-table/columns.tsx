@@ -169,7 +169,6 @@ export const createColumns = ({ onEdit, onDelete, onManageRounds, onSetReminder,
     cell: ({ row }) => {
       const application = row.original
       
-      // Show current round status for interview-stage applications
       if (application.status === "interview_scheduled") {
         return (
           <div className="flex flex-col space-y-1">

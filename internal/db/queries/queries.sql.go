@@ -192,6 +192,15 @@ func (q *Queries) DeleteRound(ctx context.Context, id uuid.UUID) error {
 	return err
 }
 
+const deleteUserByID = `-- name: DeleteUserByID :exec
+DELETE FROM users WHERE id = $1
+`
+
+func (q *Queries) DeleteUserByID(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.Exec(ctx, deleteUserByID, id)
+	return err
+}
+
 const getAllApplications = `-- name: GetAllApplications :many
 SELECT id, title_application, company, location, sent_date, status, notes, url_application, user_id, created_at, updated_at FROM applications WHERE user_id = $1
 `

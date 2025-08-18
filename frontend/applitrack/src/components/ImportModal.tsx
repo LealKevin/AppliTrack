@@ -91,7 +91,6 @@ export function ImportModal({ isOpen, onClose, onImport, isImporting = false, re
         <div className="space-y-6">
           {!showResults && (
             <>
-              {/* File Upload Section */}
               <div className="space-y-4">
                 <div
                   className={cn(
@@ -158,7 +157,6 @@ export function ImportModal({ isOpen, onClose, onImport, isImporting = false, re
 
           {showResults && (
             <>
-              {/* Results Summary */}
               <div className="grid grid-cols-3 gap-4">
                 <div className="text-center p-4 rounded-lg bg-muted/50">
                   <div className="text-2xl font-bold text-muted-foreground">{result.total_records}</div>
@@ -180,7 +178,6 @@ export function ImportModal({ isOpen, onClose, onImport, isImporting = false, re
                 </div>
               </div>
 
-              {/* Success Message */}
               {hasSuccess && !hasErrors && (
                 <div className="flex items-center gap-3 p-4 rounded-lg bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800">
                   <IconCheck className="h-6 w-6 text-green-600 dark:text-green-400" />
@@ -195,7 +192,6 @@ export function ImportModal({ isOpen, onClose, onImport, isImporting = false, re
                 </div>
               )}
 
-              {/* Mixed Results */}
               {hasSuccess && hasErrors && (
                 <div className="flex items-center gap-3 p-4 rounded-lg bg-yellow-50 dark:bg-yellow-950/20 border border-yellow-200 dark:border-yellow-800">
                   <IconAlertCircle className="h-6 w-6 text-yellow-600 dark:text-yellow-400" />
@@ -210,7 +206,6 @@ export function ImportModal({ isOpen, onClose, onImport, isImporting = false, re
                 </div>
               )}
 
-              {/* Error Details */}
               {hasErrors && (
                 <div className="space-y-3">
                   <div className="flex items-center gap-2">
@@ -245,7 +240,6 @@ export function ImportModal({ isOpen, onClose, onImport, isImporting = false, re
             </>
           )}
 
-          {/* CSV Format Instructions */}
           <div className="space-y-4">
             <div className="flex items-center gap-2">
               <IconInfoCircle className="h-4 w-4 text-blue-500" />
@@ -286,7 +280,6 @@ export function ImportModal({ isOpen, onClose, onImport, isImporting = false, re
             </div>
           </div>
 
-          {/* Actions */}
           <div className="flex justify-end gap-2">
             {showResults && (
               <Button 

@@ -11,7 +11,6 @@ async function fetchCSRFToken(): Promise<string> {
     });
     csrfToken = response.data.token;
   }
-  console.log("CSRF Token fetched:", csrfToken);
   return csrfToken;
 }
 
@@ -24,8 +23,8 @@ apiClient.interceptors.request.use(async (config) => {
     try {
       const token = await fetchCSRFToken();
       config.headers['X-CSRF-Token'] = token;
-    } catch (error) {
-      console.error('Failed to fetch CSRF token:', error);
+    } catch {
+      // Silently ignore CSRF token fetch errors
     }
   }
   return config;
@@ -164,6 +163,10 @@ export async function getUser(): Promise<UserType> {
   return response.data;
 }
 
+export async function deleteUser(): Promise<void> {
+  await apiClient.delete("/api/user/current");
+}
+
 export async function getAppsCount(): Promise<ApplicationCounts> {
   const response = await apiClient.get<ApplicationCounts>("/api/applications/count");
   return response.data;
@@ -189,7 +192,6 @@ export async function importApplicationsFromCSV(file: File): Promise<ImportResul
   return response.data;
 }
 
-// Rounds API functions
 export async function fetchRounds(applicationId: string): Promise<Round[]> {
   const response = await apiClient.get<{ Application: any; Rounds: Round[] | null }>(`/api/applications/${applicationId}/rounds`);
   return response.data.Rounds || [];
@@ -216,7 +218,6 @@ export async function fetchInterviewApplications(): Promise<InterviewApplication
 
 // Reminder API functions
 export async function createReminder(reminderData: CreateReminderRequest): Promise<Reminder> {
-  console.log("Creating reminder with data:", reminderData);
   
   // Transform data to match backend ReminderReq struct
   const backendRequest = {
@@ -225,7 +226,6 @@ export async function createReminder(reminderData: CreateReminderRequest): Promi
     application_id: reminderData.application_id
   };
   
-  console.log("Transformed request for backend:", backendRequest);
   const response = await apiClient.post<Reminder>("/api/reminders", backendRequest);
   return response.data;
 }
@@ -240,11 +240,9 @@ export async function updateReminder(reminderId: string, reminderData: UpdateRem
   const backendRequest = {
     status: reminderData.status || "pending",
     reminder_date: new Date(reminderData.reminder_date).toISOString(),
-    // Backend expects application_id but doesn't use it for updates, so provide dummy if missing
     application_id: reminderData.application_id || "00000000-0000-0000-0000-000000000000"
   };
   
-  console.log("Updating reminder with data:", backendRequest);
   const response = await apiClient.put<Reminder>(`/api/reminders/${reminderId}`, backendRequest);
   return response.data;
 }

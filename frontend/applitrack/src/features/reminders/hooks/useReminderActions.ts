@@ -7,28 +7,24 @@ export function useReminderActions() {
   const queryClient = useQueryClient();
   const toast = useToast();
 
-  // Mark reminder as completed
   const markDoneMutation = useMutation({
     mutationFn: completeReminder,
     onSuccess: () => {
       toast.success("Reminder marked as completed");
-      // Invalidate all reminder queries
       queryClient.invalidateQueries({ queryKey: ["reminders"] });
     },
-    onError: (error) => {
+    onError: () => {
       toast.error("Failed to complete reminder");
-      console.error("Complete reminder error:", error);
     }
   });
 
-  // Snooze reminder for specified number of days
   const snoozeMutation = useMutation({
     mutationFn: ({ reminderId, days }: { reminderId: string; days: number }) => {
       const newDate = new Date();
       newDate.setDate(newDate.getDate() + days);
       
       return updateReminder(reminderId, {
-        reminder_date: newDate.toISOString().split('T')[0], // YYYY-MM-DD format
+        reminder_date: newDate.toISOString().split('T')[0],
         status: 'pending'
       });
     },
@@ -40,13 +36,11 @@ export function useReminderActions() {
       toast.success(`Reminder snoozed for ${daysLabel}`);
       queryClient.invalidateQueries({ queryKey: ["reminders"] });
     },
-    onError: (error) => {
+    onError: () => {
       toast.error("Failed to snooze reminder");
-      console.error("Snooze reminder error:", error);
     }
   });
 
-  // Quick action functions
   const markDone = (reminderId: string) => {
     markDoneMutation.mutate(reminderId);
   };

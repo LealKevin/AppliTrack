@@ -51,20 +51,18 @@ export default function RoundCard({ round }: RoundCardProps) {
   const updateRoundMutation = useUpdateRound();
   const deleteRoundMutation = useDeleteRound();
 
-  // Sync editedRound state when round prop changes
   useEffect(() => {
     setEditedRound(round);
   }, [round]);
 
   const handleSave = () => {
     updateRoundMutation.mutate(
-      { roundId: round.id, roundData: editedRound },
+      { roundId: round.id, roundData: { ...editedRound, date: editedRound.date || new Date().toISOString() } },
       {
         onSuccess: () => {
           setIsEditing(false);
         },
-        onError: (error) => {
-          console.error("Failed to update round:", error);
+        onError: () => {
         }
       }
     );
@@ -139,7 +137,7 @@ export default function RoundCard({ round }: RoundCardProps) {
                   <Input
                     id="date"
                     type="date"
-                    value={editedRound.date}
+                    value={editedRound.date || ''}
                     onChange={(e) => setEditedRound({ ...editedRound, date: e.target.value })}
                     className="mt-1"
                   />

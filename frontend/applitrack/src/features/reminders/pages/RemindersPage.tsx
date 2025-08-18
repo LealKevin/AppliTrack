@@ -18,11 +18,9 @@ const RemindersPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [timeFilter, setTimeFilter] = useState<TimeFilter>('today');
   
-  // Apply search and time filters
   const filteredReminders = useMemo(() => {
     let filtered = reminders;
     
-    // Apply search filter
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter(reminder => {
@@ -36,7 +34,6 @@ const RemindersPage: React.FC = () => {
       });
     }
     
-    // Apply time filter
     if (timeFilter !== 'all') {
       const now = new Date();
       const today = startOfDay(now);

@@ -1,8 +1,7 @@
 import { useAuth } from "../contexts/AuthContext";
-import { useNavigate, Outlet } from "react-router-dom";
+import { Navigate, Outlet } from "react-router-dom";
 
 export function CheckUser() {
-	const navigate = useNavigate();
 	const { isAuthenticated, isLoading } = useAuth();
 
 	if (isLoading) {
@@ -10,8 +9,7 @@ export function CheckUser() {
 	}
 
 	if (isAuthenticated) {
-		navigate("/");
-		return;
+		return <Navigate to="/" replace />;
 	}
 
 	return <Outlet />;
