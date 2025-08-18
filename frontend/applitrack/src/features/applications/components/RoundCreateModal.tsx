@@ -77,12 +77,12 @@ function RoundCreateModal({
 			title: title.trim(),
 			type,
 			status,
-			date: date ? date.toISOString() : new Date().toISOString(), // Full ISO timestamp required
+			date: date ? date.toISOString() : new Date().toISOString(),
 			notes: notes?.trim() || undefined,
 			interviewer: interviewer?.trim() || undefined,
 			duration: duration?.trim() || undefined,
 			outcome: outcome?.trim() || undefined,
-			application_id: applicationId, // Required field
+			application_id: applicationId,
 		};
 
 
@@ -132,15 +132,13 @@ function RoundCreateModal({
 				</DialogHeader>
 				<form onSubmit={handleCreateRound}>
 					<div className="grid gap-4 py-4">
-						{/* Title */}
-						<Input 
+							<Input 
 							name="title" 
 							placeholder="Round title (e.g., Technical Interview)" 
 							required
 						/>
 
-						{/* Type Selection */}
-						<div>
+							<div>
 							<label className="text-sm font-medium text-gray-700 mb-2 block">
 								Round Type
 							</label>
@@ -159,8 +157,7 @@ function RoundCreateModal({
 							</div>
 						</div>
 
-						{/* Status Selection */}
-						<div>
+							<div>
 							<label className="text-sm font-medium text-gray-700 mb-2 block">
 								Status
 							</label>
@@ -179,8 +176,7 @@ function RoundCreateModal({
 							</div>
 						</div>
 
-						{/* Date */}
-						<div>
+							<div>
 							<label className="text-sm font-medium text-gray-700 mb-2 block">
 								Date (Optional)
 							</label>
@@ -209,8 +205,7 @@ function RoundCreateModal({
 							</Popover>
 						</div>
 
-						{/* Optional Fields */}
-						<Input 
+							<Input 
 							name="interviewer" 
 							placeholder="Interviewer name (optional)" 
 						/>
@@ -225,8 +220,7 @@ function RoundCreateModal({
 							placeholder="Outcome (optional)" 
 						/>
 
-						{/* Notes */}
-						<textarea 
+							<textarea 
 							className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" 
 							placeholder="Notes (optional)" 
 							name="notes" 

@@ -1,4 +1,4 @@
-import type { IApplication } from "../pages/ApplicationsPage";
+import type { IApplication } from "@/shared/types/api";
 import { updateApplication } from "@/shared/utils/apiCalls";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 

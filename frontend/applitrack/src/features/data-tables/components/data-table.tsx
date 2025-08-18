@@ -45,7 +45,7 @@ import useApplications from "@/features/applications/hooks/useApplications";
 import ApplicationCreateModal from "@/features/applications/components/ApplicationCreateModal";
 import ApplicationRemoveModal from "@/features/applications/components/ApplicationRemoveModal";
 import useDeleteApp from "@/features/applications/hooks/useDeleteApp";
-import type { IApplication } from "@/features/applications/pages/ApplicationsPage";
+import type { IApplication } from "@/shared/types/api";
 import { formatDateToDDMMYYYY } from "@/shared/utils/dateFormat";
 import ApplicationEditModal from "@/features/applications/components/ApplicationEditModal";
 import useUpdateApp from "@/features/applications/hooks/useUpdateApp";

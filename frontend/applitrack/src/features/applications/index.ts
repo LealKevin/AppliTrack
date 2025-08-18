@@ -1,6 +1,4 @@
-// Applications Feature Public API
 export { default as ApplicationsPage } from './pages/ApplicationsPage';
-export { Temp } from './pages/Temp';
 export { default as useApplications } from './hooks/useApplications';
 export { default as useCreateApplication } from './hooks/useCreateApplication';
 export { default as useDeleteApp } from './hooks/useDeleteApp';
@@ -16,5 +14,4 @@ export { default as TrashButton } from './components/TrashButton';
 export { default as StatusButton } from './components/StatusButton';
 export { default as WebSiteButton } from './components/WebSiteButton';
 
-// Re-export types
-export type { IApplication } from './pages/ApplicationsPage';
+export type { IApplication } from '@/shared/types/api';

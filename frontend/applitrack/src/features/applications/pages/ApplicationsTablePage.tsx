@@ -1,12 +1,11 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useSearchParams, useNavigate as useRouterNavigate } from "react-router-dom"
+import { useSearchParams } from "react-router-dom"
 
 import { Tabs, TabsContent } from "@/shared/components/ui/tabs"
 import { ApplicationsDataTable } from "../components/data-table/applications-data-table"
 import { createColumns } from "../components/data-table/columns"
-// import { DataTableToolbar } from "../components/data-table/data-table-toolbar"
 
 import useApplications from "@/features/applications/hooks/useApplications"
 import useDeleteApp from "@/features/applications/hooks/useDeleteApp"
@@ -25,7 +24,6 @@ import type { IApplication } from "@/shared/types/api"
 
 export default function ApplicationsTablePage() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const routerNavigate = useRouterNavigate();
   const highlightAppId = searchParams.get('highlight');
   const createParam = searchParams.get('create');
   const [highlightedAppId, setHighlightedAppId] = useState<string | null>(null);
@@ -94,7 +92,7 @@ export default function ApplicationsTablePage() {
   }, [highlightedAppId]);
   
   // Add click handler to clear highlighting
-  const handlePageClick = (e: React.MouseEvent) => {
+  const handlePageClick = () => {
     if (highlightedAppId) {
       setHighlightedAppId(null);
     }

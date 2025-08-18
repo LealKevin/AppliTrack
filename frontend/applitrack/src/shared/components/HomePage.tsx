@@ -17,18 +17,17 @@ function HomePage() {
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-7xl mx-auto p-6 space-y-8">
-        
-        {/* Header Section */}
+
         <div className="space-y-2">
           <h1 className="text-2xl font-semibold text-foreground">
             Welcome back
           </h1>
           <p className="text-muted-foreground">
-            {today.toLocaleDateString('en-US', { 
-              weekday: 'long', 
-              year: 'numeric', 
-              month: 'long', 
-              day: 'numeric' 
+            {today.toLocaleDateString('en-US', {
+              weekday: 'long',
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric'
             })}
           </p>
           {stats && stats.applicationsThisWeek > 0 && (
@@ -41,10 +40,8 @@ function HomePage() {
           )}
         </div>
 
-        {/* Key Metrics Row */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          
-          {/* Applications This Week */}
+
           <Card className="shadow-sm border-0 bg-card">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -67,7 +64,6 @@ function HomePage() {
             </CardContent>
           </Card>
 
-          {/* Total Applications */}
           <Card className="shadow-sm border-0 bg-card">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -90,7 +86,6 @@ function HomePage() {
             </CardContent>
           </Card>
 
-          {/* Response Rate */}
           <Card className="shadow-sm border-0 bg-card">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -126,7 +121,6 @@ function HomePage() {
             </CardContent>
           </Card>
 
-          {/* Active Pipeline */}
           <Card className="shadow-sm border-0 bg-card">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -139,8 +133,8 @@ function HomePage() {
               ) : (
                 <div className="space-y-1">
                   <div className="text-2xl font-semibold">
-                    {(stats?.statusCounts.interview_scheduled_count || 0) + 
-                     (stats?.statusCounts.interviewing_count || 0)}
+                    {(stats?.statusCounts.interview_scheduled_count || 0) +
+                      (stats?.statusCounts.interviewing_count || 0)}
                   </div>
                   <div className="text-xs text-muted-foreground">
                     Active interviews
@@ -151,7 +145,6 @@ function HomePage() {
           </Card>
         </div>
 
-        {/* Today's Actions */}
         {!actionsLoading && thisWeekActions.length > 0 && (
           <Card className="shadow-sm border-0 bg-card">
             <CardHeader>
@@ -163,13 +156,12 @@ function HomePage() {
               {thisWeekActions.slice(0, 3).map(action => (
                 <div key={action.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
                   <div className="flex items-center gap-3">
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                      action.urgency === 'overdue' 
-                        ? 'bg-red-100 text-red-600' 
-                        : action.urgency === 'today'
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center ${action.urgency === 'overdue'
+                      ? 'bg-red-100 text-red-600'
+                      : action.urgency === 'today'
                         ? 'bg-orange-100 text-orange-600'
                         : 'bg-blue-100 text-blue-600'
-                    }`}>
+                      }`}>
                       {action.type === 'interview' ? (
                         <User className="h-4 w-4" />
                       ) : (
@@ -181,8 +173,8 @@ function HomePage() {
                         {action.title}
                       </div>
                       <div className="text-xs text-muted-foreground">
-                        {action.company} • {new Date(action.date).toLocaleDateString('en-US', { 
-                          month: 'short', 
+                        {action.company} • {new Date(action.date).toLocaleDateString('en-US', {
+                          month: 'short',
                           day: 'numeric',
                           ...(action.urgency === 'later' && { year: 'numeric' })
                         })}
@@ -214,37 +206,34 @@ function HomePage() {
         )}
 
 
-        {/* Analytics Section */}
         <div className="grid lg:grid-cols-3 gap-6">
-          {/* Application Trends Chart */}
           <div className="lg:col-span-2">
             <ChartAreaInteractive />
+
+            <div className="mt-4 flex flex-col sm:flex-row gap-4 justify-center">
+              <Link to="/applications?create=true" className="">
+                <Button className=" h-12 text-base font-medium">
+                  <Plus className="h-5 w-5 mr-2" />
+                  Add New Application
+                </Button>
+              </Link>
+
+              <div className="flex gap-2">
+                <Link to="/applications">
+                  <Button variant="outline" className="h-12 px-6">
+                    <FileText className="h-4 w-4 mr-2" />
+                    View All
+                  </Button>
+                </Link>
+              </div>
+            </div>
           </div>
-          
-          {/* Status Pipeline Chart */}
+
           <div className="lg:col-span-1">
             <StatusPipelineChart />
           </div>
         </div>
 
-        {/* Quick Actions */}
-        <div className="flex flex-col sm:flex-row gap-4">
-          <Link to="/applications?create=true" className="flex-1">
-            <Button className="w-full h-12 text-base font-medium">
-              <Plus className="h-5 w-5 mr-2" />
-              Add New Application
-            </Button>
-          </Link>
-          
-          <div className="flex gap-2">
-            <Link to="/applications">
-              <Button variant="outline" className="h-12 px-6">
-                <FileText className="h-4 w-4 mr-2" />
-                View All
-              </Button>
-            </Link>
-          </div>
-        </div>
 
       </div>
     </div>

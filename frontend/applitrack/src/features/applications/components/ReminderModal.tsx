@@ -36,7 +36,7 @@ function ReminderModal({
     existingReminderDate ? new Date(existingReminderDate) : undefined
   );
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
-  
+
   const { createReminderForApplication, updateReminder, deleteReminder, createReminder } = useReminders();
   const toast = useToast();
 
@@ -50,26 +50,25 @@ function ReminderModal({
       label: "1 week",
       date: new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
     });
-    
+
     suggestions.push({
-      label: "2 weeks", 
+      label: "2 weeks",
       date: new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000)
     });
-    
+
     suggestions.push({
       label: "1 month",
       date: new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000)
     });
 
-    // Smart suggestions based on application status
     if (application.status === "rejected") {
       suggestions.push({
-        label: "6 months (recommended for re-apply)",
+        label: "6 months",
         date: new Date(now.getTime() + 180 * 24 * 60 * 60 * 1000)
       });
     } else if (application.status === "pending" || application.status === "sent") {
       suggestions.push({
-        label: "3 weeks (recommended for follow-up)",
+        label: "3 weeks",
         date: new Date(now.getTime() + 21 * 24 * 60 * 60 * 1000)
       });
     }
@@ -108,7 +107,7 @@ function ReminderModal({
     } else {
       // Create new reminder
       createReminderForApplication(application.id, isoDate);
-      
+
       // Handle success/error through the hook's mutation callbacks
       if (createReminder.isSuccess) {
         toast.success("Reminder set successfully");
@@ -208,8 +207,8 @@ function ReminderModal({
 
         <DialogFooter className="gap-2">
           {existingReminderId && (
-            <Button 
-              variant="destructive" 
+            <Button
+              variant="destructive"
               onClick={handleDelete}
               disabled={deleteReminder.isPending}
             >
@@ -219,7 +218,7 @@ function ReminderModal({
           <Button variant="outline" onClick={handleClose}>
             Cancel
           </Button>
-          <Button 
+          <Button
             onClick={handleSave}
             disabled={!selectedDate || updateReminder.isPending}
           >

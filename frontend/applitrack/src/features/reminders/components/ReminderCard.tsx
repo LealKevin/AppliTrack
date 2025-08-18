@@ -8,7 +8,7 @@ import { useNavigate } from "react-router-dom";
 interface ReminderCardProps {
   reminder: ReminderWithApplication;
   urgency: ReminderUrgency;
-  compact?: boolean; // For notification panel vs dashboard
+  compact?: boolean;
 }
 
 function ReminderCard({ reminder, urgency, compact = false }: ReminderCardProps) {

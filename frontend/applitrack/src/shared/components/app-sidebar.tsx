@@ -100,7 +100,6 @@ const data = {
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { user } = useAuth();
   const { toggleSidebar, state } = useSidebar();
-  console.log("user sidebar", user);
   
   const handleHeaderClick = () => {
     if (state === "collapsed") {
@@ -112,13 +111,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     <Sidebar className="border-r" collapsible="icon" {...props}>
       <SidebarHeader>
         <div className="flex items-center justify-center py-4">
-          {/* Expanded state - centered icon and text */}
           <div className="flex items-center gap-2 group-data-[collapsible=icon]:hidden">
             <BriefcaseBusiness className="!size-5" />
             <span className="font-semibold">ApplyTrack</span>
           </div>
           
-          {/* Collapsed state - centered icon only */}
           <BriefcaseBusiness 
             className="!size-5 hidden group-data-[collapsible=icon]:block hover:scale-110 transition-transform cursor-pointer" 
             onClick={handleHeaderClick}

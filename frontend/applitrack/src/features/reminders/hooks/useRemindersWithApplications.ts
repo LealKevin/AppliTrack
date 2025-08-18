@@ -14,20 +14,13 @@ export const useRemindersWithApplications = () => {
     queryFn: () => fetchApplications(""), // Fetch all applications
   });
 
-  // Debug logging
-  console.log('useRemindersWithApplications - reminders:', remindersQuery.data);
-  console.log('useRemindersWithApplications - applications:', applicationsQuery.data);
-  console.log('Application IDs in array:', applicationsQuery.data?.map(app => app.Application.id));
 
-  // Combine reminders with application data
   const remindersWithApplications: ReminderWithApplication[] = 
     remindersQuery.data?.map((reminder: Reminder) => {
-      console.log('Looking for application with ID:', reminder.application_id);
       const interviewApp = applicationsQuery.data?.find(
         (app: InterviewApplication) => app.Application.id === reminder.application_id
       );
       const application = interviewApp?.Application;
-      console.log('Found application:', application);
       
       return {
         ...reminder,

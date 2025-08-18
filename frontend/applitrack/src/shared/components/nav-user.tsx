@@ -1,4 +1,4 @@
-import { IconDotsVertical, IconLogout } from "@tabler/icons-react";
+import { IconDotsVertical, IconLogout, IconSettings } from "@tabler/icons-react";
 
 import { Avatar, AvatarFallback } from "@/shared/components/ui/avatar";
 import {
@@ -17,6 +17,7 @@ import {
 } from "@/shared/components/ui/sidebar";
 import type { UserType } from "@/shared/utils/apiCalls";
 import { useAuth } from "@/features/authentication/contexts/AuthContext";
+import { UserProfileSheet } from "@/shared/components/UserProfileSheet";
 
 type NavUserProps = {
 	user: UserType | null;
@@ -80,6 +81,12 @@ export function NavUser({ user }: NavUserProps) {
 							</div>
 						</DropdownMenuLabel>
 						<DropdownMenuSeparator />
+						<UserProfileSheet user={user}>
+							<DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+								<IconSettings />
+								Profile Settings
+							</DropdownMenuItem>
+						</UserProfileSheet>
 						<DropdownMenuItem
 							onClick={() => {
 								logout();

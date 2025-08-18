@@ -93,3 +93,7 @@ func (s *UserService) GetUserByID(userID uuid.UUID) (User, error) {
 func (s *UserService) GetAllUsers() ([]User, error) {
 	return s.Store.GetAll()
 }
+
+func (s *UserService) DeleteUser(userID uuid.UUID) error {
+	return s.Store.DeleteByID(userID)
+}

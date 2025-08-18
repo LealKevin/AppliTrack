@@ -50,6 +50,9 @@ SELECT * FROM users WHERE email = $1;
 -- name: GetOneUserByID :one
 SELECT * FROM users WHERE id = $1;
 
+-- name: DeleteUserByID :exec
+DELETE FROM users WHERE id = $1;
+
 -- name: GetAnalyticsOverview :one
 SELECT 
     COUNT(*) as total_applications,
