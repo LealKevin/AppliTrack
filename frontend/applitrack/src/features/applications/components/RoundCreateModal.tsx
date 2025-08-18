@@ -9,7 +9,7 @@ import { Input } from "@/shared/components/ui/input";
 import { Button } from "@/shared/components/ui/button";
 import { useState } from "react";
 import { useCreateRound } from "../hooks/useRounds";
-import type { CreateRoundRequest, RoundType, RoundStatus } from "@/shared/types/api";
+import type { RoundType, RoundStatus } from "@/shared/types/api";
 import {
 	Popover,
 	PopoverContent,
@@ -19,6 +19,7 @@ import { cn } from "@/shared/lib/utils";
 import { Calendar as CalendarIcon } from "lucide-react";
 import { Calendar } from "@/shared/components/ui/calendar";
 import { format } from "date-fns";
+import { createRoundSchema, parseRoundFormData, useFormValidation } from "@/shared/validation";
 
 type RoundCreateModalProps = {
 	applicationId: string;
@@ -54,41 +55,29 @@ function RoundCreateModal({
 	const [error, setError] = useState<string | null>(null);
 
 	const createRoundMutation = useCreateRound();
+	const { validate, getFieldError, clearErrors } = useFormValidation(createRoundSchema);
 
 	function handleCreateRound(event: React.FormEvent<HTMLFormElement>) {
 		event.preventDefault();
 		setError(null);
+		clearErrors();
 		
 		const form = event.currentTarget as HTMLFormElement;
 		const formData = new FormData(form);
 
-		const title = formData.get("title") as string;
-		const notes = formData.get("notes") as string;
-		const interviewer = formData.get("interviewer") as string;
-		const duration = formData.get("duration") as string;
-		const outcome = formData.get("outcome") as string;
+		// Parse FormData and prepare for validation
+		const selectedDate = date ? date.toISOString() : new Date().toISOString();
+		const roundData = parseRoundFormData(formData, applicationId, type, status, selectedDate);
 		
-		if (!title?.trim() || title.trim().length < 2) {
-			setError("Round title is required and must be at least 2 characters");
-			return;
+		const validation = validate(roundData);
+		
+		if (!validation.success) {
+			return; // Validation errors will be displayed via getFieldError
 		}
-
-		const roundData: CreateRoundRequest = {
-			title: title.trim(),
-			type,
-			status,
-			date: date ? date.toISOString() : new Date().toISOString(), // Full ISO timestamp required
-			notes: notes?.trim() || undefined,
-			interviewer: interviewer?.trim() || undefined,
-			duration: duration?.trim() || undefined,
-			outcome: outcome?.trim() || undefined,
-			application_id: applicationId, // Required field
-		};
-
 
 		createRoundMutation.mutate({
 			applicationId,
-			roundData
+			roundData: validation.data!
 		}, {
 			onSuccess: () => {
 				onSuccess?.();
@@ -133,11 +122,16 @@ function RoundCreateModal({
 				<form onSubmit={handleCreateRound}>
 					<div className="grid gap-4 py-4">
 						{/* Title */}
-						<Input 
-							name="title" 
-							placeholder="Round title (e.g., Technical Interview)" 
-							required
-						/>
+						<div>
+							<Input 
+								name="title" 
+								placeholder="Round title (e.g., Technical Interview)" 
+								className={getFieldError("title") ? "border-red-500" : ""}
+							/>
+							{getFieldError("title") && (
+								<span className="text-sm text-red-600 mt-1 block">{getFieldError("title")}</span>
+							)}
+						</div>
 
 						{/* Type Selection */}
 						<div>

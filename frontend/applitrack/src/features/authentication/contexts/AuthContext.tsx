@@ -71,7 +71,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   );
 
   if (isLoadingUser && !isSuccess && !isError) {
-    return <div>Is looooading</div>;
+    return <div></div>;
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

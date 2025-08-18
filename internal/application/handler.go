@@ -189,13 +189,13 @@ func (h *Handler) CreateApplication(c echo.Context) error {
 
 type UpdateApplicationRequest struct {
 	ID               uuid.UUID `json:"id"`
-	TitleApplication string    `json:"title"`
-	Company          string    `json:"company"`
-	Location         string    `json:"location"`
-	SentDate         time.Time `json:"sent_date"`
-	Status           *string   `json:"status"`
+	TitleApplication string    `json:"title" validate:"required,min=3"`
+	Company          string    `json:"company" validate:"required,min=2"`
+	Location         string    `json:"location" validate:"required,min=2"`
+	SentDate         time.Time `json:"sent_date" validate:"required"`
+	Status           *string   `json:"status" validate:"required,oneof=sent pending rejected interview_scheduled interviewing offer"`
 	Notes            *string   `json:"notes"`
-	UrlApplication   *string   `json:"url_application"`
+	UrlApplication   *string   `json:"url_application" validate:"omitempty,url"`
 }
 
 func (h *Handler) UpdateApplication(c echo.Context) error {
@@ -208,6 +208,10 @@ func (h *Handler) UpdateApplication(c echo.Context) error {
 	var appRequest UpdateApplicationRequest
 	if err := c.Bind(&appRequest); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "invalid input")
+	}
+
+	if err := c.Validate(appRequest); err != nil {
+		return err
 	}
 
 	updateParams := db.UpdateOneApplicationByIDParams{
@@ -393,14 +397,14 @@ func (h *Handler) GetApplicationRounds(c echo.Context) error {
 }
 
 type RoundRequest struct {
-	Title         string    `json:"title"`
-	Type          string    `json:"type"`
-	Status        string    `json:"status"`
-	Date          time.Time `json:"date"`
+	Title         string    `json:"title" validate:"required,min=2"`
+	Type          string    `json:"type" validate:"required,oneof=phone_screen technical behavioral system_design coding onsite final"`
+	Status        string    `json:"status" validate:"required,oneof=scheduled completed passed failed"`
+	Date          time.Time `json:"date" validate:"required"`
 	Notes         *string   `json:"notes,omitempty"`
 	Interviewer   *string   `json:"interviewer,omitempty"`
 	Duration      *string   `json:"duration,omitempty"`
-	Outcome       *string   `json:"outcome,omitempty"`
+	Outcome       *string   `json:"outcome,omitempty,oneof=pass fail pending"`
 	ApplicationID uuid.UUID `json:"application_id"`
 }
 
@@ -417,6 +421,10 @@ func (h *Handler) CreateRound(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("invalid round json: %w", err))
 	}
 
+	if err := c.Validate(roundRequest); err != nil {
+		return err
+	}
+
 	createdRound, err := h.Service.CreateRound(userID, applicationID, roundRequest)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "unable to create round: "+err.Error())
@@ -427,14 +435,14 @@ func (h *Handler) CreateRound(c echo.Context) error {
 
 type UpdateRoundRequest struct {
 	ID            uuid.UUID `json:"id"`
-	Title         string    `json:"title"`
-	Type          string    `json:"type"`
-	Status        string    `json:"status"`
-	Date          time.Time `json:"date"`
+	Title         string    `json:"title" validate:"required,min=2"`
+	Type          string    `json:"type" validate:"required,oneof=phone_screen technical behavioral system_design coding onsite final"`
+	Status        string    `json:"status" validate:"required,oneof=scheduled completed passed failed"`
+	Date          time.Time `json:"date" validate:"required"`
 	Notes         *string   `json:"notes,omitempty"`
 	Interviewer   *string   `json:"interviewer,omitempty"`
 	Duration      *string   `json:"duration,omitempty"`
-	Outcome       *string   `json:"outcome,omitempty"`
+	Outcome       *string   `json:"outcome,omitempty,oneof=pass fail pending"`
 	ApplicationID uuid.UUID `json:"application_id"`
 }
 
@@ -444,6 +452,10 @@ func (h *Handler) UpdateRound(c echo.Context) error {
 	var updateRoundRequest UpdateRoundRequest
 	if err := c.Bind(&updateRoundRequest); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "invalid round json")
+	}
+
+	if err := c.Validate(updateRoundRequest); err != nil {
+		return err
 	}
 
 	updatedRound, err := h.Service.UpdateRound(userID, updateRoundRequest)
