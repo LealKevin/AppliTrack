@@ -1,6 +1,7 @@
 package user
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
@@ -38,14 +39,14 @@ func (h *Handler) RegisterProtectedRoutes(e *echo.Group) {
 }
 
 type RegisterRequest struct {
-	Email          string `json:"email"`
-	Password       string `json:"password"`
-	PasswordRepeat string `json:"passwordRepeat"`
+	Email          string `json:"email" validate:"required,email"`
+	Password       string `json:"password" validate:"required,min=8"`
+	PasswordRepeat string `json:"passwordRepeat" validate:"required,eqfield=Password"`
 }
 
 type loginRequest struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	Email    string `json:"email" validate:"required,email"`
+	Password string `json:"password" validate:"required"`
 }
 
 type userResponse struct {
@@ -67,6 +68,10 @@ func (h *Handler) Register(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "invalid request body")
 	}
 
+	if err := c.Validate(req); err != nil {
+		return err
+	}
+
 	serviceReq := RegisterRequest{
 		Email:          req.Email,
 		Password:       req.Password,
@@ -75,6 +80,9 @@ func (h *Handler) Register(c echo.Context) error {
 
 	authResp, err := h.Service.Register(serviceReq)
 	if err != nil {
+		if errors.Is(err, ErrDuplicateEmail) {
+			return echo.NewHTTPError(http.StatusConflict, "Email already exists")
+		}
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
@@ -100,6 +108,10 @@ func (h *Handler) Login(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "invalid request body")
 	}
 
+	if err := c.Validate(req); err != nil {
+		return err
+	}
+
 	serviceReq := LoginRequest{
 		Email:    req.Email,
 		Password: req.Password,
@@ -107,7 +119,10 @@ func (h *Handler) Login(c echo.Context) error {
 
 	authResp, err := h.Service.Login(serviceReq)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusUnauthorized, "invalid email or password")
+		if errors.Is(err, ErrInvalidCredentials) {
+			return echo.NewHTTPError(http.StatusUnauthorized, "Invalid email or password")
+		}
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
 	c.SetCookie(&http.Cookie{
