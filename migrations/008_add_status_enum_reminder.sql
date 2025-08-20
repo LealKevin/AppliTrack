@@ -1,6 +1,8 @@
 
 -- Write your migrate up statements here
 
+-- Update existing 'pending' status to 'sent' to maintain data consistency
+UPDATE reminders SET status = 'sent' WHERE status = 'pending';
 
 ALTER TABLE reminders
 DROP CONSTRAINT reminders_status_check;
