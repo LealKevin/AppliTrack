@@ -11,7 +11,9 @@ import (
 	"time"
 
 	db "ApplyTrack/internal/db/queries"
+	"ApplyTrack/internal/utils"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	_ "github.com/jackc/pgx/v5/stdlib"
@@ -98,7 +100,10 @@ func Test_Register(t *testing.T) {
 		assert.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
-		c := echo.New().NewContext(req, rec)
+		
+		e := echo.New()
+		e.Validator = &utils.CustomValidator{Validator: validator.New()}
+		c := e.NewContext(req, rec)
 
 		err = handler.Register(c)
 		t.Logf("Handler error: %v \n", err)
