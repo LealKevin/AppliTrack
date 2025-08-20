@@ -1,4 +1,4 @@
-FROM golang:1.21-alpine AS builder
+FROM golang:1.23-alpine AS builder
 
 WORKDIR /app
 
@@ -14,10 +14,10 @@ RUN apk add --no-cache ca-certificates postgresql-client && \
     adduser -D -s /bin/sh appuser
 
 WORKDIR /go
-RUN wget https://github.com/jackc/tern/releases/download/v1.13.0/tern_1.13.0_linux_amd64.tar.gz && \
-    tar -xzf tern_1.13.0_linux_amd64.tar.gz && \
+RUN wget https://github.com/jackc/tern/releases/download/v2.3.2/tern_2.3.2_linux_amd64.tar.gz && \
+    tar -xzf tern_2.3.2_linux_amd64.tar.gz && \
     mv tern /usr/local/bin/ && \
-    rm tern_1.13.0_linux_amd64.tar.gz
+    rm tern_2.3.2_linux_amd64.tar.gz
 
 WORKDIR /app
 
