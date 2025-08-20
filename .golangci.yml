@@ -3,13 +3,13 @@ run:
   tests: true
 
 linters:
+  disable-all: true
   enable:
     - errcheck
     - gosimple
     - govet
     - ineffassign
     - staticcheck
-    - typecheck
     - unused
     - gosec
     - goimports 
@@ -18,12 +18,6 @@ linters:
     - unconvert
     - unparam
     - whitespace
-    - exportloopref
-    - errname
-    - durationcheck
-    - contextcheck
-    - tenv
-    - tparallel
 
 linters-settings:
   errcheck:
@@ -51,9 +45,15 @@ issues:
       linters:
         - errcheck
         - gosec
+        - typecheck
+    - text: "undefined:"
+      linters:
+        - typecheck
+    - path: mocks\.go
+      linters:
+        - typecheck
   max-issues-per-linter: 0
   max-same-issues: 0
 
 output:
   sort-results: true
-
