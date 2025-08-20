@@ -38,7 +38,7 @@ linters-settings:
       - G104
 
   misspell:
-    locale: EU
+    locale: US
 
   revive:
     rules:
