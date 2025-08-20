@@ -36,7 +36,7 @@ CREATE TABLE  rounds (
     id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,                                                                                            
     application_id UUID NOT NULL REFERENCES applications(id) ON DELETE CASCADE,                                                                
     title TEXT NOT NULL,                                                                                                                       
-    type TEXT NOT NULL CHECK (type IN ('phone_screen', 'technical', 'behavioral', 'final', 'onsite')),                                         
+    type TEXT NOT NULL CHECK (type IN ('phone_screen', 'technical', 'final', 'onsite')),                                         
     status TEXT NOT NULL CHECK (status IN ('scheduled', 'completed', 'passed', 'failed')),                                                     
     date DATE NOT NULL,                                                                                                                                 
     notes TEXT NULL,                                                                                                                                

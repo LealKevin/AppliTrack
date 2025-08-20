@@ -1,54 +1,64 @@
-# React + TypeScript + Vite
+# ApplyTrack Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Job application tracking system built with React 19, TypeScript, and Tailwind CSS.
 
-Currently, two official plugins are available:
+## Environment Setup
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+### Development
+```bash
+npm install
+npm run dev
+```
+The app will run on `http://localhost:5173` with API proxy to `http://localhost:8080`.
 
-## Expanding the ESLint configuration
+### Production Build
+```bash
+npm run build
+```
+Builds to `dist/` folder ready for deployment.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Environment Variables
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+### Development (`.env.local`)
+```bash
+VITE_API_URL=http://localhost:8080
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
+### Production (`.env.production`)
+```bash
+VITE_API_URL=https://your-production-api-domain.com
 ```
+
+## Deployment
+
+### Vercel (Recommended)
+1. Connect your GitHub repository
+2. Set root directory: `frontend/applitrack`
+3. Build command: `npm run build`
+4. Output directory: `dist`
+5. Add environment variable: `VITE_API_URL=https://your-api-domain.com`
+
+### Netlify
+1. Connect repository with build settings:
+   - Base directory: `frontend/applitrack`
+   - Build command: `npm run build`
+   - Publish directory: `frontend/applitrack/dist`
+2. Add environment variable: `VITE_API_URL=https://your-api-domain.com`
+
+## Scripts
+
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run preview` - Preview production build
+- `npm run lint` - Run ESLint
+
+## Tech Stack
+
+- **Framework:** React 19
+- **Language:** TypeScript
+- **Styling:** Tailwind CSS v4
+- **UI Components:** Radix UI
+- **State Management:** TanStack Query
+- **Routing:** React Router v7
+- **Build Tool:** Vite
+- **HTTP Client:** Axios
