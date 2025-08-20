@@ -35,8 +35,10 @@ func NewDatabase() (*Database, error) {
 
 	config.MaxConns = 10
 	config.MinConns = 2
-	config.MaxConnIdleTime = time.Hour
-	config.MaxConnLifetime = time.Hour * 2
+	config.MaxConnIdleTime = time.Minute * 30
+	config.MaxConnLifetime = time.Hour
+	config.ConnConfig.ConnectTimeout = time.Second * 30
+	config.ConnConfig.RuntimeParams["sslmode"] = "require"
 
 	Conn, err = pgxpool.NewWithConfig(context.Background(), config)
 	if err != nil {

@@ -176,7 +176,13 @@ function ReminderModal({
           {/* Custom Date Picker */}
           <div className="space-y-3">
             <label className="text-sm font-medium">Or choose custom date</label>
-            <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
+            <Popover 
+              open={isCalendarOpen} 
+              onOpenChange={(open) => {
+                console.log('🔄 ReminderModal Popover state change:', { open, selectedDate });
+                setIsCalendarOpen(open);
+              }}
+            >
               <PopoverTrigger asChild>
                 <Button
                   variant="outline"
@@ -184,16 +190,36 @@ function ReminderModal({
                     "w-full justify-start text-left font-normal",
                     !selectedDate && "text-muted-foreground"
                   )}
+                  onClick={() => {
+                    console.log('📅 ReminderModal Date picker clicked', { currentDate: selectedDate });
+                  }}
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
                   {selectedDate ? format(selectedDate, "PPP") : <span>Pick a date</span>}
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
+              <PopoverContent 
+                className="bg-muted w-auto p-0 rounded-sm" 
+                align="start"
+                onOpenAutoFocus={() => {
+                  console.log('🎯 ReminderModal PopoverContent focused');
+                }}
+                ref={(ref) => {
+                  if (ref) {
+                    console.log('📊 ReminderModal PopoverContent ref:', {
+                      computedStyle: window.getComputedStyle(ref),
+                      zIndex: window.getComputedStyle(ref).zIndex,
+                      backgroundColor: window.getComputedStyle(ref).backgroundColor,
+                      opacity: window.getComputedStyle(ref).opacity
+                    });
+                  }
+                }}
+              >
                 <Calendar
                   mode="single"
                   selected={selectedDate}
                   onSelect={(date) => {
+                    console.log('📆 ReminderModal Date selected:', { date });
                     setSelectedDate(date);
                     setIsCalendarOpen(false);
                   }}

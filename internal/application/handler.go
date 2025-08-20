@@ -398,7 +398,7 @@ func (h *Handler) GetApplicationRounds(c echo.Context) error {
 
 type RoundRequest struct {
 	Title         string    `json:"title" validate:"required,min=2"`
-	Type          string    `json:"type" validate:"required,oneof=phone_screen technical behavioral system_design coding onsite final"`
+	Type          string    `json:"type" validate:"required,oneof=phone_screen technical system_design coding onsite final"`
 	Status        string    `json:"status" validate:"required,oneof=scheduled completed passed failed"`
 	Date          time.Time `json:"date" validate:"required"`
 	Notes         *string   `json:"notes,omitempty"`
@@ -436,7 +436,7 @@ func (h *Handler) CreateRound(c echo.Context) error {
 type UpdateRoundRequest struct {
 	ID            uuid.UUID `json:"id"`
 	Title         string    `json:"title" validate:"required,min=2"`
-	Type          string    `json:"type" validate:"required,oneof=phone_screen technical behavioral system_design coding onsite final"`
+	Type          string    `json:"type" validate:"required,oneof=phone_screen technical system_design coding onsite final"`
 	Status        string    `json:"status" validate:"required,oneof=scheduled completed passed failed"`
 	Date          time.Time `json:"date" validate:"required"`
 	Notes         *string   `json:"notes,omitempty"`

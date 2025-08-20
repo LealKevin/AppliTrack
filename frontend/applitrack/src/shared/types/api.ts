@@ -10,7 +10,6 @@ export type ApplicationStatus =
 export type RoundType = 
   | "phone_screen" 
   | "technical" 
-  | "behavioral" 
   | "final" 
   | "onsite";
 
