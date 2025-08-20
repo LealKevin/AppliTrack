@@ -49,7 +49,7 @@ func NewDatabase() (*Database, error) {
 		return &Database{}, fmt.Errorf("unable to ping database: %w", err)
 	}
 
-	fmt.Println("Sucessfull connection to database")
+	fmt.Println("Successful connection to database")
 	return &Database{Conn: Conn}, nil
 }
 

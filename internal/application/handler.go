@@ -404,7 +404,7 @@ type RoundRequest struct {
 	Notes         *string   `json:"notes,omitempty"`
 	Interviewer   *string   `json:"interviewer,omitempty"`
 	Duration      *string   `json:"duration,omitempty"`
-	Outcome       *string   `json:"outcome" validade:"required,oneof=pass fail pending"`
+	Outcome       *string   `json:"outcome" validate:"required,oneof=pass fail pending"`
 	ApplicationID uuid.UUID `json:"application_id"`
 }
 
