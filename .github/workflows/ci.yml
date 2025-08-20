@@ -1,72 +1,87 @@
-name: CI - Pull Request Checks
+name: CI – Pull Request Checks
 
 on:
   pull_request:
-    branches:
-      - main
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
 
 jobs:
   ci:
     name: Continuous Integration
     runs-on: ubuntu-latest
-    
+
+    strategy:
+      fail-fast: false
+      matrix:
+        go: ['1.23.x']  
+
+    env:
+      JWTSECRET: ${{ secrets.JWTSECRET || 'asdhoiudfhiuhdhakjshdouhehrfwhofnalsidhohdohowfhoewfdkshl' }}
+
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v4
 
       - name: Set up Go
-        uses: actions/setup-go@v4
+        uses: actions/setup-go@v5
         with:
-          go-version: '1.23'
+          go-version: ${{ matrix.go }}
+          cache: true  
 
-      - name: Cache Go modules
-        uses: actions/cache@v3
+      - name: Cache Go build cache
+        uses: actions/cache@v4
         with:
-          path: ~/go/pkg/mod
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          path: ~/.cache/go-build
+          key: ${{ runner.os }}-gobuild-${{ hashFiles('**/go.sum') }}
           restore-keys: |
-            ${{ runner.os }}-go-
+            ${{ runner.os }}-gobuild-
 
-      - name: Download dependencies
-        run: go mod download
+      - name: Verify deps
+        run: |
+          go mod download
+          go mod verify
 
-      - name: Verify dependencies
-        run: go mod verify
-
-      - name: Run go vet
+      - name: go vet
         run: go vet ./...
 
-      - name: Run tests
-        env:
-          JWTSECRET: gPma6YETKL3Q6G3FjTvgeYl/FHzJg6T637ITHdfF7NidYsCaNvw1ZKdlcoSqH/yIwZj0uDXRZV7oYXU8Hu8ZVg==
-        run: go test -race -coverprofile=coverage.out ./...
-
-      - name: Check test coverage
+      - name: go fmt check
         run: |
-          go tool cover -func=coverage.out
-          COVERAGE=$(go tool cover -func=coverage.out | grep total | awk '{print substr($3, 1, length($3)-1)}')
-          echo "Coverage: $COVERAGE%"
-          if (( $(echo "$COVERAGE < 30" | bc -l) )); then
-            echo "Warning: Test coverage is below 30%"
-          fi
-
-      - name: Run go fmt check
-        run: |
-          if [ "$(gofmt -s -l . | wc -l)" -gt 0 ]; then
-            echo "The following files are not formatted:"
-            gofmt -s -l .
+          UNFORMATTED=$(gofmt -s -l .)
+          if [ -n "$UNFORMATTED" ]; then
+            echo "These files are not gofmt-ed:"
+            echo "$UNFORMATTED"
             exit 1
           fi
 
-      - name: Install golangci-lint
-        run: |
-          curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.54.2
+      - name: Run tests (race + coverage)
+        run: go test -race -covermode=atomic -coverprofile=coverage.out ./...
 
-      - name: Run golangci-lint
-        run: $(go env GOPATH)/bin/golangci-lint run
+      - name: Enforce coverage >= 30%
+        run: |
+          total=$(go tool cover -func=coverage.out | awk '/^total:/{gsub("%","",$3); print $3}')
+          echo "Total coverage: ${total}%"
+          awk -v t="$total" 'BEGIN { exit (t < 30) ? 1 : 0 }' || { echo "Coverage below 30%"; exit 1; }
+
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-${{ matrix.go }}
+          path: coverage.out
+
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v6
+        with:
+          version: v1.58.0
 
       - name: Build application
         run: go build -o tmp/main ./cmd/api/main.go
 
       - name: Test Docker build
         run: docker build -t applytrack-test .
+
