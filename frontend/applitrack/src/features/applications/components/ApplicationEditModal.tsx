@@ -10,11 +10,8 @@ import { Button } from "@/shared/components/ui/button";
 import { useState } from "react";
 import useUpdateApp from "../hooks/useUpdateApp";
 import type { IApplication } from "@/shared/types/api";
-import {
-	Popover,
-	PopoverContent,
-	PopoverTrigger,
-} from "@radix-ui/react-popover";
+import { Popover } from "@radix-ui/react-popover";
+import { PopoverContent, PopoverTrigger } from "@radix-ui/react-popover";
 import { cn } from "@/shared/lib/utils";
 import { Calendar as CalendarIcon } from "lucide-react";
 import { Calendar } from "@/shared/components/ui/calendar";
@@ -126,7 +123,11 @@ function ApplicationEditModal({
 						<Input name="Company" placeholder="Company" defaultValue={application?.company} />
 						<Input name="Location" placeholder="Location" defaultValue={application?.location} />
 						<Input name="UrlApplication" placeholder="Application url" defaultValue={application?.url_application} />
-						<Popover>
+						<Popover 
+							onOpenChange={(open) => {
+								console.log('🔄 EditModal Popover state change:', { open, date, modalOpen: isModalOpen });
+							}}
+						>
 							<PopoverTrigger asChild>
 								<Button
 									variant="ghost"
@@ -135,16 +136,37 @@ function ApplicationEditModal({
 										"input justify-start text-left font-normal",
 										!date && "text-muted-foreground",
 									)}
+									onClick={() => {
+										console.log('📅 EditModal Date picker clicked', { currentDate: date });
+									}}
 								>
 									<CalendarIcon className="mr-2 h-4 w-4" />
 									{date ? format(date, "PPP") : <span>Pick a date</span>}
 								</Button>
 							</PopoverTrigger>
-							<PopoverContent className="bg-muted w-auto p-0 rounded-sm">
+							<PopoverContent 
+								className="bg-muted w-auto p-0 rounded-sm"
+								onOpenAutoFocus={() => {
+									console.log('🎯 EditModal PopoverContent focused');
+								}}
+								ref={(ref) => {
+									if (ref) {
+										console.log('📊 EditModal PopoverContent ref:', {
+											computedStyle: window.getComputedStyle(ref),
+											zIndex: window.getComputedStyle(ref).zIndex,
+											backgroundColor: window.getComputedStyle(ref).backgroundColor,
+											opacity: window.getComputedStyle(ref).opacity
+										});
+									}
+								}}
+							>
 								<Calendar
 									mode="single"
 									selected={date}
-									onSelect={(date) => date && setDate(date)}
+									onSelect={(date) => {
+										console.log('📆 EditModal Date selected:', { date });
+										date && setDate(date);
+									}}
 									initialFocus
 								/>
 							</PopoverContent>

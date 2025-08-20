@@ -5,7 +5,6 @@ import type { RoundType, RoundStatus } from "@/shared/types/api";
 const roundTypeEnum = z.enum([
   "phone_screen",
   "technical", 
-  "behavioral",
   "onsite",
   "final"
 ] as const);

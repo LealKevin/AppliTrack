@@ -2,11 +2,13 @@ import type { UserInput } from "@/features/authentication/hooks/useConnection";
 import type { IApplication, ApplicationCounts, Round, CreateRoundRequest, UpdateRoundRequest, InterviewApplication, Reminder, CreateReminderRequest, UpdateReminderRequest, ReminderWithApplication } from "@/shared/types/api";
 import axios from "axios";
 
+const API_URL = import.meta.env.VITE_API_URL || "";
+
 let csrfToken: string | null = null;
 
 async function fetchCSRFToken(): Promise<string> {
   if (!csrfToken) {
-    const response = await axios.get<{ token: string }>("/api/csrf", {
+    const response = await axios.get<{ token: string }>(`${API_URL}/api/csrf`, {
       withCredentials: true
     });
     csrfToken = response.data.token;
@@ -15,6 +17,7 @@ async function fetchCSRFToken(): Promise<string> {
 }
 
 const apiClient = axios.create({
+  baseURL: API_URL,
   withCredentials: true
 });
 

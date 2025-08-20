@@ -20,6 +20,7 @@ func (m *MockStore) GetApplicationsByStatus(userID uuid.UUID, status string) ([]
 	args := m.Called(userID, status)
 	return args.Get(0).([]db.Application), args.Error(1)
 }
+
 func (m *MockStore) GetOne(userID, ID uuid.UUID) (db.Application, error) {
 	args := m.Called(userID, ID)
 	return args.Get(0).(db.Application), args.Error(1)
@@ -63,4 +64,34 @@ func (m *MockStore) GetAnalyticsCompanies(userID uuid.UUID) ([]db.GetAnalyticsCo
 func (m *MockStore) GetTopCompany(userID uuid.UUID) (string, error) {
 	args := m.Called(userID)
 	return args.String(0), args.Error(1)
+}
+
+func (m *MockStore) CreateRound(round db.CreateRoundParams) (db.Round, error) {
+	args := m.Called(round)
+	return args.Get(0).(db.Round), args.Error(1)
+}
+
+func (m *MockStore) UpdateRound(round db.UpdateRoundParams) (db.Round, error) {
+	args := m.Called(round)
+	return args.Get(0).(db.Round), args.Error(1)
+}
+
+func (m *MockStore) DeleteRound(roundID uuid.UUID) error {
+	args := m.Called(roundID)
+	return args.Error(0)
+}
+
+func (m *MockStore) GetInterviewApplications(userID uuid.UUID) ([]db.Application, error) {
+	args := m.Called(userID)
+	return args.Get(0).([]db.Application), args.Error(1)
+}
+
+func (m *MockStore) GetRounds(appID uuid.UUID) ([]db.Round, error) {
+	args := m.Called(appID)
+	return args.Get(0).([]db.Round), args.Error(1)
+}
+
+func (m *MockStore) GetRoundByID(roundID uuid.UUID) (db.Round, error) {
+	args := m.Called(roundID)
+	return args.Get(0).(db.Round), args.Error(1)
 }

@@ -283,7 +283,7 @@ function ImportModal({ isOpen, onClose, onImport, isImporting = false, result }:
                   <div>
                     <div className="font-medium text-blue-800 dark:text-blue-200 mb-2">Example:</div>
                     <div className="font-mono text-xs bg-blue-100 dark:bg-blue-900/30 p-3 rounded-xl border overflow-x-auto">
-                      "Software Engineer","Tech Corp","2024-01-15","New York","pending","Great opportunity","https://example.com"
+                      "Software Engineer","Tech Corp","2024-01-15","New York","interview_scheduled","Great opportunity","https://example.com"
                     </div>
                   </div>
 
@@ -292,7 +292,10 @@ function ImportModal({ isOpen, onClose, onImport, isImporting = false, result }:
                     <div className="flex gap-2 flex-wrap">
                       <Badge variant="outline" className="text-xs">pending</Badge>
                       <Badge variant="outline" className="text-xs">sent</Badge>
+                      <Badge variant="outline" className="text-xs">interview_scheduled</Badge>
+                      <Badge variant="outline" className="text-xs">interviewing</Badge>
                       <Badge variant="outline" className="text-xs">rejected</Badge>
+                      <Badge variant="outline" className="text-xs">offer</Badge>
                     </div>
                   </div>
                 </div>

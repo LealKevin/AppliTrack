@@ -16,7 +16,6 @@ interface RoundCardProps {
 const roundTypeLabels = {
   phone_screen: "Phone Screen",
   technical: "Technical",
-  behavioral: "Behavioral", 
   final: "Final",
   onsite: "Onsite"
 };
@@ -28,13 +27,13 @@ const statusConfig = {
     className: "bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400"
   },
   completed: {
-    label: "Completed", 
+    label: "Completed",
     icon: CheckCircle,
     className: "bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400"
   },
   passed: {
     label: "Passed",
-    icon: CheckCircle, 
+    icon: CheckCircle,
     className: "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400"
   },
   failed: {
@@ -91,7 +90,7 @@ export default function RoundCard({ round }: RoundCardProps) {
                   className="mt-1"
                 />
               </div>
-              
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="type">Round Type</Label>
@@ -102,10 +101,9 @@ export default function RoundCard({ round }: RoundCardProps) {
                     <SelectTrigger className="mt-1">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="grid grid-cols-1">
                       <SelectItem value="phone_screen">Phone Screen</SelectItem>
                       <SelectItem value="technical">Technical</SelectItem>
-                      <SelectItem value="behavioral">Behavioral</SelectItem>
                       <SelectItem value="final">Final</SelectItem>
                       <SelectItem value="onsite">Onsite</SelectItem>
                     </SelectContent>
@@ -142,7 +140,7 @@ export default function RoundCard({ round }: RoundCardProps) {
                     className="mt-1"
                   />
                 </div>
-                
+
                 <div>
                   <Label htmlFor="duration">Duration</Label>
                   <Input
@@ -191,11 +189,11 @@ export default function RoundCard({ round }: RoundCardProps) {
               )}
             </div>
           </div>
-          
+
           <div className="flex gap-2 pt-4">
-            <Button 
-              onClick={handleSave} 
-              size="sm" 
+            <Button
+              onClick={handleSave}
+              size="sm"
               disabled={updateRoundMutation.isPending}
             >
               {updateRoundMutation.isPending ? "Saving..." : "Save"}
@@ -226,7 +224,7 @@ export default function RoundCard({ round }: RoundCardProps) {
               {status.label}
             </Badge>
           </div>
-          
+
           <CardAction>
             <div className="flex gap-1">
               <Button
@@ -260,7 +258,7 @@ export default function RoundCard({ round }: RoundCardProps) {
                 <span>{new Date(round.date).toLocaleDateString()}</span>
               </div>
             )}
-            
+
             {round.duration && (
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Clock className="w-4 h-4" />

@@ -130,7 +130,11 @@ function ApplicationCreateModal({
               )}
             </div>
             <div>
-              <Popover>
+              <Popover
+                onOpenChange={(open) => {
+                  console.log('🔄 CreateModal Popover state change:', { open, date });
+                }}
+              >
                 <PopoverTrigger asChild>
                   <Button
                     variant="ghost"
@@ -140,16 +144,37 @@ function ApplicationCreateModal({
                       !date && "text-muted-foreground",
                       getFieldError("sent_date") && "border-red-500"
                     )}
+                    onClick={() => {
+                      console.log('📅 CreateModal Date picker clicked', { currentDate: date });
+                    }}
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
                     {date ? format(date, "PPP") : <span>Pick a date</span>}
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="bg-muted w-auto p-0 rounded-sm">
+                <PopoverContent 
+                  className="bg-muted w-auto p-0 rounded-sm"
+                  onOpenAutoFocus={() => {
+                    console.log('🎯 CreateModal PopoverContent focused');
+                  }}
+                  ref={(ref) => {
+                    if (ref) {
+                      console.log('📊 CreateModal PopoverContent ref:', {
+                        computedStyle: window.getComputedStyle(ref),
+                        zIndex: window.getComputedStyle(ref).zIndex,
+                        backgroundColor: window.getComputedStyle(ref).backgroundColor,
+                        opacity: window.getComputedStyle(ref).opacity
+                      });
+                    }
+                  }}
+                >
                   <Calendar
                     mode="single"
                     selected={date}
-                    onSelect={setDate}
+                    onSelect={(date) => {
+                      console.log('📆 CreateModal Date selected:', { date });
+                      setDate(date);
+                    }}
                     initialFocus
                   />
                 </PopoverContent>

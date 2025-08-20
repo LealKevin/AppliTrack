@@ -398,13 +398,13 @@ func (h *Handler) GetApplicationRounds(c echo.Context) error {
 
 type RoundRequest struct {
 	Title         string    `json:"title" validate:"required,min=2"`
-	Type          string    `json:"type" validate:"required,oneof=phone_screen technical behavioral system_design coding onsite final"`
+	Type          string    `json:"type" validate:"required,oneof=phone_screen technical system_design coding onsite final"`
 	Status        string    `json:"status" validate:"required,oneof=scheduled completed passed failed"`
 	Date          time.Time `json:"date" validate:"required"`
 	Notes         *string   `json:"notes,omitempty"`
 	Interviewer   *string   `json:"interviewer,omitempty"`
 	Duration      *string   `json:"duration,omitempty"`
-	Outcome       *string   `json:"outcome,omitempty,oneof=pass fail pending"`
+	Outcome       *string   `json:"outcome" validade:"required,oneof=pass fail pending"`
 	ApplicationID uuid.UUID `json:"application_id"`
 }
 
@@ -418,7 +418,7 @@ func (h *Handler) CreateRound(c echo.Context) error {
 	var roundRequest RoundRequest
 	if err := c.Bind(&roundRequest); err != nil {
 		fmt.Println("Creating round with params:", roundRequest)
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("invalid round json: %w", err))
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Errorf("invalid round json: %w", err))
 	}
 
 	if err := c.Validate(roundRequest); err != nil {
@@ -436,13 +436,13 @@ func (h *Handler) CreateRound(c echo.Context) error {
 type UpdateRoundRequest struct {
 	ID            uuid.UUID `json:"id"`
 	Title         string    `json:"title" validate:"required,min=2"`
-	Type          string    `json:"type" validate:"required,oneof=phone_screen technical behavioral system_design coding onsite final"`
+	Type          string    `json:"type" validate:"required,oneof=phone_screen technical system_design coding onsite final"`
 	Status        string    `json:"status" validate:"required,oneof=scheduled completed passed failed"`
 	Date          time.Time `json:"date" validate:"required"`
 	Notes         *string   `json:"notes,omitempty"`
 	Interviewer   *string   `json:"interviewer,omitempty"`
 	Duration      *string   `json:"duration,omitempty"`
-	Outcome       *string   `json:"outcome,omitempty,oneof=pass fail pending"`
+	Outcome       *string   `json:"outcome,omitempty" validate:"oneof=pass fail pending"`
 	ApplicationID uuid.UUID `json:"application_id"`
 }
 
