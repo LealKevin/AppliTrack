@@ -404,7 +404,7 @@ type RoundRequest struct {
 	Notes         *string   `json:"notes,omitempty"`
 	Interviewer   *string   `json:"interviewer,omitempty"`
 	Duration      *string   `json:"duration,omitempty"`
-	Outcome       *string   `json:"outcome,omitempty,oneof=pass fail pending"`
+	Outcome       *string   `json:"outcome" validade:"required,oneof=pass fail pending"`
 	ApplicationID uuid.UUID `json:"application_id"`
 }
 
@@ -418,7 +418,7 @@ func (h *Handler) CreateRound(c echo.Context) error {
 	var roundRequest RoundRequest
 	if err := c.Bind(&roundRequest); err != nil {
 		fmt.Println("Creating round with params:", roundRequest)
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("invalid round json: %w", err))
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Errorf("invalid round json: %w", err))
 	}
 
 	if err := c.Validate(roundRequest); err != nil {
@@ -442,7 +442,7 @@ type UpdateRoundRequest struct {
 	Notes         *string   `json:"notes,omitempty"`
 	Interviewer   *string   `json:"interviewer,omitempty"`
 	Duration      *string   `json:"duration,omitempty"`
-	Outcome       *string   `json:"outcome,omitempty,oneof=pass fail pending"`
+	Outcome       *string   `json:"outcome,omitempty" validate:"oneof=pass fail pending"`
 	ApplicationID uuid.UUID `json:"application_id"`
 }
 

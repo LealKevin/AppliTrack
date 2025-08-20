@@ -102,7 +102,7 @@ export default function RoundCard({ round }: RoundCardProps) {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent className="grid grid-cols-1">
-                      <SelectItem value="phone_screen">Phone Scrsdeen</SelectItem>
+                      <SelectItem value="phone_screen">Phone Screen</SelectItem>
                       <SelectItem value="technical">Technical</SelectItem>
                       <SelectItem value="final">Final</SelectItem>
                       <SelectItem value="onsite">Onsite</SelectItem>
