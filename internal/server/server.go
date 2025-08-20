@@ -64,11 +64,11 @@ func (s *Server) SetupMiddleware() {
 	s.echo.Use(middleware.Logger())
 	s.echo.Use(middleware.Recover())
 	s.echo.Use(utils.SecurityHeadersMiddleware())
-	
+
 	s.echo.Use(middleware.RateLimiter(middleware.NewRateLimiterMemoryStore(
 		rate.Limit(100),
 	)))
-	
+
 	allowedOrigins := []string{"http://localhost:5173"}
 	if originsEnv := os.Getenv("CORS_ALLOWED_ORIGINS"); originsEnv != "" {
 		allowedOrigins = strings.Split(originsEnv, ",")
@@ -76,14 +76,14 @@ func (s *Server) SetupMiddleware() {
 			allowedOrigins[i] = strings.TrimSpace(origin)
 		}
 	}
-	
+
 	s.echo.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins:     allowedOrigins,
 		AllowMethods:     []string{echo.GET, echo.POST, echo.PUT, echo.DELETE, echo.PATCH, echo.OPTIONS},
 		AllowHeaders:     []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept, echo.HeaderAuthorization, "X-CSRF-Token"},
 		AllowCredentials: true,
 	}))
-	
+
 	s.echo.Use(middleware.CSRFWithConfig(middleware.CSRFConfig{
 		TokenLookup:    "header:X-CSRF-Token",
 		CookiePath:     "/",

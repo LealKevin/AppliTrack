@@ -21,7 +21,7 @@ func NewAuthRateLimiter(limit int, window time.Duration) *AuthRateLimiter {
 		limit:    limit,
 		window:   window,
 	}
-	
+
 	go limiter.cleanup()
 	return limiter
 }
@@ -29,12 +29,12 @@ func NewAuthRateLimiter(limit int, window time.Duration) *AuthRateLimiter {
 func (rl *AuthRateLimiter) cleanup() {
 	ticker := time.NewTicker(5 * time.Minute)
 	defer ticker.Stop()
-	
+
 	for range ticker.C {
 		rl.mutex.Lock()
 		now := time.Now()
 		windowStart := now.Add(-rl.window)
-		
+
 		for ip, attempts := range rl.attempts {
 			validAttempts := make([]time.Time, 0, len(attempts))
 			for _, attempt := range attempts {
@@ -42,7 +42,7 @@ func (rl *AuthRateLimiter) cleanup() {
 					validAttempts = append(validAttempts, attempt)
 				}
 			}
-			
+
 			if len(validAttempts) == 0 {
 				delete(rl.attempts, ip)
 			} else {
@@ -56,10 +56,10 @@ func (rl *AuthRateLimiter) cleanup() {
 func (rl *AuthRateLimiter) isAllowed(ip string) bool {
 	rl.mutex.Lock()
 	defer rl.mutex.Unlock()
-	
+
 	now := time.Now()
 	windowStart := now.Add(-rl.window)
-	
+
 	attempts := rl.attempts[ip]
 	validAttempts := make([]time.Time, 0, len(attempts))
 	for _, attempt := range attempts {
@@ -67,19 +67,19 @@ func (rl *AuthRateLimiter) isAllowed(ip string) bool {
 			validAttempts = append(validAttempts, attempt)
 		}
 	}
-	
+
 	if len(validAttempts) >= rl.limit {
 		rl.attempts[ip] = validAttempts
 		return false
 	}
-	
+
 	rl.attempts[ip] = append(validAttempts, now)
 	return true
 }
 
 func AuthRateLimitMiddleware(limit int, window time.Duration) echo.MiddlewareFunc {
 	limiter := NewAuthRateLimiter(limit, window)
-	
+
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			ip := c.RealIP()

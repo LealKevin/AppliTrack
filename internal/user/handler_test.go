@@ -100,7 +100,7 @@ func Test_Register(t *testing.T) {
 		assert.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
-		
+
 		e := echo.New()
 		e.Validator = &utils.CustomValidator{Validator: validator.New()}
 		c := e.NewContext(req, rec)

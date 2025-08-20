@@ -1,8 +1,8 @@
 package utils
 
 import (
-	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 func PgtypeTextFromPointer(s *string) pgtype.Text {

@@ -12,7 +12,7 @@ import (
 
 // Define specific error types for user operations
 var (
-	ErrDuplicateEmail = errors.New("email already exists")
+	ErrDuplicateEmail     = errors.New("email already exists")
 	ErrInvalidCredentials = errors.New("invalid email or password")
 )
 
@@ -21,9 +21,9 @@ func isDuplicateEmailError(err error) bool {
 	errorMsg := strings.ToLower(err.Error())
 	// Check for PostgreSQL unique constraint violation patterns
 	return strings.Contains(errorMsg, "duplicate") ||
-		   strings.Contains(errorMsg, "unique") ||
-		   strings.Contains(errorMsg, "already exists") ||
-		   strings.Contains(errorMsg, "violates unique constraint")
+		strings.Contains(errorMsg, "unique") ||
+		strings.Contains(errorMsg, "already exists") ||
+		strings.Contains(errorMsg, "violates unique constraint")
 }
 
 type LoginRequest struct {
