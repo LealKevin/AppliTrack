@@ -16,6 +16,7 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -35,9 +36,9 @@ func createMockApplication(title, company string) db.Application {
 		Company:          company,
 		SentDate:         time.Date(2024, 1, 15, 0, 0, 0, 0, time.UTC),
 		Location:         "Test Location",
-		Status:           "sent",
-		Notes:            "Test notes",
-		UrlApplication:   "https://example.com",
+		Status:           pgtype.Text{String: "sent", Valid: true},
+		Notes:            pgtype.Text{String: "Test notes", Valid: true},
+		UrlApplication:   pgtype.Text{String: "https://example.com", Valid: true},
 		UserID:           uuid.New(),
 		CreatedAt:        time.Now(),
 		UpdatedAt:        time.Now(),
