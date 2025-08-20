@@ -1,9 +1,7 @@
 run:
   timeout: 8m
   tests: true
-  skip-dirs:
-    - tmp
-    - vendor
+  skip-dirs-use-default: true
 
 linters:
   enable:
@@ -46,6 +44,9 @@ linters-settings:
         arguments: [true]
 
 issues:
+  exclude-dirs:
+    - tmp
+    - vendor
   exclude-rules:
     - path: _test\.go
       linters:
