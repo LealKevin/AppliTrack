@@ -1,7 +1,9 @@
 run:
-  timeout: 5m
-  issues-exit-code: 1
+  timeout: 8m
   tests: true
+  skip-dirs:
+    - tmp
+    - vendor
 
 linters:
   enable:
@@ -13,23 +15,31 @@ linters:
     - typecheck
     - unused
     - gosec
-    - gofmt
-    - goimports
+    - goimports 
     - misspell
     - revive
     - unconvert
     - unparam
     - whitespace
+    - exportloopref
+    - errname
+    - durationcheck
+    - contextcheck
+    - tenv
+    - tparallel
 
 linters-settings:
   errcheck:
     check-type-assertions: true
     check-blank: false
-  
+
   gosec:
     excludes:
       - G104
-  
+
+  misspell:
+    locale: EU
+
   revive:
     rules:
       - name: exported
@@ -43,3 +53,7 @@ issues:
         - gosec
   max-issues-per-linter: 0
   max-same-issues: 0
+
+output:
+  sort-results: true
+
