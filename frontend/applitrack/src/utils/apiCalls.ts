@@ -1,6 +1,8 @@
 import type { UserInput } from "@/hooks/useConnection";
 import type { IApplication } from "@/pages/ApplicationsPage";
 import axios from "axios";
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 type IUser = {
 	id: number;
 	name: string;
@@ -12,20 +14,20 @@ export async function fetchApplications(
 	status: string,
 ): Promise<IApplication[]> {
 	const response = await axios.get<{applications: IApplication[]}>(
-		`/api/applications?status=${status ?? ""}`,
+		`${API_BASE_URL}/api/applications?status=${status ?? ""}`,
 		{ withCredentials: true }
 	);
 	return response.data.applications;
 }
 
 export async function deleteApplication(id: number): Promise<IApplication[]> {
-	const response = await axios.delete<{applications: IApplication[]}>(`/api/applications/${id}`, { withCredentials: true });
+	const response = await axios.delete<{applications: IApplication[]}>(`${API_BASE_URL}/api/applications/${id}`, { withCredentials: true });
 	return response.data.applications;
 }
 
 export async function fetchApplicationsByStatus(status: string) {
 	const response = await axios.get<{applications: IApplication[]}>(
-		`/api/applications/${status}`,
+		`${API_BASE_URL}/api/applications/${status}`,
 		{ withCredentials: true }
 	);
 	return response.data.applications;
@@ -55,7 +57,7 @@ export async function createApplication(application: IApplication) {
 		notes: application.Notes || "",
 		url_application: application.UrlApplication,
 	};
-	const response = await axios.post<IApplication>("/api/application", applicationRequest, { withCredentials: true });
+	const response = await axios.post<IApplication>(`${API_BASE_URL}/api/application`, applicationRequest, { withCredentials: true });
 	return response.data;
 }
 
@@ -73,7 +75,7 @@ export async function updateApplication(application: IApplication) {
 		notes: application.Notes,
 		url_application: application.UrlApplication,
 	};
-	const response = await axios.put<IApplication>(`/api/applications`, {
+	const response = await axios.put<IApplication>(`${API_BASE_URL}/api/applications`, {
 		...applicationRequest,
 	}, { withCredentials: true });
 	return response.data;
@@ -86,7 +88,7 @@ export async function createUser(
 	newPassWordRepeat: string,
 ): Promise<CreateUserResponse> {
 	const response = await axios.post<CreateUserResponse>(
-		"/api/register",
+		`${API_BASE_URL}/api/register`,
 		{
 			name: newName,
 			email: newEmail,
@@ -102,7 +104,7 @@ export async function connectUser(
 	input: UserInput,
 ): Promise<CreateUserResponse> {
 	const response = await axios.post<CreateUserResponse>(
-		"/api/login",
+		`${API_BASE_URL}/api/login`,
 		{
 			email: input.email,
 			password: input.password,
@@ -116,7 +118,7 @@ export async function connectUser(
 }
 
 export async function logoutUser(): Promise<void> {
-	await axios.post("/api/logout", {}, { withCredentials: true });
+	await axios.post(`${API_BASE_URL}/api/logout`, {}, { withCredentials: true });
 }
 
 export type UserType = {
@@ -128,7 +130,7 @@ export type UserType = {
 };
 
 export async function getUser(): Promise<UserType> {
-	const response = await axios.get<UserType>("/api/user/current", {
+	const response = await axios.get<UserType>(`${API_BASE_URL}/api/user/current`, {
 		withCredentials: true,
 	});
 	console.log("Here");
@@ -144,7 +146,7 @@ export type AppsCount = {
 };
 export async function getAppsCount(): Promise<AppsCount> {
 	console.log("Count count");
-	const response = await axios.get<AppsCount>("/api/applications/count", {
+	const response = await axios.get<AppsCount>(`${API_BASE_URL}/api/applications/count`, {
 		withCredentials: true,
 	});
 	console.log(response.data);

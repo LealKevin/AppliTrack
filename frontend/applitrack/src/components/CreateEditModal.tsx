@@ -10,6 +10,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import axios from "axios";
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 import { useState } from "react";
 import type { IApplication } from "@/pages/ApplicationsPage";
 
@@ -55,7 +57,7 @@ function CreateEditModal({
 		const data = Object.fromEntries(formData.entries());
 
 		try {
-			const response = await axios.post("api/application", {
+			const response = await axios.post(`${API_BASE_URL}/api/application`, {
 				...data,
 				UserID: 1,
 			});
