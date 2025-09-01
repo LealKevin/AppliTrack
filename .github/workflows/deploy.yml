@@ -22,7 +22,9 @@ jobs:
             git config user.email "kevinleal@hotmail.com"
             git config user.name "kevin"
             git config pull.rebase false
+            rm -f .env.db
             git pull origin main
             docker compose down
-            docker compose up -d --build
+            docker system prune -f
+            docker compose up -d --build --no-cache
 
