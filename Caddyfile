@@ -1,30 +1,15 @@
 api.139-59-147-172.sslip.io {
     encode zstd gzip
 
-    # CORS at proxy: allow only your frontend origin with credentials
-    # Remove any upstream CORS headers to avoid duplicates/conflicts
+    # Matchers
     @from_app header Origin https://applitrack-app-hv8px.ondigitalocean.app
-    header @from_app -Access-Control-Allow-Origin
-    header @from_app -Access-Control-Allow-Credentials
-    header @from_app -Access-Control-Allow-Headers
-    header @from_app -Access-Control-Allow-Methods
-    route @from_app {
-        header {
-            Access-Control-Allow-Origin {http.request.header.Origin}
-            Access-Control-Allow-Methods "GET, POST, PUT, PATCH, DELETE, OPTIONS"
-            Access-Control-Allow-Headers {http.request.header.Access-Control-Request-Headers}
-            Access-Control-Allow-Credentials true
-            Vary "Origin, Access-Control-Request-Headers"
-        }
-        reverse_proxy api:8080
-    }
-
-    # Handle preflight requests from the allowed origin
     @preflight {
         method OPTIONS
         header Origin https://applitrack-app-hv8px.ondigitalocean.app
     }
-    route @preflight {
+
+    # Preflight: add CORS headers then 204
+    handle @preflight {
         header {
             Access-Control-Allow-Origin {http.request.header.Origin}
             Access-Control-Allow-Methods "GET, POST, PUT, PATCH, DELETE, OPTIONS"
@@ -35,11 +20,18 @@ api.139-59-147-172.sslip.io {
         respond 204
     }
 
-    # Fallback: reverse proxy to the API service on the Docker network
-    @not_options {
-        not {
-            method OPTIONS
+    # Actual requests from allowed origin: add CORS headers then proxy
+    handle @from_app {
+        header {
+            Access-Control-Allow-Origin {http.request.header.Origin}
+            Access-Control-Allow-Credentials true
+            Vary "Origin"
         }
+        reverse_proxy api:8080
     }
-    reverse_proxy @not_options api:8080
+
+    # Fallback: proxy everything else
+    handle {
+        reverse_proxy api:8080
+    }
 }
