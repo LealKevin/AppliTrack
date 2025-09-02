@@ -1,14 +1,19 @@
 api.139-59-147-172.sslip.io {
     encode zstd gzip
 
-    # CORS: allow only your frontend origin and credentials
+    # CORS at proxy: allow only your frontend origin with credentials
+    # Remove any upstream CORS headers to avoid duplicates/conflicts
     @from_app header Origin https://applitrack-app-hv8px.ondigitalocean.app
+    header @from_app -Access-Control-Allow-Origin
+    header @from_app -Access-Control-Allow-Credentials
+    header @from_app -Access-Control-Allow-Headers
+    header @from_app -Access-Control-Allow-Methods
     header @from_app {
         Access-Control-Allow-Origin {http.request.header.Origin}
         Access-Control-Allow-Methods "GET, POST, PUT, PATCH, DELETE, OPTIONS"
-        Access-Control-Allow-Headers "Content-Type, Authorization"
+        Access-Control-Allow-Headers {http.request.header.Access-Control-Request-Headers}
         Access-Control-Allow-Credentials true
-        Vary "Origin"
+        Vary "Origin, Access-Control-Request-Headers"
     }
 
     # Handle preflight requests
@@ -18,4 +23,3 @@ api.139-59-147-172.sslip.io {
     # Reverse proxy to the API service on the Docker network
     reverse_proxy api:8080
 }
-
