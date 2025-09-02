@@ -11,6 +11,9 @@ jobs:
     name: Pre-deployment Checks
     runs-on: ubuntu-latest
     
+    env:
+      JWTSECRET: ${{ secrets.JWTSECRET || 'asdhoiudfhiuhdhakjshdouhehrfwhofnalsidhohdohowfhoewfdkshl' }}
+    
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -79,4 +82,3 @@ jobs:
               docker compose logs
               exit 1
             fi
-
