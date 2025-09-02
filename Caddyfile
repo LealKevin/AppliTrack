@@ -8,12 +8,15 @@ api.139-59-147-172.sslip.io {
     header @from_app -Access-Control-Allow-Credentials
     header @from_app -Access-Control-Allow-Headers
     header @from_app -Access-Control-Allow-Methods
-    header @from_app {
-        Access-Control-Allow-Origin {http.request.header.Origin}
-        Access-Control-Allow-Methods "GET, POST, PUT, PATCH, DELETE, OPTIONS"
-        Access-Control-Allow-Headers {http.request.header.Access-Control-Request-Headers}
-        Access-Control-Allow-Credentials true
-        Vary "Origin, Access-Control-Request-Headers"
+    route @from_app {
+        header {
+            Access-Control-Allow-Origin {http.request.header.Origin}
+            Access-Control-Allow-Methods "GET, POST, PUT, PATCH, DELETE, OPTIONS"
+            Access-Control-Allow-Headers {http.request.header.Access-Control-Request-Headers}
+            Access-Control-Allow-Credentials true
+            Vary "Origin, Access-Control-Request-Headers"
+        }
+        reverse_proxy api:8080
     }
 
     # Handle preflight requests from the allowed origin
@@ -21,15 +24,22 @@ api.139-59-147-172.sslip.io {
         method OPTIONS
         header Origin https://applitrack-app-hv8px.ondigitalocean.app
     }
-    header @preflight {
-        Access-Control-Allow-Origin {http.request.header.Origin}
-        Access-Control-Allow-Methods "GET, POST, PUT, PATCH, DELETE, OPTIONS"
-        Access-Control-Allow-Headers {http.request.header.Access-Control-Request-Headers}
-        Access-Control-Allow-Credentials true
-        Vary "Origin, Access-Control-Request-Headers"
+    route @preflight {
+        header {
+            Access-Control-Allow-Origin {http.request.header.Origin}
+            Access-Control-Allow-Methods "GET, POST, PUT, PATCH, DELETE, OPTIONS"
+            Access-Control-Allow-Headers {http.request.header.Access-Control-Request-Headers}
+            Access-Control-Allow-Credentials true
+            Vary "Origin, Access-Control-Request-Headers"
+        }
+        respond 204
     }
-    respond @preflight 204
 
-    # Reverse proxy to the API service on the Docker network
-    reverse_proxy api:8080
+    # Fallback: reverse proxy to the API service on the Docker network
+    @not_options {
+        not {
+            method OPTIONS
+        }
+    }
+    reverse_proxy @not_options api:8080
 }
