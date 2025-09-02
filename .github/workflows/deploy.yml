@@ -1,4 +1,4 @@
-name: CD - Deploy to Production
+name: Deploy to Server
 
 on:
   push:
@@ -57,6 +57,7 @@ jobs:
             git config user.email "${{ secrets.GIT_EMAIL }}"
             git config user.name "${{ secrets.GIT_USERNAME }}"
             git config pull.rebase false
+            rm -f .env.db
             git pull origin main
             docker compose down
             docker compose up -d --build
