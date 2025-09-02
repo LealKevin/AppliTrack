@@ -1,47 +1,5 @@
-api.139-59-147-172.sslip.io {
+{$API_HOST} {
     encode zstd gzip
-
-    # Matchers
-    @from_app header Origin https://applitrack-app-hv8px.ondigitalocean.app
-    @preflight {
-        method OPTIONS
-        header Origin https://applitrack-app-hv8px.ondigitalocean.app
-    }
-
-    # Preflight: add CORS headers then 204
-    handle @preflight {
-        header {
-            Access-Control-Allow-Origin {http.request.header.Origin}
-            Access-Control-Allow-Methods "GET, POST, PUT, PATCH, DELETE, OPTIONS"
-            Access-Control-Allow-Headers {http.request.header.Access-Control-Request-Headers}
-            Access-Control-Allow-Credentials true
-            Vary "Origin, Access-Control-Request-Headers"
-        }
-        respond 204
-    }
-
-    # Actual requests from allowed origin: ensure exactly one ACAO header
-    handle @from_app {
-        # Remove any CORS headers added by upstream to avoid duplicates
-        header -Access-Control-Allow-Origin
-        header -Access-Control-Allow-Credentials
-        header -Access-Control-Allow-Headers
-        header -Access-Control-Allow-Methods
-
-        # Add our single, correct CORS headers
-        header {
-            Access-Control-Allow-Origin {http.request.header.Origin}
-            Access-Control-Allow-Credentials true
-            Access-Control-Allow-Methods "GET, POST, PUT, PATCH, DELETE, OPTIONS"
-            Access-Control-Allow-Headers "Content-Type, Authorization, X-CSRF-Token"
-            Vary "Origin"
-        }
-
-        reverse_proxy api:8080
-    }
-
-    # Fallback: proxy everything else
-    handle {
-        reverse_proxy api:8080
-    }
+    # Let the app (Echo) handle all CORS. Caddy only terminates TLS and proxies.
+    reverse_proxy api:8080
 }
