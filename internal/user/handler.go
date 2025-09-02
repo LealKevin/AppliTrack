@@ -1,7 +1,9 @@
 package user
 
 import (
+	"errors"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/google/uuid"
@@ -18,27 +20,29 @@ func NewHandler(service *UserService) *Handler {
 	}
 }
 
+func isDevelopment() bool {
+	env := os.Getenv("GO_ENV")
+	return env == "" || env == "development"
+}
+
 func (h *Handler) RegisterRoutes(e *echo.Group) {
-	e.POST("/register", h.Register)
-	e.POST("/login", h.Login)
-	e.POST("/logout", h.Logout)
 }
 
 func (h *Handler) RegisterProtectedRoutes(e *echo.Group) {
 	e.GET("/users", h.GetAllUsers)
 	e.GET("/user/current", h.GetCurrentUser)
+	e.DELETE("/user/current", h.DeleteCurrentUser)
 }
 
-type registerRequest struct {
-	Name           string `json:"name"`
-	Email          string `json:"email"`
-	Password       string `json:"password"`
-	PasswordRepeat string `json:"passwordRepeat"`
+type RegisterRequest struct {
+	Email          string `json:"email" validate:"required,email"`
+	Password       string `json:"password" validate:"required,min=8"`
+	PasswordRepeat string `json:"passwordRepeat" validate:"required,eqfield=Password"`
 }
 
 type loginRequest struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	Email    string `json:"email" validate:"required,email"`
+	Password string `json:"password" validate:"required"`
 }
 
 type userResponse struct {
@@ -55,13 +59,16 @@ type authResponse struct {
 }
 
 func (h *Handler) Register(c echo.Context) error {
-	var req registerRequest
+	var req RegisterRequest
 	if err := c.Bind(&req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "invalid request body")
 	}
 
+	if err := c.Validate(req); err != nil {
+		return err
+	}
+
 	serviceReq := RegisterRequest{
-		Name:           req.Name,
 		Email:          req.Email,
 		Password:       req.Password,
 		PasswordRepeat: req.PasswordRepeat,
@@ -69,6 +76,9 @@ func (h *Handler) Register(c echo.Context) error {
 
 	authResp, err := h.Service.Register(serviceReq)
 	if err != nil {
+		if errors.Is(err, ErrDuplicateEmail) {
+			return echo.NewHTTPError(http.StatusConflict, "Email already exists")
+		}
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
@@ -77,7 +87,7 @@ func (h *Handler) Register(c echo.Context) error {
 		Value:    authResp.Token,
 		Path:     "/",
 		HttpOnly: true,
-		Secure:   true,
+		Secure:   !isDevelopment(),
 		SameSite: http.SameSiteLaxMode,
 		MaxAge:   60 * 60 * 24,
 	})
@@ -94,6 +104,10 @@ func (h *Handler) Login(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "invalid request body")
 	}
 
+	if err := c.Validate(req); err != nil {
+		return err
+	}
+
 	serviceReq := LoginRequest{
 		Email:    req.Email,
 		Password: req.Password,
@@ -101,7 +115,10 @@ func (h *Handler) Login(c echo.Context) error {
 
 	authResp, err := h.Service.Login(serviceReq)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusUnauthorized, "invalid email or password")
+		if errors.Is(err, ErrInvalidCredentials) {
+			return echo.NewHTTPError(http.StatusUnauthorized, "Invalid email or password")
+		}
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
 	c.SetCookie(&http.Cookie{
@@ -109,7 +126,7 @@ func (h *Handler) Login(c echo.Context) error {
 		Value:    authResp.Token,
 		Path:     "/",
 		HttpOnly: true,
-		Secure:   true,
+		Secure:   !isDevelopment(),
 		SameSite: http.SameSiteLaxMode,
 		MaxAge:   60 * 60 * 24,
 	})
@@ -126,7 +143,7 @@ func (h *Handler) Logout(c echo.Context) error {
 		Value:    "",
 		Path:     "/",
 		HttpOnly: true,
-		Secure:   true,
+		Secure:   !isDevelopment(),
 		SameSite: http.SameSiteLaxMode,
 		Expires:  time.Unix(0, 0),
 		MaxAge:   -1,
@@ -165,10 +182,42 @@ func (h *Handler) GetCurrentUser(c echo.Context) error {
 	return c.JSON(http.StatusOK, mapToUserResponse(user))
 }
 
+func (h *Handler) GetCSRFToken(c echo.Context) error {
+	return c.JSON(http.StatusOK, map[string]string{
+		"token": c.Get("csrf").(string),
+	})
+}
+
+func (h *Handler) DeleteCurrentUser(c echo.Context) error {
+	userIDValue := c.Get("userID")
+	if userIDValue == nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, "invalid user")
+	}
+
+	userID := userIDValue.(uuid.UUID)
+
+	err := h.Service.DeleteUser(userID)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "failed to delete user")
+	}
+
+	c.SetCookie(&http.Cookie{
+		Name:     "jwt",
+		Value:    "",
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   !isDevelopment(),
+		SameSite: http.SameSiteLaxMode,
+		Expires:  time.Unix(0, 0),
+		MaxAge:   -1,
+	})
+
+	return c.JSON(http.StatusOK, map[string]string{"message": "user deleted successfully"})
+}
+
 func mapToUserResponse(user User) userResponse {
 	return userResponse{
 		ID:        user.ID,
-		Name:      user.Name,
 		Email:     user.Email,
 		CreatedAt: user.CreatedAt,
 		UpdatedAt: user.UpdatedAt,

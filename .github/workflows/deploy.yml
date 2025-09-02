@@ -4,29 +4,79 @@ on:
   push:
     branches:
       - main
-    workflow_dispatch:
+  workflow_dispatch:
 
 jobs:
+  ci:
+    name: Pre-deployment Checks
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.21'
+
+      - name: Cache Go modules
+        uses: actions/cache@v3
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      - name: Download dependencies
+        run: go mod download
+
+      - name: Run tests
+        run: go test -race ./...
+
+      - name: Build verification
+        run: go build -o tmp/main ./cmd/api/main.go
+
+      - name: Docker build test
+        run: docker build -t applytrack-deploy-test .
+
   deploy:
+    name: Deploy to Production
+    needs: ci
     runs-on: ubuntu-latest
 
     steps:
-      - name: SSH Deploy to VPS
+      - name: Deploy to production server
         uses: appleboy/ssh-action@v0.1.10
         with:
           host: ${{ secrets.SERVER_HOST }}
-          username: root
+          username: ${{ secrets.SERVER_USERNAME }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
-            cd /root/AppliTrack
-            git config user.email "kevinleal@hotmail.com"
-            git config user.name "kevin"
+            cd ${{ secrets.DEPLOY_PATH }}
+            git config user.email "${{ secrets.GIT_EMAIL }}"
+            git config user.name "${{ secrets.GIT_USERNAME }}"
             git config pull.rebase false
             rm -f .env.db
             git pull origin main
             docker compose down
-            docker system prune -f
-            docker compose build --pull --no-cache
-            docker compose up -d
+            docker compose up -d --build
+            echo "✅ Deployment completed successfully!"
 
+      - name: Verify deployment
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USERNAME }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          script: |
+            cd ${{ secrets.DEPLOY_PATH }}
+            if docker compose ps | grep -q "Up"; then
+              echo "✅ Services are running"
+              docker compose ps
+            else
+              echo "❌ Deployment failed - services not running"
+              docker compose logs
+              exit 1
+            fi
 

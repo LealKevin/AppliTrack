@@ -1,0 +1,37 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mv:*)",
+      "Bash(mkdir:*)",
+      "Bash(npm run build:*)",
+      "Bash(npm run lint)",
+      "Bash(grep:*)",
+      "Bash(cd:*)",
+      "Bash(cd:*)",
+      "Bash(find:*)",
+      "Bash(git cherry-pick:*)",
+      "WebFetch(domain:ui.shadcn.com)",
+      "WebFetch(domain:ui.shadcn.com)",
+      "Bash(npm run build:*)",
+      "Bash(npm run lint)",
+      "Bash(go build:*)",
+      "Bash(curl:*)",
+      "Bash(go run:*)",
+      "Bash(npm run lint:*)",
+      "Bash(golangci-lint run:*)",
+      "Bash(golangci-lint config:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npm run test:e2e:*)",
+      "Bash(npm run:*)",
+      "Bash(docker-compose up:*)",
+      "Bash(brew services start postgresql@15)",
+      "Bash(make:*)",
+      "Bash(open:*)",
+      "Bash(docker:*)",
+      "Bash(/dev/null)",
+      "Bash(npx playwright test:*)",
+      "Bash(rm:*)"
+    ],
+    "deny": []
+  }
+}

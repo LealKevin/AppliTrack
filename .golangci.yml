@@ -1,0 +1,50 @@
+run:
+  timeout: 8m
+  tests: true
+
+linters:
+  disable-all: true
+  enable:
+    - gofmt
+    - goimports
+    - misspell
+    - errcheck
+    - gosimple
+    - ineffassign
+    - unused
+    - gosec
+
+issues:
+  exclude-dirs:
+    - tmp
+    - vendor
+    - internal/db/queries
+  exclude-rules:
+    - linters:
+        - typecheck
+      text: ".*"
+    - path: _test\.go
+      linters:
+        - errcheck
+        - gosec
+    - path: internal/db/queries/
+      linters:
+        - all
+    - path: mocks\.go
+      linters:
+        - all
+  max-issues-per-linter: 0
+  max-same-issues: 0
+
+linters-settings:
+  misspell:
+    locale: US
+  errcheck:
+    check-type-assertions: true
+    check-blank: false
+  gosec:
+    excludes:
+      - G104
+
+output:
+  sort-results: true

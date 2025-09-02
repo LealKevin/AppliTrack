@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"fmt"
+	"net/url"
 	"os"
 	"time"
 
@@ -12,49 +13,79 @@ import (
 
 var Conn *pgxpool.Pool
 
-func InitDB() {
+type Database struct {
+	Conn *pgxpool.Pool
+}
 
+func NewDatabase() (*Database, error) {
 	var err error
-	if err := godotenv.Load(".env"); err != nil {
-		fmt.Print("Unable to find .env")
-		return
-	}
+	// Load .env if present (for local dev), but do not fail if missing
+	_ = godotenv.Load(".env")
 
 	dsn := os.Getenv("DATABASE_URL")
 
 	if dsn == "" {
-		fmt.Print("Unable to find dsn")
-		return
+		return &Database{}, fmt.Errorf("DATABASE_URL is not set")
+	}
+
+	// Add SSL mode to the URL if not already present
+	parsedURL, err := url.Parse(dsn)
+	if err != nil {
+		return &Database{}, fmt.Errorf("unable to parse DATABASE_URL: %w", err)
+	}
+
+	query := parsedURL.Query()
+	if query.Get("sslmode") == "" {
+		sslMode := os.Getenv("SSL_MODE")
+		if sslMode == "" {
+			// Default based on environment
+			goEnv := os.Getenv("GO_ENV")
+			if goEnv == "development" {
+				sslMode = "disable"
+			} else {
+				sslMode = "require" // secure default for production
+			}
+		}
+		query.Set("sslmode", sslMode)
+		parsedURL.RawQuery = query.Encode()
+		dsn = parsedURL.String()
 	}
 
 	config, err := pgxpool.ParseConfig(dsn)
 	if err != nil {
-		fmt.Printf("Unable to parse DATABASE_URL")
-		return
+		return &Database{}, fmt.Errorf("unable to parse DATABASE_URL: %w", err)
 	}
 
 	config.MaxConns = 10
 	config.MinConns = 2
-	config.MaxConnIdleTime = time.Hour
-	config.MaxConnLifetime.Minutes()
+	config.MaxConnIdleTime = time.Minute * 30
+	config.MaxConnLifetime = time.Hour
+	config.ConnConfig.ConnectTimeout = time.Second * 30
 
 	Conn, err = pgxpool.NewWithConfig(context.Background(), config)
 	if err != nil {
-		fmt.Printf("Unable to connect to DB, error: %v", err)
-		return
+		return &Database{}, fmt.Errorf("unable to connect to database: %w", err)
 	}
 
 	if err = Conn.Ping(context.Background()); err != nil {
-		fmt.Printf("Unable to Ping, error: %v", err)
+		return &Database{}, fmt.Errorf("unable to ping database: %w", err)
 	}
 
-	fmt.Println("Sucessfull connection to database")
+	fmt.Println("Successful connection to database")
+	return &Database{Conn: Conn}, nil
 }
 
-func CloseDB() {
-	if Conn != nil {
-		Conn.Close()
+func (db *Database) GetConnection() *pgxpool.Pool {
+	if db.Conn == nil {
+		fmt.Println("Database connection is not initialized")
+		return nil
+	}
+	return db.Conn
+}
+
+func (db *Database) Close() {
+	if db.Conn != nil {
+		db.Conn.Close()
 		fmt.Println("Closed connection to database")
 	}
-
 }
