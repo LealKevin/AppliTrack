@@ -20,13 +20,23 @@ api.139-59-147-172.sslip.io {
         respond 204
     }
 
-    # Actual requests from allowed origin: add CORS headers then proxy
+    # Actual requests from allowed origin: ensure exactly one ACAO header
     handle @from_app {
+        # Remove any CORS headers added by upstream to avoid duplicates
+        header -Access-Control-Allow-Origin
+        header -Access-Control-Allow-Credentials
+        header -Access-Control-Allow-Headers
+        header -Access-Control-Allow-Methods
+
+        # Add our single, correct CORS headers
         header {
             Access-Control-Allow-Origin {http.request.header.Origin}
             Access-Control-Allow-Credentials true
+            Access-Control-Allow-Methods "GET, POST, PUT, PATCH, DELETE, OPTIONS"
+            Access-Control-Allow-Headers "Content-Type, Authorization, X-CSRF-Token"
             Vary "Origin"
         }
+
         reverse_proxy api:8080
     }
 
