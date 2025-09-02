@@ -21,13 +21,14 @@ api.139-59-147-172.sslip.io {
         method OPTIONS
         header Origin https://applitrack-app-hv8px.ondigitalocean.app
     }
-    respond @preflight 204 {
-        headers Access-Control-Allow-Origin "{http.request.header.Origin}"
-        headers Access-Control-Allow-Methods "GET, POST, PUT, PATCH, DELETE, OPTIONS"
-        headers Access-Control-Allow-Headers "{http.request.header.Access-Control-Request-Headers}"
-        headers Access-Control-Allow-Credentials "true"
-        headers Vary "Origin, Access-Control-Request-Headers"
+    header @preflight {
+        Access-Control-Allow-Origin {http.request.header.Origin}
+        Access-Control-Allow-Methods "GET, POST, PUT, PATCH, DELETE, OPTIONS"
+        Access-Control-Allow-Headers {http.request.header.Access-Control-Request-Headers}
+        Access-Control-Allow-Credentials true
+        Vary "Origin, Access-Control-Request-Headers"
     }
+    respond @preflight 204
 
     # Reverse proxy to the API service on the Docker network
     reverse_proxy api:8080
