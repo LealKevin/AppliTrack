@@ -19,7 +19,18 @@
       "Bash(go run:*)",
       "Bash(npm run lint:*)",
       "Bash(golangci-lint run:*)",
-      "Bash(golangci-lint config:*)"
+      "Bash(golangci-lint config:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npm run test:e2e:*)",
+      "Bash(npm run:*)",
+      "Bash(docker-compose up:*)",
+      "Bash(brew services start postgresql@15)",
+      "Bash(make:*)",
+      "Bash(open:*)",
+      "Bash(docker:*)",
+      "Bash(/dev/null)",
+      "Bash(npx playwright test:*)",
+      "Bash(rm:*)"
     ],
     "deny": []
   }

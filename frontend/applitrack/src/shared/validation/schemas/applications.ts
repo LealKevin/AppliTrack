@@ -35,9 +35,10 @@ export const createApplicationSchema = z.object({
     .optional(),
   url_application: z
     .string()
-    .url("Please enter a valid URL")
     .optional()
-    .or(z.literal(""))
+    .refine((val) => !val || val.trim() === "" || z.string().url().safeParse(val).success, {
+      message: "Please enter a valid URL or leave empty"
+    })
 });
 
 // Update application validation schema - matches backend UpdateApplicationRequest validation

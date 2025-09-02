@@ -44,7 +44,7 @@ db-reset: migrate-down migrate sqlc
 # Development
 dev:
 	@echo "Starting development server..."
-	go run cmd/api/main.go
+	@export $$(cat .env | xargs) && go run cmd/api/main.go
 
 # Build
 build:

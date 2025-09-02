@@ -60,7 +60,7 @@ function ApplicationCreateModal({
       title_application: validation.data!.title,
       company: validation.data!.company,
       location: validation.data!.location,
-      url_application: validation.data!.url_application || "",
+      url_application: validation.data!.url_application || undefined,
       sent_date: validation.data!.sent_date,
       status: validation.data!.status,
       notes: validation.data!.notes || "",

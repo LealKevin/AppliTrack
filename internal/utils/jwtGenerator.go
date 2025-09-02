@@ -33,7 +33,7 @@ func CreateToken(userId string) (string, error) {
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 24)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
-			Issuer:    "AppliTrack",
+			Issuer:    "ApplyTrack",
 		},
 	}
 

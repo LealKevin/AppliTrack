@@ -55,11 +55,14 @@ function useUpcomingActions() {
         urgency = 'this_week';
       }
 
+      const appTitle = reminder.Application?.title_application ?? 'Application';
+      const company = reminder.Application?.company ?? 'Unknown company';
+
       actions.push({
         id: reminder.id,
         type: 'reminder',
-        title: `Follow up on ${reminder.Application.title_application}`,
-        company: reminder.Application.company,
+        title: `Follow up on ${appTitle}`,
+        company,
         date: reminder.reminder_date,
         urgency
       });
@@ -89,7 +92,7 @@ function useUpcomingActions() {
             id: round.id,
             type: 'interview',
             title: `${roundTypeDisplay} interview`,
-            company: app.Application.company,
+            company: app.Application?.company ?? 'Unknown company',
             date: round.date,
             urgency
           });

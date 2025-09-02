@@ -43,10 +43,12 @@ export function useReminderNotifications() {
 
   const showReminderNotification = (reminder: ReminderWithApplication) => {
     const app = reminder.Application;
-    
+    const title = app?.title_application ?? "application";
+    const company = app?.company ?? "your target";
+
     // Show a simple notification toast
     toast.info(
-      `⏰ Reminder: Follow up on your ${app.title_application} application at ${app.company}!`
+      `⏰ Reminder: Follow up on your ${title} application at ${company}!`
     );
 
     // Emit custom event for ApplicationsPage to show the reminder modal/actions

@@ -70,15 +70,19 @@ export async function fetchApplicationsByStatus(status: string) {
 }
 
 export async function createApplication(application: IApplication) {
-  const applicationRequest = {
+  const applicationRequest: any = {
     title: application.title_application,
     company: application.company,
     location: application.location || "",
     sent_date: new Date(application.sent_date).toISOString(),
     status: application.status,
     notes: application.notes || "",
-    url_application: application.url_application,
   };
+  
+  // Only include url_application if it's provided and not empty
+  if (application.url_application && application.url_application.trim() !== "") {
+    applicationRequest.url_application = application.url_application;
+  }
   
   const response = await apiClient.post<IApplication>("/api/application", applicationRequest);
   return response.data;
@@ -102,18 +106,21 @@ type bodyRequest = {
 export async function updateApplication(application: IApplication) {
   const sentDate = new Date(application.sent_date).toISOString();
 
-  const applicationRequest: bodyRequest = {
+  const applicationRequest: any = {
     title: application.title_application,
     company: application.company,
     location: application.location || "",
     sent_date: sentDate,
     status: application.status,
     notes: application.notes || "",
-    url_application: application.url_application,
   };
-  const response = await apiClient.put<IApplication>(`/api/applications/${application.id}`, {
-    ...applicationRequest,
-  });
+  
+  // Only include url_application if it's provided and not empty
+  if (application.url_application && application.url_application.trim() !== "") {
+    applicationRequest.url_application = application.url_application;
+  }
+  
+  const response = await apiClient.put<IApplication>(`/api/applications/${application.id}`, applicationRequest);
   return response.data;
 }
 

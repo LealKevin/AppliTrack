@@ -31,7 +31,7 @@ export interface IApplication {
   sent_date: string;
   status: ApplicationStatus;
   notes?: string | null;
-  url_application: string;
+  url_application?: string;
   created_at: string;
   updated_at: string;
 }

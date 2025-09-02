@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"fmt"
+	"net/url"
 	"os"
 	"time"
 
@@ -17,15 +18,37 @@ type Database struct {
 }
 
 func NewDatabase() (*Database, error) {
-	var err error
-	if err := godotenv.Load(".env"); err != nil {
-		return &Database{}, fmt.Errorf("unable to load .env file: %w", err)
-	}
+    var err error
+    // Load .env if present (for local dev), but do not fail if missing
+    _ = godotenv.Load(".env")
 
-	dsn := os.Getenv("DATABASE_URL")
+    dsn := os.Getenv("DATABASE_URL")
 
 	if dsn == "" {
 		return &Database{}, fmt.Errorf("DATABASE_URL is not set")
+	}
+
+	// Add SSL mode to the URL if not already present
+	parsedURL, err := url.Parse(dsn)
+	if err != nil {
+		return &Database{}, fmt.Errorf("unable to parse DATABASE_URL: %w", err)
+	}
+
+	query := parsedURL.Query()
+	if query.Get("sslmode") == "" {
+		sslMode := os.Getenv("SSL_MODE")
+		if sslMode == "" {
+			// Default based on environment
+			goEnv := os.Getenv("GO_ENV")
+			if goEnv == "development" {
+				sslMode = "disable"
+			} else {
+				sslMode = "require" // secure default for production
+			}
+		}
+		query.Set("sslmode", sslMode)
+		parsedURL.RawQuery = query.Encode()
+		dsn = parsedURL.String()
 	}
 
 	config, err := pgxpool.ParseConfig(dsn)
@@ -38,7 +61,6 @@ func NewDatabase() (*Database, error) {
 	config.MaxConnIdleTime = time.Minute * 30
 	config.MaxConnLifetime = time.Hour
 	config.ConnConfig.ConnectTimeout = time.Second * 30
-	config.ConnConfig.RuntimeParams["sslmode"] = "require"
 
 	Conn, err = pgxpool.NewWithConfig(context.Background(), config)
 	if err != nil {
