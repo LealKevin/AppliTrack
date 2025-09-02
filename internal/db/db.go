@@ -18,11 +18,11 @@ type Database struct {
 }
 
 func NewDatabase() (*Database, error) {
-    var err error
-    // Load .env if present (for local dev), but do not fail if missing
-    _ = godotenv.Load(".env")
+	var err error
+	// Load .env if present (for local dev), but do not fail if missing
+	_ = godotenv.Load(".env")
 
-    dsn := os.Getenv("DATABASE_URL")
+	dsn := os.Getenv("DATABASE_URL")
 
 	if dsn == "" {
 		return &Database{}, fmt.Errorf("DATABASE_URL is not set")
