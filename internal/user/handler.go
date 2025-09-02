@@ -82,15 +82,20 @@ func (h *Handler) Register(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	c.SetCookie(&http.Cookie{
-		Name:     "jwt",
-		Value:    authResp.Token,
-		Path:     "/",
-		HttpOnly: true,
-		Secure:   !isDevelopment(),
-		SameSite: http.SameSiteLaxMode,
-		MaxAge:   60 * 60 * 24,
-	})
+    c.SetCookie(&http.Cookie{
+        Name:     "jwt",
+        Value:    authResp.Token,
+        Path:     "/",
+        HttpOnly: true,
+        Secure:   !isDevelopment(),
+        SameSite: func() http.SameSite {
+            if isDevelopment() {
+                return http.SameSiteLaxMode
+            }
+            return http.SameSiteNoneMode
+        }(),
+        MaxAge:   60 * 60 * 24,
+    })
 
 	return c.JSON(http.StatusCreated, authResponse{
 		User:  mapToUserResponse(authResp.User),
@@ -121,15 +126,20 @@ func (h *Handler) Login(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	c.SetCookie(&http.Cookie{
-		Name:     "jwt",
-		Value:    authResp.Token,
-		Path:     "/",
-		HttpOnly: true,
-		Secure:   !isDevelopment(),
-		SameSite: http.SameSiteLaxMode,
-		MaxAge:   60 * 60 * 24,
-	})
+    c.SetCookie(&http.Cookie{
+        Name:     "jwt",
+        Value:    authResp.Token,
+        Path:     "/",
+        HttpOnly: true,
+        Secure:   !isDevelopment(),
+        SameSite: func() http.SameSite {
+            if isDevelopment() {
+                return http.SameSiteLaxMode
+            }
+            return http.SameSiteNoneMode
+        }(),
+        MaxAge:   60 * 60 * 24,
+    })
 
 	return c.JSON(http.StatusOK, authResponse{
 		User:  mapToUserResponse(authResp.User),
@@ -138,16 +148,21 @@ func (h *Handler) Login(c echo.Context) error {
 }
 
 func (h *Handler) Logout(c echo.Context) error {
-	c.SetCookie(&http.Cookie{
-		Name:     "jwt",
-		Value:    "",
-		Path:     "/",
-		HttpOnly: true,
-		Secure:   !isDevelopment(),
-		SameSite: http.SameSiteLaxMode,
-		Expires:  time.Unix(0, 0),
-		MaxAge:   -1,
-	})
+    c.SetCookie(&http.Cookie{
+        Name:     "jwt",
+        Value:    "",
+        Path:     "/",
+        HttpOnly: true,
+        Secure:   !isDevelopment(),
+        SameSite: func() http.SameSite {
+            if isDevelopment() {
+                return http.SameSiteLaxMode
+            }
+            return http.SameSiteNoneMode
+        }(),
+        Expires:  time.Unix(0, 0),
+        MaxAge:   -1,
+    })
 
 	return c.JSON(http.StatusOK, map[string]string{"message": "logged out"})
 }
@@ -201,16 +216,21 @@ func (h *Handler) DeleteCurrentUser(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "failed to delete user")
 	}
 
-	c.SetCookie(&http.Cookie{
-		Name:     "jwt",
-		Value:    "",
-		Path:     "/",
-		HttpOnly: true,
-		Secure:   !isDevelopment(),
-		SameSite: http.SameSiteLaxMode,
-		Expires:  time.Unix(0, 0),
-		MaxAge:   -1,
-	})
+    c.SetCookie(&http.Cookie{
+        Name:     "jwt",
+        Value:    "",
+        Path:     "/",
+        HttpOnly: true,
+        Secure:   !isDevelopment(),
+        SameSite: func() http.SameSite {
+            if isDevelopment() {
+                return http.SameSiteLaxMode
+            }
+            return http.SameSiteNoneMode
+        }(),
+        Expires:  time.Unix(0, 0),
+        MaxAge:   -1,
+    })
 
 	return c.JSON(http.StatusOK, map[string]string{"message": "user deleted successfully"})
 }
