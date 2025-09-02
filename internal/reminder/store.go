@@ -10,7 +10,7 @@ import (
 
 type Store interface {
 	GetReminders(userID uuid.UUID) ([]db.Reminder, error)
-	CreateReminder(userID uuid.UUID, req db.CreateReminderParams) (db.Reminder, error)
+	CreateReminder(req db.CreateReminderParams) (db.Reminder, error)
 	UpdateReminder(storeReq db.UpdateReminderParams) (db.Reminder, error)
 	CompleteReminder(userID, reminderID uuid.UUID) error
 	DeleteReminder(userID, reminderID uuid.UUID) error
@@ -41,7 +41,7 @@ func (s *postgresReminderStore) GetReminders(userID uuid.UUID) ([]db.Reminder, e
 	return reminders, nil
 }
 
-func (s *postgresReminderStore) CreateReminder(userID uuid.UUID, req db.CreateReminderParams) (db.Reminder, error) {
+func (s *postgresReminderStore) CreateReminder(req db.CreateReminderParams) (db.Reminder, error) {
 	ctx := context.Background()
 	reminder, err := s.db.CreateReminder(ctx, req)
 	if err != nil {

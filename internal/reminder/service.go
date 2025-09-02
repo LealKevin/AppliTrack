@@ -57,7 +57,7 @@ func (s *reminderService) CreateReminder(userID uuid.UUID, req ReminderReq) (Rem
 		ReminderDate:  req.ReminderDate,
 		ApplicationID: req.ApplicationID,
 	}
-	reminder, err := s.store.CreateReminder(userID, storeReq)
+	reminder, err := s.store.CreateReminder(storeReq)
 	if err != nil {
 		return ReminderResp{}, err
 	}
