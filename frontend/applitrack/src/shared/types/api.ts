@@ -124,7 +124,7 @@ export interface ReminderWithApplication {
   application_id: string;
   created_at: string;
   updated_at: string;
-  Application: IApplication;
+  Application?: IApplication;
 }
 
 export interface ApplicationsResponse {

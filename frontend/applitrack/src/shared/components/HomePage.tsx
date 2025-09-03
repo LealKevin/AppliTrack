@@ -16,7 +16,7 @@ function HomePage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-7xl mx-auto p-6 space-y-8">
+      <div className="max-w-7xl mx-auto p-4 sm:p-6 space-y-6 sm:space-y-8">
 
         <div className="space-y-2">
           <h1 className="text-2xl font-semibold text-foreground">
@@ -211,16 +211,16 @@ function HomePage() {
             <ChartAreaInteractive />
 
             <div className="mt-4 flex flex-col sm:flex-row gap-4 justify-center">
-              <Link to="/applications?create=true" className="">
-                <Button className=" h-12 text-base font-medium">
+              <Link to="/applications?create=true" className="w-full sm:w-auto">
+                <Button className="w-full sm:w-auto h-12 text-base font-medium">
                   <Plus className="h-5 w-5 mr-2" />
                   Add New Application
                 </Button>
               </Link>
 
               <div className="flex gap-2">
-                <Link to="/applications">
-                  <Button variant="outline" className="h-12 px-6">
+                <Link to="/applications" className="w-full sm:w-auto">
+                  <Button variant="outline" className="w-full sm:w-auto h-12 px-6">
                     <FileText className="h-4 w-4 mr-2" />
                     View All
                   </Button>

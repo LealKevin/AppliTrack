@@ -110,15 +110,16 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar className="border-r" collapsible="icon" {...props}>
       <SidebarHeader>
-        <div className="flex items-center justify-center py-4">
+        <div className="flex items-center justify-center py-4 px-2">
           <div className="flex items-center gap-2 group-data-[collapsible=icon]:hidden">
-            <BriefcaseBusiness className="!size-5" />
-            <span className="font-semibold">ApplyTrack</span>
+            <BriefcaseBusiness className="!size-5 sm:!size-6" />
+            <span className="font-semibold text-sm sm:text-base">ApplyTrack</span>
           </div>
           
           <BriefcaseBusiness 
-            className="!size-5 hidden group-data-[collapsible=icon]:block hover:scale-110 transition-transform cursor-pointer" 
+            className="!size-5 sm:!size-6 hidden group-data-[collapsible=icon]:block hover:scale-110 transition-transform cursor-pointer touch-none" 
             onClick={handleHeaderClick}
+            style={{ minHeight: '44px', minWidth: '44px' }}
           />
         </div>
       </SidebarHeader>

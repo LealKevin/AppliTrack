@@ -3,6 +3,9 @@ import { Button } from "@/shared/components/ui/button";
 import { useUserConnectionModal } from "@/features/authentication/contexts/userConnectionModalProvider";
 import useDisconnection from "@/features/authentication/hooks/useDisconnection";
 import NotificationBell from "../../features/reminders/components/NotificationBell";
+import { useState } from "react";
+import { Menu, X } from "lucide-react";
+import { Sheet, SheetContent, SheetTrigger } from "@/shared/components/ui/sheet";
 
 const iconHome = (
 	<svg
@@ -31,62 +34,114 @@ const iconUser = (
 	</svg>
 );
 
-
 function Header() {
 	const { openModal: openConnectionModal } = useUserConnectionModal();
 	const { pathname } = useLocation();
+	const [isOpen, setIsOpen] = useState(false);
 
 	const { mutate: disconnect } = useDisconnection();
-	return (
-		<header className="sticky">
-			<nav className="flex justify-center ">
-				<Button className="self-start flex-start w-10 h-10 m-4" asChild>
-					<Link to="/">{iconHome}</Link>
-				</Button>
 
-				<Button
-					variant={pathname === "/offers" ? "default" : "secondary"}
-					className="w-48 m-4 flex-auto h-10"
-					asChild
-				>
-					<Link to="/offers">Offers</Link>
-				</Button>
-				<Button
-					variant={pathname === "/applications" ? "default" : "secondary"}
-					className="w-48 m-4 flex-auto h-10"
-					asChild
-				>
-					<Link to="/applications">Applications</Link>
-				</Button>
-				<Button
-					variant={pathname === "/stats" ? "default" : "secondary"}
-					className="w-48 m-4 flex-auto h-10"
-					asChild
-				>
-					<Link to="/stats">Stats</Link>
-				</Button>
-				<div className="self-end m-4">
-					<NotificationBell />
+	const navigationItems = [
+		{ path: "/offers", label: "Offers" },
+		{ path: "/applications", label: "Applications" },
+		{ path: "/stats", label: "Stats" },
+	];
+
+	const handleDisconnect = () => {
+		disconnect();
+		setIsOpen(false);
+	};
+
+	return (
+		<header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+			{/* Desktop Navigation */}
+			<nav className="hidden md:flex items-center justify-between px-6 py-3">
+				<div className="flex items-center space-x-2">
+					<Button size="sm" variant="ghost" asChild>
+						<Link to="/" className="flex items-center">
+							{iconHome}
+						</Link>
+					</Button>
 				</div>
 
-				<Button className="self-end  m-4 w-10 h-10" asChild>
-					<Link
-						onClick={() => {
-									disconnect();
-						}}
-						to="/login"
-					>
-						disconnect
+				<div className="flex items-center space-x-2">
+					{navigationItems.map((item) => (
+						<Button
+							key={item.path}
+							variant={pathname === item.path ? "default" : "ghost"}
+							size="sm"
+							asChild
+						>
+							<Link to={item.path}>{item.label}</Link>
+						</Button>
+					))}
+				</div>
+
+				<div className="flex items-center space-x-2">
+					<NotificationBell />
+					<Button size="sm" variant="ghost" onClick={() => disconnect()}>
+						Logout
+					</Button>
+					<Button size="sm" variant="ghost" onClick={openConnectionModal}>
+						{iconUser}
+					</Button>
+				</div>
+			</nav>
+
+			{/* Mobile Navigation */}
+			<nav className="md:hidden flex items-center justify-between px-4 py-3">
+				<Button size="sm" variant="ghost" asChild>
+					<Link to="/" className="flex items-center">
+						{iconHome}
 					</Link>
 				</Button>
 
-				<Button
-					onClick={openConnectionModal}
-					className="self-end  m-4 w-10 h-10"
-					asChild
-				>
-					{iconUser}
-				</Button>
+				<div className="flex items-center space-x-2">
+					<NotificationBell />
+					<Sheet open={isOpen} onOpenChange={setIsOpen}>
+						<SheetTrigger asChild>
+							<Button size="sm" variant="ghost">
+								<Menu className="h-5 w-5" />
+							</Button>
+						</SheetTrigger>
+						<SheetContent side="right" className="w-64">
+							<div className="flex flex-col space-y-4 mt-8">
+								{navigationItems.map((item) => (
+									<Button
+										key={item.path}
+										variant={pathname === item.path ? "default" : "ghost"}
+										size="lg"
+										className="justify-start"
+										asChild
+										onClick={() => setIsOpen(false)}
+									>
+										<Link to={item.path}>{item.label}</Link>
+									</Button>
+								))}
+								<hr className="my-4" />
+								<Button
+									variant="ghost"
+									size="lg"
+									className="justify-start"
+									onClick={() => {
+										openConnectionModal();
+										setIsOpen(false);
+									}}
+								>
+									Profile
+								</Button>
+								<Button
+									variant="ghost"
+									size="lg"
+									className="justify-start text-destructive"
+									onClick={handleDisconnect}
+								>
+									Logout
+								</Button>
+							</div>
+						</SheetContent>
+					</Sheet>
+				</div>
 			</nav>
 		</header>
 	);

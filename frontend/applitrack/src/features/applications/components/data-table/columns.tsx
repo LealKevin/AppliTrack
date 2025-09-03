@@ -126,6 +126,9 @@ export const createColumns = ({ onEdit, onDelete, onManageRounds, onSetReminder,
       const location = row.getValue("location") as string
       return <div className="text-muted-foreground">{location}</div>
     },
+    meta: {
+      className: "hidden md:table-cell",
+    },
   },
   {
     accessorKey: "status",
@@ -201,6 +204,9 @@ export const createColumns = ({ onEdit, onDelete, onManageRounds, onSetReminder,
         )
       }
     },
+    meta: {
+      className: "hidden lg:table-cell",
+    },
   },
   {
     accessorKey: "sent_date",
@@ -231,7 +237,7 @@ export const createColumns = ({ onEdit, onDelete, onManageRounds, onSetReminder,
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
+            <Button variant="ghost" className="h-10 w-10 p-0 touch-none" style={{ minHeight: '44px', minWidth: '44px' }}>
               <span className="sr-only">Open menu</span>
               <MoreHorizontal className="h-4 w-4" />
             </Button>

@@ -110,19 +110,19 @@ export function ApplicationsDataTable<TData, TValue>({
 
   return (
     <div className="w-full">
-      <div className="flex items-center py-4 mb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center py-4 mb-4 gap-4">
         <Input
           placeholder="Search applications..."
           value={globalFilter ?? ""}
           onChange={(event) => setGlobalFilter(String(event.target.value))}
-          className="max-w-sm mr-4"
+          className="w-full sm:max-w-sm"
         />
-        <div className="ml-auto flex items-center gap-2">
+        <div className="flex items-center gap-2 sm:ml-auto flex-wrap">
           {onDeleteSelected && table.getFilteredSelectedRowModel().rows.length > 0 && (
             <Button
               onClick={handleDeleteClick}
               variant="destructive"
-              className="mx-2"
+              className="min-h-[44px]"
               disabled={isDeleting}
             >
               <Trash2 className="h-4 w-4" />
@@ -132,12 +132,12 @@ export function ApplicationsDataTable<TData, TValue>({
             </Button>
           )}
           {onImportCSV && (
-            <Button onClick={onImportCSV} variant={"secondary"} className="mx-2">
+            <Button onClick={onImportCSV} variant={"secondary"} className="min-h-[44px]">
               <Upload className="h-4 w-4" />
               <span className="hidden sm:inline sm:ml-2">Import CSV</span>
             </Button>
           )}
-          <Button onClick={onAddApplication} variant={"default"} className="mx-4">
+          <Button onClick={onAddApplication} variant={"default"} className="min-h-[44px]">
             <Plus className="h-4 w-4" />
             <span className="hidden sm:inline sm:ml-2">Add Application</span>
           </Button>
@@ -179,14 +179,15 @@ export function ApplicationsDataTable<TData, TValue>({
           </DropdownMenu>
         </div>
       </div>
-      <div className="rounded-md border">
-        <Table>
+      <div className="rounded-md border overflow-x-auto">
+        <Table className="min-w-[800px]">
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
+                  const meta = header.column.columnDef.meta as { className?: string } | undefined;
                   return (
-                    <TableHead key={header.id}>
+                    <TableHead key={header.id} className={`whitespace-nowrap ${meta?.className || ''}`}>
                       {header.isPlaceholder
                         ? null
                         : flexRender(
@@ -203,11 +204,14 @@ export function ApplicationsDataTable<TData, TValue>({
             {isLoading ? (
               Array.from({ length: 5 }).map((_, index) => (
                 <TableRow key={index}>
-                  {columns.map((_, colIndex) => (
-                    <TableCell key={colIndex}>
-                      <div className="h-4 bg-muted animate-pulse rounded" />
-                    </TableCell>
-                  ))}
+                  {columns.map((column, colIndex) => {
+                    const meta = column.meta as { className?: string } | undefined;
+                    return (
+                      <TableCell key={colIndex} className={`${meta?.className || ''}`}>
+                        <div className="h-4 bg-muted animate-pulse rounded" />
+                      </TableCell>
+                    );
+                  })}
                 </TableRow>
               ))
             ) : table.getRowModel().rows?.length ? (
@@ -220,14 +224,17 @@ export function ApplicationsDataTable<TData, TValue>({
                   onDoubleClick={() => onRowDoubleClick?.(row.original)}
                   className={`${onRowDoubleClick ? "cursor-pointer" : ""} ${isHighlighted ? "bg-blue-50 dark:bg-blue-950/30" : ""}`}
                 >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </TableCell>
-                  ))}
+                  {row.getVisibleCells().map((cell) => {
+                    const meta = cell.column.columnDef.meta as { className?: string } | undefined;
+                    return (
+                      <TableCell key={cell.id} className={`whitespace-nowrap ${meta?.className || ''}`}>
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </TableCell>
+                    );
+                  })}
                 </TableRow>
                 )
               })
@@ -244,17 +251,18 @@ export function ApplicationsDataTable<TData, TValue>({
           </TableBody>
         </Table>
       </div>
-      <div className="flex items-center justify-end space-x-2 py-6">
-        <div className="flex-1 text-sm text-muted-foreground">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0 py-6">
+        <div className="text-sm text-muted-foreground text-center sm:text-left">
           {table.getFilteredSelectedRowModel().rows.length} of{" "}
           {table.getFilteredRowModel().rows.length} row(s) selected.
         </div>
-        <div className="space-x-2">
+        <div className="flex justify-center space-x-2">
           <Button
             variant="outline"
             size="sm"
             onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage()}
+            className="min-h-[44px]"
           >
             Previous
           </Button>
@@ -263,6 +271,7 @@ export function ApplicationsDataTable<TData, TValue>({
             size="sm"
             onClick={() => table.nextPage()}
             disabled={!table.getCanNextPage()}
+            className="min-h-[44px]"
           >
             Next
           </Button>

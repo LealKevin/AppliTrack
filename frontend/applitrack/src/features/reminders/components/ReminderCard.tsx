@@ -15,6 +15,17 @@ function ReminderCard({ reminder, urgency, compact = false }: ReminderCardProps)
   const navigate = useNavigate();
   const app = reminder.Application;
 
+  // Guard clause for missing application data
+  if (!app) {
+    return (
+      <div className={`border rounded-lg bg-gray-50 border-l-4 border-l-gray-400 ${compact ? 'py-2 px-3' : 'py-3 px-4'}`}>
+        <div className="text-sm text-muted-foreground">
+          Application data not available for this reminder
+        </div>
+      </div>
+    );
+  }
+
   const formatRelativeDate = (dateString: string) => {
     const date = new Date(dateString);
     const now = new Date();
@@ -44,7 +55,9 @@ function ReminderCard({ reminder, urgency, compact = false }: ReminderCardProps)
   };
 
   const handleViewApplication = () => {
-    navigate(`/applications?highlight=${app.id}`);
+    if (app?.id) {
+      navigate(`/applications?highlight=${app.id}`);
+    }
   };
 
   return (
@@ -56,11 +69,11 @@ function ReminderCard({ reminder, urgency, compact = false }: ReminderCardProps)
             <span className="text-base">{urgency.icon}</span>
             <div className="flex-1 min-w-0">
               <h3 className={`font-medium truncate ${compact ? 'text-sm' : 'text-base'}`}>
-                {app.title_application}
+                {app.title_application || 'Untitled Application'}
               </h3>
               <div className="flex items-center gap-1 text-sm text-muted-foreground">
                 <Building2 className="w-3 h-3 flex-shrink-0" />
-                <span className="truncate">{app.company}</span>
+                <span className="truncate">{app.company || 'Unknown Company'}</span>
               </div>
             </div>
           </div>
@@ -71,12 +84,12 @@ function ReminderCard({ reminder, urgency, compact = false }: ReminderCardProps)
               <span>{formatRelativeDate(reminder.reminder_date)}</span>
             </div>
             <Badge 
-              variant={app.status === 'rejected' ? 'destructive' : 
-                      app.status === 'pending' ? 'secondary' : 
-                      app.status === 'sent' ? 'outline' : 'default'}
+              variant={(app.status === 'rejected') ? 'destructive' : 
+                      (app.status === 'pending') ? 'secondary' : 
+                      (app.status === 'sent') ? 'outline' : 'default'}
               className="text-xs"
             >
-              {app.status.charAt(0).toUpperCase() + app.status.slice(1)}
+              {app.status ? app.status.charAt(0).toUpperCase() + app.status.slice(1) : 'Unknown'}
             </Badge>
           </div>
         </div>

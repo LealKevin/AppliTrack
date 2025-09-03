@@ -170,7 +170,7 @@ export default function ApplicationsTablePage() {
   }
 
   return (
-    <div className="flex h-full flex-col space-y-8 p-8" onClick={handlePageClick}>
+    <div className="flex h-full flex-col space-y-4 sm:space-y-6 lg:space-y-8 p-4 sm:p-6 lg:p-8" onClick={handlePageClick}>
 
       {/* Status Tabs */}
       <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as typeof activeTab)}>

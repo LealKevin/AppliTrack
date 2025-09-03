@@ -12,9 +12,10 @@ function CustomSidebarTrigger() {
   return (
     <button
       onClick={toggleSidebar}
-      className="m-5 fixed size-9 rounded-md border border-border bg-background hover:bg-accent hover:text-accent-foreground flex items-center justify-center transition-colors duration-200"
+      className="m-2 sm:m-4 lg:m-5 fixed size-9 sm:size-10 lg:size-11 rounded-md border border-border bg-background hover:bg-accent hover:text-accent-foreground flex items-center justify-center transition-colors duration-200 z-40 touch-none"
+      style={{ minHeight: '44px', minWidth: '44px' }}
     >
-      <PanelLeftIcon className="size-4" />
+      <PanelLeftIcon className="size-4 sm:size-5" />
       <span className="sr-only">Toggle Sidebar</span>
     </button>
   );
@@ -26,7 +27,7 @@ export default function MainPage() {
       <AppSidebar />
       <SidebarInset>
         <CustomSidebarTrigger />
-        <div className="m-10">
+        <div className="p-4 sm:p-6 lg:p-8 xl:p-10">
           <Outlet />
         </div>
       </SidebarInset>
