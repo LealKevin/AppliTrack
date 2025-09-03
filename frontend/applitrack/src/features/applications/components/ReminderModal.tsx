@@ -106,15 +106,20 @@ function ReminderModal({
       });
     } else {
       // Create new reminder
-      createReminderForApplication(application.id, isoDate);
-
-      // Handle success/error through the hook's mutation callbacks
-      if (createReminder.isSuccess) {
-        toast.success("Reminder set successfully");
-        handleClose();
-      } else if (createReminder.isError) {
-        toast.error("Failed to set reminder");
-      }
+      createReminder.mutate({
+        reminder_date: isoDate,
+        status: 'pending',
+        application_id: application.id,
+      }, {
+        onSuccess: () => {
+          toast.success("Reminder set successfully");
+          handleClose();
+        },
+        onError: (error) => {
+          toast.error("Failed to set reminder");
+          console.error("Create reminder error:", error);
+        }
+      });
     }
   };
 

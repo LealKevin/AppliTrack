@@ -2,6 +2,7 @@ import { AppSidebar } from "@/shared/components/app-sidebar";
 import { SidebarInset, SidebarProvider, useSidebar } from "@/shared/components/ui/sidebar";
 import { Outlet } from "react-router-dom";
 import { PanelLeftIcon } from "lucide-react";
+import { Toaster } from "@/shared/components/ui/sonner";
 
 function CustomSidebarTrigger() {
   const { toggleSidebar, state } = useSidebar();
@@ -29,6 +30,7 @@ export default function MainPage() {
           <Outlet />
         </div>
       </SidebarInset>
+      <Toaster />
     </SidebarProvider>
   );
 }

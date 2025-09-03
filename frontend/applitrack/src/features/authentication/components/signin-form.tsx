@@ -12,7 +12,6 @@ function SigninForm({
 	className,
 	...props
 }: React.ComponentProps<"div">) {
-	const [newName, setNewName] = useState("");
 	const [newEmail, setNewEmail] = useState("");
 	const [newPassword, setNewPassword] = useState("");
 	const [newPasswordRepeat, setNewPasswordRepeat] = useState("");
@@ -43,7 +42,7 @@ function SigninForm({
 			{
 				email: validation.data!.email,
 				password: validation.data!.password,
-				name: newName,
+				name: "",
 				passwordRepeat: validation.data!.passwordRepeat,
 			},
 			{
@@ -79,14 +78,6 @@ function SigninForm({
 				</CardHeader>
 				<form onSubmit={handleSubmit}>
 					<CardContent className="space-y-2">
-						<div className="grid gap-3">
-							<Label htmlFor="email">Name</Label>
-							<Input
-								onChange={(e) => setNewName(e.currentTarget.value)}
-								id="name"
-								placeholder="Your name"
-							/>
-						</div>
 
 						<div className="grid gap-3">
 							<Label htmlFor="email">E-mail</Label>

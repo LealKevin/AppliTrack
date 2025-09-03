@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { fetchRounds, createRound, updateRound, deleteRound } from "@/shared/utils/apiCalls";
 import type { Round, CreateRoundRequest, UpdateRoundRequest } from "@/shared/types/api";
+import { toast } from "sonner";
 
 // Get rounds for a specific application
 export function useRounds(applicationId: string) {
@@ -20,6 +21,7 @@ export function useCreateRound() {
     mutationFn: ({ applicationId, roundData }: { applicationId: string; roundData: CreateRoundRequest }) =>
       createRound(applicationId, roundData),
     onSuccess: (_, { applicationId }) => {
+      toast.success("Round created successfully");
       // Invalidate and refetch rounds for this application
       queryClient.invalidateQueries({ queryKey: ["rounds", applicationId] });
       
@@ -27,6 +29,7 @@ export function useCreateRound() {
       queryClient.invalidateQueries({ queryKey: ["applications"] });
     },
     onError: (error) => {
+      toast.error("Failed to create round");
       console.error("Failed to create round:", error);
     },
   });
@@ -59,11 +62,13 @@ export function useUpdateRound() {
       }
     },
     onSuccess: () => {
+      toast.success("Round updated successfully");
       // Invalidate queries to ensure consistency
       queryClient.invalidateQueries({ queryKey: ["rounds"] });
       queryClient.invalidateQueries({ queryKey: ["applications"] });
     },
     onError: (error) => {
+      toast.error("Failed to update round");
       // Revert optimistic update on error
       queryClient.invalidateQueries({ queryKey: ["rounds"] });
       console.error("Failed to update round:", error);
@@ -92,11 +97,13 @@ export function useDeleteRound() {
       }
     },
     onSuccess: () => {
+      toast.success("Round deleted successfully");
       // Invalidate queries to ensure consistency
       queryClient.invalidateQueries({ queryKey: ["rounds"] });
       queryClient.invalidateQueries({ queryKey: ["applications"] });
     },
     onError: (error) => {
+      toast.error("Failed to delete round");
       // Revert optimistic update on error
       queryClient.invalidateQueries({ queryKey: ["rounds"] });
       console.error("Failed to delete round:", error);
