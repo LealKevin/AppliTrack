@@ -31,6 +31,7 @@ function ApplicationCreateModal({
 }: CreateModalProps) {
   const [status, setStatus] = useState<ApplicationStatus>("pending");
   const [date, setDate] = useState<Date>();
+  const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
   const sentDateFormatted = date
     ? new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())).toISOString()
     : new Date().toISOString();
@@ -131,9 +132,8 @@ function ApplicationCreateModal({
             </div>
             <div>
               <Popover
-                onOpenChange={(open) => {
-                  console.log('🔄 CreateModal Popover state change:', { open, date });
-                }}
+                open={isDatePickerOpen}
+                onOpenChange={setIsDatePickerOpen}
               >
                 <PopoverTrigger asChild>
                   <Button
@@ -145,7 +145,7 @@ function ApplicationCreateModal({
                       getFieldError("sent_date") && "border-red-500"
                     )}
                     onClick={() => {
-                      console.log('📅 CreateModal Date picker clicked', { currentDate: date });
+                      // Date picker clicked
                     }}
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
@@ -154,26 +154,13 @@ function ApplicationCreateModal({
                 </PopoverTrigger>
                 <PopoverContent 
                   className="bg-muted w-auto p-0 rounded-sm"
-                  onOpenAutoFocus={() => {
-                    console.log('🎯 CreateModal PopoverContent focused');
-                  }}
-                  ref={(ref) => {
-                    if (ref) {
-                      console.log('📊 CreateModal PopoverContent ref:', {
-                        computedStyle: window.getComputedStyle(ref),
-                        zIndex: window.getComputedStyle(ref).zIndex,
-                        backgroundColor: window.getComputedStyle(ref).backgroundColor,
-                        opacity: window.getComputedStyle(ref).opacity
-                      });
-                    }
-                  }}
                 >
                   <Calendar
                     mode="single"
                     selected={date}
                     onSelect={(date) => {
-                      console.log('📆 CreateModal Date selected:', { date });
                       setDate(date);
+                      setIsDatePickerOpen(false); // Fermer le calendrier après sélection
                     }}
                     initialFocus
                   />
