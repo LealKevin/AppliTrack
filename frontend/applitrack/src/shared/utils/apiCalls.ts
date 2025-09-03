@@ -229,10 +229,11 @@ export async function fetchInterviewApplications(): Promise<InterviewApplication
 // Reminder API functions
 export async function createReminder(reminderData: CreateReminderRequest): Promise<Reminder> {
   
-  // Transform data to match backend ReminderReq struct
+  const reminderDate = new Date(reminderData.reminder_date + 'T00:00:00Z');
+  
   const backendRequest = {
-    status: "pending",  // Default status as expected by backend
-    reminder_date: new Date(reminderData.reminder_date).toISOString(),
+    status: "pending",
+    reminder_date: reminderDate.toISOString(),
     application_id: reminderData.application_id
   };
   
@@ -246,10 +247,11 @@ export async function fetchUserReminders(): Promise<Reminder[]> {
 }
 
 export async function updateReminder(reminderId: string, reminderData: UpdateReminderRequest): Promise<Reminder> {
-  // Transform data to match backend ReminderReq struct
+  const reminderDate = new Date(reminderData.reminder_date + 'T00:00:00Z');
+  
   const backendRequest = {
     status: reminderData.status || "pending",
-    reminder_date: new Date(reminderData.reminder_date).toISOString(),
+    reminder_date: reminderDate.toISOString(),
     application_id: reminderData.application_id || "00000000-0000-0000-0000-000000000000"
   };
   
