@@ -1,7 +1,6 @@
 package reminder
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/google/uuid"
