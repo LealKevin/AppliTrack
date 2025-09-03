@@ -48,7 +48,7 @@ export function useReminderNotifications() {
 
     // Show a simple notification toast
     toast.info(
-      `⏰ Reminder: Follow up on your ${title} application at ${company}!`
+      `Reminder: Follow up on your ${title} application at ${company}!`
     );
 
     // Emit custom event for ApplicationsPage to show the reminder modal/actions
@@ -62,7 +62,7 @@ export function useReminderNotifications() {
     window.dispatchEvent(new CustomEvent('reminder-reapply', {
       detail: { reminder }
     }));
-    
+
     // Mark reminder as completed
     completeReminder.mutate(reminder.id, {
       onSuccess: () => {
@@ -78,12 +78,12 @@ export function useReminderNotifications() {
   const handleSnooze = (reminder: ReminderWithApplication, days: number) => {
     const newDate = new Date();
     newDate.setDate(newDate.getDate() + days);
-    
+
     snoozeReminder(reminder.id, newDate.toISOString().split('T')[0]);
-    
+
     const label = days === 7 ? "1 week" : days === 14 ? "2 weeks" : days === 30 ? "1 month" : `${days} days`;
     toast.success(`Reminder snoozed for ${label}`);
-    
+
     // Remove from shown notifications
     shownNotifications.delete(reminder.id);
     // Refresh due reminders
@@ -135,7 +135,7 @@ export function useReminderNotifications() {
     isLoading: dueRemindersQuery.isLoading,
     error: dueRemindersQuery.error,
     refetch: dueRemindersQuery.refetch,
-    
+
     // Utility functions for external components to use
     handleReApply,
     handleSnooze,

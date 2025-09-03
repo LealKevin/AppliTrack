@@ -60,6 +60,7 @@ export function useDashboardReminders() {
     queryKey: ['reminders', 'dashboard'],
     queryFn: fetchDashboardReminders,
     retry: false,
+    enabled: false, // Disable dashboard endpoint call
     staleTime: 2 * 60 * 1000,
     gcTime: 5 * 60 * 1000,
   });
@@ -67,7 +68,7 @@ export function useDashboardReminders() {
   const fallbackQuery = useQuery<ReminderWithApplication[]>({
     queryKey: ['reminders', 'due'],
     queryFn: fetchDueReminders,
-    enabled: !dashboardQuery.data && !dashboardQuery.isFetching,
+    enabled: true, // Always enable fallback since dashboard is disabled
     staleTime: 2 * 60 * 1000,
     gcTime: 5 * 60 * 1000,
   });

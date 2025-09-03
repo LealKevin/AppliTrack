@@ -1,6 +1,7 @@
 package reminder
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -55,7 +56,7 @@ type ReminderReq struct {
 func (h *Handler) CreateReminder(c echo.Context) error {
 	var req ReminderReq
 	if err := c.Bind(&req); err != nil {
-		return echo.NewHTTPError(400, "Invalid request body, err", err.Error())
+		return echo.NewHTTPError(400, "Invalid request body")
 	}
 
 	userID := c.Get("userID").(uuid.UUID)
