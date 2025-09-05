@@ -146,7 +146,7 @@ type ReminderWithApplicationResp struct {
 	ApplicationID uuid.UUID `json:"application_id"`
 	CreatedAt     time.Time `json:"created_at"`
 	UpdatedAt     time.Time `json:"updated_at"`
-	Application   application.ApplicationResp
+	Application   application.ApplicationResp `json:"Application"`
 }
 
 func (s *reminderService) GetRemindersWithApplications(userID uuid.UUID) (OverdueReminderResp, error) {

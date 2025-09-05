@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { fetchDueReminders } from "@/shared/utils/apiCalls";
+import { fetchRemindersWithApplications } from "@/shared/utils/apiCalls";
 import type { ReminderWithApplication } from "@/shared/types/api";
 import type { ReminderDashboardData } from "../types/dashboard";
 
@@ -43,61 +43,32 @@ const transformDueRemindersToGroups = (dueReminders?: ReminderWithApplication[])
   };
 };
 
-const fetchDashboardReminders = async (): Promise<ReminderDashboardData> => {
-  const response = await fetch('/api/reminders/dashboard', {
-    credentials: 'include'
-  });
-  
-  if (!response.ok) {
-    throw new Error('Dashboard endpoint not ready yet');
-  }
-  
-  return response.json();
-};
-
 export function useDashboardReminders() {
-  const dashboardQuery = useQuery<ReminderDashboardData>({
+  const remindersQuery = useQuery({
     queryKey: ['reminders', 'dashboard'],
-    queryFn: fetchDashboardReminders,
-    retry: false,
-    enabled: false, // Disable dashboard endpoint call
-    staleTime: 2 * 60 * 1000,
-    gcTime: 5 * 60 * 1000,
-  });
-
-  const fallbackQuery = useQuery<ReminderWithApplication[]>({
-    queryKey: ['reminders', 'due'],
-    queryFn: fetchDueReminders,
-    enabled: true, // Always enable fallback since dashboard is disabled
+    queryFn: fetchRemindersWithApplications,
     staleTime: 2 * 60 * 1000,
     gcTime: 5 * 60 * 1000,
   });
 
   const data = useMemo(() => {
-    if (dashboardQuery.data) {
-      return dashboardQuery.data;
-    }
-    if (fallbackQuery.data) {
-      return transformDueRemindersToGroups(fallbackQuery.data);
+    if (remindersQuery.data) {
+      return {
+        overdue: remindersQuery.data.overdue,
+        due_today: remindersQuery.data.due_today,
+        due_this_week: remindersQuery.data.due_this_week,
+        total_pending: remindersQuery.data.total_pending
+      } as ReminderDashboardData;
     }
     return null;
-  }, [dashboardQuery.data, fallbackQuery.data]);
-
-  const isLoading = dashboardQuery.isFetching || (fallbackQuery.isFetching && !dashboardQuery.data);
-  const isError = dashboardQuery.isError && fallbackQuery.isError;
-  const error = dashboardQuery.error || fallbackQuery.error;
+  }, [remindersQuery.data]);
 
   return {
     data,
-    isLoading,
-    isError,
-    error,
-    refetch: () => {
-      dashboardQuery.refetch();
-      if (!dashboardQuery.data) {
-        fallbackQuery.refetch();
-      }
-    },
+    isLoading: remindersQuery.isLoading,
+    isError: remindersQuery.isError,
+    error: remindersQuery.error,
+    refetch: remindersQuery.refetch,
     hasOverdue: data ? data.overdue.length > 0 : false,
     hasDueToday: data ? data.due_today.length > 0 : false,
     totalDue: data ? data.total_pending : 0,

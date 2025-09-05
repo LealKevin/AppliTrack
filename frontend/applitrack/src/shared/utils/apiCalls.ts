@@ -271,3 +271,15 @@ export async function fetchDueReminders(): Promise<ReminderWithApplication[]> {
   const response = await apiClient.get<ReminderWithApplication[]>("/api/reminders/due");
   return response.data;
 }
+
+export interface OverdueReminderResp {
+  overdue: ReminderWithApplication[];
+  due_today: ReminderWithApplication[];
+  due_this_week: ReminderWithApplication[];
+  total_pending: number;
+}
+
+export async function fetchRemindersWithApplications(): Promise<OverdueReminderResp> {
+  const response = await apiClient.get<OverdueReminderResp>("/api/reminders/dashboard");
+  return response.data;
+}
