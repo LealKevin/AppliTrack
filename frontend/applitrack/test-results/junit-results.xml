@@ -1,42 +1,13 @@
-<testsuites id="" name="" tests="1" failures="1" skipped="0" errors="0" time="31.687337">
-<testsuite name="simple.spec.ts" timestamp="2025-09-01T14:30:57.284Z" hostname="chromium" tests="1" failures="1" skipped="0" time="30.968" errors="0">
-<testcase name="complete flow: login, create, delete application" classname="simple.spec.ts" time="30.968">
-<failure message="simple.spec.ts:3:1 complete flow: login, create, delete application" type="FAILURE">
-<![CDATA[  [chromium] › simple.spec.ts:3:1 › complete flow: login, create, delete application ───────────────
-
-    Test timeout of 30000ms exceeded.
-
-    Error: page.click: Test timeout of 30000ms exceeded.
-    Call log:
-      - waiting for locator('button:has-text("Add")')
-        - locator resolved to <button data-slot="button" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-[10rem] text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive bg-primary text-primary…>…</button>
-      - attempting click action
-        - waiting for element to be visible, enabled and stable
-      - element was detached from the DOM, retrying
-
-
-      13 |   
-      14 |   // 2. CRÉER candidature
-    > 15 |   await page.click('button:has-text("Add")');
-         |              ^
-      16 |   
-      17 |   await page.fill('input[name="TitleApplication"]', 'Test E2E');
-      18 |   await page.fill('input[name="Company"]', 'TestCorp');
-        at /Users/kevin/repos/ApplyTrack/frontend/applitrack/e2e/simple.spec.ts:15:14
-
-    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
-    ../test-results/simple-complete-flow-login-create-delete-application-chromium/test-failed-1.png
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-
-    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
-    ../test-results/simple-complete-flow-login-create-delete-application-chromium/video.webm
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-]]>
-</failure>
+<testsuites id="" name="" tests="1" failures="0" skipped="0" errors="0" time="7.934463000000001">
+<testsuite name="simple.spec.ts" timestamp="2025-09-03T13:04:35.256Z" hostname="chromium" tests="1" failures="0" skipped="0" time="7.166" errors="0">
+<testcase name="complete flow: login, create, delete application" classname="simple.spec.ts" time="7.166">
 <system-out>
 <![CDATA[✅ Login réussi
+✅ Candidature créée
+✅ Candidature supprimée
+🎯 Flow complet réussi : Login → Create → Delete
 
-[[ATTACHMENT|simple-complete-flow-login-create-delete-application-chromium/test-failed-1.png]]
+[[ATTACHMENT|simple-complete-flow-login-create-delete-application-chromium/test-finished-1.png]]
 
 [[ATTACHMENT|simple-complete-flow-login-create-delete-application-chromium/video.webm]]
 ]]>
