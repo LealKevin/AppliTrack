@@ -1,6 +1,7 @@
 package reminder
 
 import (
+	"log"
 	"time"
 
 	"github.com/google/uuid"
@@ -61,6 +62,7 @@ func (h *Handler) CreateReminder(c echo.Context) error {
 	userID := c.Get("userID").(uuid.UUID)
 	reminder, err := h.service.CreateReminder(userID, req)
 	if err != nil {
+		log.Println(err)
 		return echo.NewHTTPError(500, "Failed to create reminder")
 	}
 
