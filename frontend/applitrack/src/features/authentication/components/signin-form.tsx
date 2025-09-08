@@ -4,7 +4,7 @@ import { Button } from "@/shared/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card";
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import useCreateAccount from "../hooks/useCreateAccount";
 import { registerSchema, useFormValidation } from "@/shared/validation";
 
@@ -15,6 +15,8 @@ function SigninForm({
 	const [newEmail, setNewEmail] = useState("");
 	const [newPassword, setNewPassword] = useState("");
 	const [newPasswordRepeat, setNewPasswordRepeat] = useState("");
+	const [acceptedPrivacyPolicy, setAcceptedPrivacyPolicy] = useState(false);
+	const [acceptedTerms, setAcceptedTerms] = useState(false);
 	const [serverError, setServerError] = useState<string | null>(null);
 
 	const navigate = useNavigate();
@@ -29,7 +31,9 @@ function SigninForm({
 		const formData = {
 			email: newEmail,
 			password: newPassword,
-			passwordRepeat: newPasswordRepeat
+			passwordRepeat: newPasswordRepeat,
+			acceptedPrivacyPolicy,
+			acceptedTerms
 		};
 		
 		const validation = validate(formData);
@@ -119,6 +123,56 @@ function SigninForm({
 								<span className="text-sm text-red-600">{getFieldError("passwordRepeat")}</span>
 							)}
 						</div>
+
+						{/* GDPR Consent Checkboxes */}
+						<div className="space-y-4 pt-4 border-t">
+							<div className="flex items-start space-x-3">
+								<input
+									type="checkbox"
+									id="privacy-policy"
+									checked={acceptedPrivacyPolicy}
+									onChange={(e) => setAcceptedPrivacyPolicy(e.target.checked)}
+									className="mt-1 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+								/>
+								<label htmlFor="privacy-policy" className="text-sm text-gray-700">
+									I accept the{" "}
+									<Link to="/privacy-policy" className="text-blue-600 hover:text-blue-500 underline" target="_blank">
+										Privacy Policy
+									</Link>
+									{" "}and consent to the processing of my personal data.
+								</label>
+							</div>
+							{getFieldError("acceptedPrivacyPolicy") && (
+								<span className="text-sm text-red-600 ml-7">{getFieldError("acceptedPrivacyPolicy")}</span>
+							)}
+
+							<div className="flex items-start space-x-3">
+								<input
+									type="checkbox"
+									id="terms-service"
+									checked={acceptedTerms}
+									onChange={(e) => setAcceptedTerms(e.target.checked)}
+									className="mt-1 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+								/>
+								<label htmlFor="terms-service" className="text-sm text-gray-700">
+									I agree to the{" "}
+									<Link to="/terms-of-service" className="text-blue-600 hover:text-blue-500 underline" target="_blank">
+										Terms of Service
+									</Link>
+								</label>
+							</div>
+							{getFieldError("acceptedTerms") && (
+								<span className="text-sm text-red-600 ml-7">{getFieldError("acceptedTerms")}</span>
+							)}
+
+							<p className="text-xs text-gray-500 ml-7">
+								Learn more about our{" "}
+								<Link to="/cookie-policy" className="text-blue-600 hover:text-blue-500 underline" target="_blank">
+									Cookie Policy
+								</Link>
+							</p>
+						</div>
+
 						<div className=" mt-4 flex flex-col gap-3">
 							<Button type="submit" className="w-full">
 								Create account

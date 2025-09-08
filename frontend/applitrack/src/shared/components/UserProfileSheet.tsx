@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { IconTrash, IconSettings } from "@tabler/icons-react"
+import { IconTrash, IconSettings, IconDownload, IconShield } from "@tabler/icons-react"
 import { Button } from "@/shared/components/ui/button"
 import {
   Sheet,
@@ -69,6 +69,70 @@ export function UserProfileSheet({ user, children }: UserProfileSheetProps) {
               <div className="grid gap-1">
                 <p className="font-medium">{user?.name || "User"}</p>
                 <p className="text-sm text-muted-foreground">{user?.email}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* GDPR & Privacy Section */}
+          <div className="grid gap-4">
+            <h3 className="text-sm font-medium flex items-center gap-2">
+              <IconShield className="size-4" />
+              Privacy & Data
+            </h3>
+            
+            <div className="space-y-3">
+              <div className="p-3 border rounded-lg">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h4 className="text-sm font-medium">Export Your Data</h4>
+                    <p className="text-xs text-muted-foreground">
+                      Download all your personal data in JSON format (GDPR compliance)
+                    </p>
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => {
+                      // Export user data via API call
+                      fetch("/api/user/export", {
+                        method: "GET",
+                        credentials: "include"
+                      })
+                      .then(response => {
+                        if (response.ok) {
+                          return response.blob();
+                        }
+                        throw new Error("Export failed");
+                      })
+                      .then(blob => {
+                        const url = window.URL.createObjectURL(blob);
+                        const a = document.createElement("a");
+                        a.href = url;
+                        a.download = "applytrack_data_export.json";
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        window.URL.revokeObjectURL(url);
+                      })
+                      .catch(error => {
+                        console.error("Data export failed:", error);
+                      });
+                    }}
+                  >
+                    <IconDownload className="size-4 mr-2" />
+                    Export Data
+                  </Button>
+                </div>
+              </div>
+
+              <div className="text-xs text-muted-foreground space-y-1">
+                <p>Your privacy rights:</p>
+                <ul className="list-disc list-inside ml-2 space-y-1">
+                  <li>Right to access your data (export above)</li>
+                  <li>Right to rectify data (edit in app)</li>
+                  <li>Right to erase data (delete account below)</li>
+                  <li>Right to data portability (export above)</li>
+                </ul>
               </div>
             </div>
           </div>

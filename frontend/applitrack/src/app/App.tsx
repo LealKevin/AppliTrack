@@ -10,15 +10,25 @@ import { CheckUser } from "../features/authentication/pages/CheckUser";
 import RoundsPage from "../features/applications/pages/RoundsPage";
 import InterviewsPage from "../features/applications/pages/InterviewsPage";
 import RemindersPage from "../features/reminders/pages/RemindersPage";
+import PrivacyPolicy from "../pages/PrivacyPolicy";
+import TermsOfService from "../pages/TermsOfService";
+import CookiePolicy from "../pages/CookiePolicy";
+import CookieBanner from "../shared/components/CookieBanner";
 
 function App() {
 	return (
 		<ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
 			<BrowserRouter>
 				<Routes>
+					{/* Public legal pages */}
+					<Route path="/privacy-policy" element={<PrivacyPolicy />} />
+					<Route path="/terms-of-service" element={<TermsOfService />} />
+					<Route path="/cookie-policy" element={<CookiePolicy />} />
+
 					<Route element={<CheckUser />}>
 						<Route path="/login" element={<LoginPage />} />
 						<Route path="/signin" element={<SigninPage />} />
+						<Route path="/register" element={<SigninPage />} />
 					</Route>
 
 					<Route element={<ProtectedRoute />}>
@@ -31,6 +41,9 @@ function App() {
 						</Route>
 					</Route>
 				</Routes>
+				
+				{/* GDPR Cookie Banner */}
+				<CookieBanner />
 			</BrowserRouter>
 		</ThemeProvider>
 	);
