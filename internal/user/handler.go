@@ -75,7 +75,7 @@ func (h *Handler) Register(c echo.Context) error {
 	if !req.AcceptedPrivacyPolicy {
 		return echo.NewHTTPError(http.StatusBadRequest, "You must accept the privacy policy to create an account")
 	}
-	
+
 	if !req.AcceptedTerms {
 		return echo.NewHTTPError(http.StatusBadRequest, "You must accept the terms of service to create an account")
 	}
@@ -96,20 +96,20 @@ func (h *Handler) Register(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-    c.SetCookie(&http.Cookie{
-        Name:     "jwt",
-        Value:    authResp.Token,
-        Path:     "/",
-        HttpOnly: true,
-        Secure:   !isDevelopment(),
-        SameSite: func() http.SameSite {
-            if isDevelopment() {
-                return http.SameSiteLaxMode
-            }
-            return http.SameSiteNoneMode
-        }(),
-        MaxAge:   60 * 60 * 24,
-    })
+	c.SetCookie(&http.Cookie{
+		Name:     "jwt",
+		Value:    authResp.Token,
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   !isDevelopment(),
+		SameSite: func() http.SameSite {
+			if isDevelopment() {
+				return http.SameSiteLaxMode
+			}
+			return http.SameSiteNoneMode
+		}(),
+		MaxAge: 60 * 60 * 24,
+	})
 
 	return c.JSON(http.StatusCreated, authResponse{
 		User:  mapToUserResponse(authResp.User),
@@ -140,20 +140,20 @@ func (h *Handler) Login(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-    c.SetCookie(&http.Cookie{
-        Name:     "jwt",
-        Value:    authResp.Token,
-        Path:     "/",
-        HttpOnly: true,
-        Secure:   !isDevelopment(),
-        SameSite: func() http.SameSite {
-            if isDevelopment() {
-                return http.SameSiteLaxMode
-            }
-            return http.SameSiteNoneMode
-        }(),
-        MaxAge:   60 * 60 * 24,
-    })
+	c.SetCookie(&http.Cookie{
+		Name:     "jwt",
+		Value:    authResp.Token,
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   !isDevelopment(),
+		SameSite: func() http.SameSite {
+			if isDevelopment() {
+				return http.SameSiteLaxMode
+			}
+			return http.SameSiteNoneMode
+		}(),
+		MaxAge: 60 * 60 * 24,
+	})
 
 	return c.JSON(http.StatusOK, authResponse{
 		User:  mapToUserResponse(authResp.User),
@@ -162,21 +162,21 @@ func (h *Handler) Login(c echo.Context) error {
 }
 
 func (h *Handler) Logout(c echo.Context) error {
-    c.SetCookie(&http.Cookie{
-        Name:     "jwt",
-        Value:    "",
-        Path:     "/",
-        HttpOnly: true,
-        Secure:   !isDevelopment(),
-        SameSite: func() http.SameSite {
-            if isDevelopment() {
-                return http.SameSiteLaxMode
-            }
-            return http.SameSiteNoneMode
-        }(),
-        Expires:  time.Unix(0, 0),
-        MaxAge:   -1,
-    })
+	c.SetCookie(&http.Cookie{
+		Name:     "jwt",
+		Value:    "",
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   !isDevelopment(),
+		SameSite: func() http.SameSite {
+			if isDevelopment() {
+				return http.SameSiteLaxMode
+			}
+			return http.SameSiteNoneMode
+		}(),
+		Expires: time.Unix(0, 0),
+		MaxAge:  -1,
+	})
 
 	return c.JSON(http.StatusOK, map[string]string{"message": "logged out"})
 }
@@ -230,21 +230,21 @@ func (h *Handler) DeleteCurrentUser(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "failed to delete user")
 	}
 
-    c.SetCookie(&http.Cookie{
-        Name:     "jwt",
-        Value:    "",
-        Path:     "/",
-        HttpOnly: true,
-        Secure:   !isDevelopment(),
-        SameSite: func() http.SameSite {
-            if isDevelopment() {
-                return http.SameSiteLaxMode
-            }
-            return http.SameSiteNoneMode
-        }(),
-        Expires:  time.Unix(0, 0),
-        MaxAge:   -1,
-    })
+	c.SetCookie(&http.Cookie{
+		Name:     "jwt",
+		Value:    "",
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   !isDevelopment(),
+		SameSite: func() http.SameSite {
+			if isDevelopment() {
+				return http.SameSiteLaxMode
+			}
+			return http.SameSiteNoneMode
+		}(),
+		Expires: time.Unix(0, 0),
+		MaxAge:  -1,
+	})
 
 	return c.JSON(http.StatusOK, map[string]string{"message": "user deleted successfully"})
 }
@@ -268,7 +268,7 @@ func (h *Handler) ExportUserData(c echo.Context) error {
 	// - All reminders
 	// - All interview rounds
 	// For this GDPR implementation, we'll export the available user data
-	
+
 	exportData := map[string]interface{}{
 		"export_date": time.Now().UTC().Format(time.RFC3339),
 		"user_profile": map[string]interface{}{
@@ -278,13 +278,13 @@ func (h *Handler) ExportUserData(c echo.Context) error {
 			"updated_at": user.UpdatedAt,
 		},
 		"data_description": map[string]string{
-			"personal_data": "Email address and account timestamps",
+			"personal_data":    "Email address and account timestamps",
 			"application_data": "Job applications, companies, positions, notes (available in main app)",
-			"reminder_data": "Personal reminders and follow-up dates (available in main app)",
-			"interview_data": "Interview rounds and feedback (available in main app)",
+			"reminder_data":    "Personal reminders and follow-up dates (available in main app)",
+			"interview_data":   "Interview rounds and feedback (available in main app)",
 		},
 		"gdpr_info": map[string]interface{}{
-			"legal_basis": "Consent and legitimate interest",
+			"legal_basis":      "Consent and legitimate interest",
 			"retention_period": "Data retained while account is active",
 			"rights": []string{
 				"Right to access (this export)",

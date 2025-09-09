@@ -140,12 +140,12 @@ type OverdueReminderResp struct {
 	TotalPending int `json:"total_pending"`
 }
 type ReminderWithApplicationResp struct {
-	ID            uuid.UUID `json:"id"`
-	ReminderDate  time.Time `json:"reminder_date"`
-	Status        string    `json:"status"`
-	ApplicationID uuid.UUID `json:"application_id"`
-	CreatedAt     time.Time `json:"created_at"`
-	UpdatedAt     time.Time `json:"updated_at"`
+	ID            uuid.UUID                   `json:"id"`
+	ReminderDate  time.Time                   `json:"reminder_date"`
+	Status        string                      `json:"status"`
+	ApplicationID uuid.UUID                   `json:"application_id"`
+	CreatedAt     time.Time                   `json:"created_at"`
+	UpdatedAt     time.Time                   `json:"updated_at"`
 	Application   application.ApplicationResp `json:"Application"`
 }
 
