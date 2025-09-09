@@ -22,7 +22,17 @@ export const registerSchema = z.object({
     .min(8, "Password must be at least 8 characters long"),
   passwordRepeat: z
     .string()
-    .min(1, "Please confirm your password")
+    .min(1, "Please confirm your password"),
+  acceptedPrivacyPolicy: z
+    .boolean()
+    .refine((val) => val === true, {
+      message: "You must accept the privacy policy to create an account"
+    }),
+  acceptedTerms: z
+    .boolean()
+    .refine((val) => val === true, {
+      message: "You must accept the terms of service to create an account"
+    })
 }).refine((data) => data.password === data.passwordRepeat, {
   message: "Passwords don't match",
   path: ["passwordRepeat"]

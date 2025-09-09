@@ -84,20 +84,20 @@ func (s *Server) SetupMiddleware() {
 		AllowCredentials: true,
 	}))
 
-    // Configure CSRF cookie attributes based on environment
-    csrfCfg := middleware.CSRFConfig{
-        TokenLookup:    "header:X-CSRF-Token",
-        CookiePath:     "/",
-        CookieHTTPOnly: true,
-    }
-    if os.Getenv("GO_ENV") == "production" {
-        csrfCfg.CookieSecure = true
-        csrfCfg.CookieSameSite = http.SameSiteNoneMode
-    } else {
-        csrfCfg.CookieSecure = false
-        csrfCfg.CookieSameSite = http.SameSiteLaxMode
-    }
-    s.echo.Use(middleware.CSRFWithConfig(csrfCfg))
+	// Configure CSRF cookie attributes based on environment
+	csrfCfg := middleware.CSRFConfig{
+		TokenLookup:    "header:X-CSRF-Token",
+		CookiePath:     "/",
+		CookieHTTPOnly: true,
+	}
+	if os.Getenv("GO_ENV") == "production" {
+		csrfCfg.CookieSecure = true
+		csrfCfg.CookieSameSite = http.SameSiteNoneMode
+	} else {
+		csrfCfg.CookieSecure = false
+		csrfCfg.CookieSameSite = http.SameSiteLaxMode
+	}
+	s.echo.Use(middleware.CSRFWithConfig(csrfCfg))
 	s.echo.Validator = &utils.CustomValidator{Validator: validator.New()}
 }
 
