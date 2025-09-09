@@ -1,5 +1,4 @@
 {$API_HOST} {
     encode zstd gzip
-    # Let the app (Echo) handle all CORS. Caddy only terminates TLS and proxies.
     reverse_proxy api:8080
 }
