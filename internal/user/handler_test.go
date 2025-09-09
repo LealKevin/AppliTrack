@@ -88,9 +88,11 @@ func Test_Register(t *testing.T) {
 
 	t.Run("Happy path", func(t *testing.T) {
 		user := &RegisterRequest{
-			Email:          "foo@bar.com",
-			Password:       "password123",
-			PasswordRepeat: "password123",
+			Email:                 "foo@bar.com",
+			Password:              "password123",
+			PasswordRepeat:        "password123",
+			AcceptedPrivacyPolicy: true,
+			AcceptedTerms:         true,
 		}
 
 		userJson, err := json.Marshal(user)
